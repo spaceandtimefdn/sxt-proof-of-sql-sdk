@@ -1,3 +1,7 @@
+## [0.17.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.1...v0.17.2) (2025-06-12)
+
+
+
 ## [0.17.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.0...v0.17.1) (2025-05-07)
 
 
@@ -26,10 +30,6 @@
 ### Bug Fixes
 
 * return type of wasm verify_prover_response_dory ([93abc28](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/93abc287879f8a78cf5a087333a8ec84e206048e))
-
-
-
-## [0.16.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.16.0...v0.16.1) (2025-04-29)
 
 
 
