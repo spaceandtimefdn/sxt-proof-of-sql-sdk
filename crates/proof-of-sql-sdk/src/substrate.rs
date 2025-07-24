@@ -5,7 +5,7 @@ use proof_of_sql::{
         commitment::{QueryCommitments, TableCommitment},
         database::TableRef,
     },
-    proof_primitive::dory::DynamicDoryCommitment,
+    proof_primitive::{dory::DynamicDoryCommitment, hyperkzg::HyperKZGCommitment},
 };
 use snafu::{ResultExt, Snafu};
 use subxt::{blocks::BlockRef, Config, OnlineClient, PolkadotConfig};
@@ -33,7 +33,7 @@ pub async fn query_commitments<BR>(
     table_refs: &[TableRef],
     url: &str,
     block_ref: Option<BR>,
-) -> Result<QueryCommitments<DynamicDoryCommitment>, Box<dyn core::error::Error>>
+) -> Result<QueryCommitments<HyperKZGCommitment>, Box<dyn core::error::Error>>
 where
     BR: Into<BlockRef<<SxtConfig as Config>::Hash>> + Clone,
 {
@@ -48,7 +48,7 @@ where
             let table_id = table_ref_to_table_id(&table_ref);
             let commitments_query = storage()
                 .commitments()
-                .commitment_storage_map(&table_id, &CommitmentScheme::DynamicDory);
+                .commitment_storage_map(&table_id, &CommitmentScheme::HyperKzg);
 
             let storage_at_block_ref = match block_ref {
                 Some(block_ref) => api.storage().at(block_ref),
@@ -66,7 +66,7 @@ where
                     .with_big_endian(),
             )?
             .0;
-            Ok::<(TableRef, TableCommitment<DynamicDoryCommitment>), Box<dyn core::error::Error>>((
+            Ok::<(TableRef, TableCommitment<HyperKZGCommitment>), Box<dyn core::error::Error>>((
                 table_ref.clone(),
                 table_commitments,
             ))
@@ -77,7 +77,7 @@ where
     let results = try_join_all(futures)
         .await?
         .into_iter()
-        .collect::<QueryCommitments<DynamicDoryCommitment>>();
+        .collect::<QueryCommitments<HyperKZGCommitment>>();
     Ok(results)
 }
 

@@ -12,6 +12,9 @@ version = "0.1.0"
 license-file = "LICENSE"
 
 [workspace.dependencies]
+ark-ec = { version = "0.5.0" }
+halo2curves = { version = "0.8.0" }
+nova-snark = { version = "0.41.0" }
 ark-serialize = { version = "0.5.0", default-features = false }
 bincode = { version = "2.0.1", default-features = false }
 chrono="0.4.39"
@@ -26,8 +29,8 @@ lazy_static = { version = "1.5.0" }
 log = "0.4.22"
 indexmap = "2.8.0"
 parity-scale-codec = { version = "3.7.0", default-features = false }
-proof-of-sql = { version = "0.99.0", default-features = false }
-proof-of-sql-planner = { version = "0.99.0", default-features = false }
+proof-of-sql = { version = "=0.105.14", default-features = false }
+proof-of-sql-planner = { version = "=0.105.14", default-features = false }
 prost = "0.12"
 prost-build = "0.12"
 prost-types = "0.12"

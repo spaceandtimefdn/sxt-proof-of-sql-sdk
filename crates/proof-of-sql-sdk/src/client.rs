@@ -2,6 +2,8 @@ use crate::{
     get_access_token, query_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
+use proof_of_sql::proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof};
+use proof_of_sql::sql::evm_proof_plan::EVMProofPlan;
 use proof_of_sql::{
     base::database::OwnedTable,
     proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
@@ -64,7 +66,7 @@ impl SxTClient {
         &self,
         query: &str,
         block_ref: Option<<SxtConfig as Config>::Hash>,
-    ) -> Result<OwnedTable<DoryScalar>, Box<dyn core::error::Error>> {
+    ) -> Result<OwnedTable<BNScalar>, Box<dyn core::error::Error>> {
         let dialect = GenericDialect {};
         let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
         let table_refs = get_table_refs_from_statement(&query_parsed)?
@@ -73,8 +75,49 @@ impl SxTClient {
             .collect::<Vec<_>>();
 
         // Load verifier setup
-        let verifier_setup_path = Path::new(&self.verifier_setup);
-        let verifier_setup = VerifierSetup::load_from_file(verifier_setup_path)?;
+
+        use ark_ec::AffineRepr;
+        use halo2curves::bn256::{Fq, Fq2, G1Affine, G2Affine};
+        use nova_snark::{
+            provider::hyperkzg::{CommitmentKey, EvaluationEngine},
+            traits::evaluation::EvaluationEngineTrait,
+        };
+        use proof_of_sql::proof_primitive::hyperkzg::HyperKZGEngine;
+
+        const VK_X_REAL: [u64; 4] = [
+            0x2a74_74c0_708b_ef80,
+            0xf762_edcf_ecfe_1c73,
+            0x2340_a37d_fae9_005f,
+            0x285b_1f14_edd7_e663,
+        ];
+        const VK_X_IMAG: [u64; 4] = [
+            0x85ad_b083_e48c_197b,
+            0x39c2_b413_1094_5472,
+            0xda72_7c1d_ef86_0103,
+            0x17cc_9307_7f56_f654,
+        ];
+        const VK_Y_REAL: [u64; 4] = [
+            0xc6db_5ddb_9bde_7fd0,
+            0x0931_3450_580c_4c17,
+            0x29ec_66e8_f530_f685,
+            0x2bad_9a37_4aec_49d3,
+        ];
+        const VK_Y_IMAG: [u64; 4] = [
+            0xa630_d3c7_cdaa_6ed9,
+            0xe32d_d53b_1584_4956,
+            0x674f_5b2f_6fdb_69d9,
+            0x219e_dfce_ee17_23de,
+        ];
+        let tau_h = G2Affine {
+            x: Fq2::new(Fq::from_raw(VK_X_REAL), Fq::from_raw(VK_X_IMAG)),
+            y: Fq2::new(Fq::from_raw(VK_Y_REAL), Fq::from_raw(VK_Y_IMAG)),
+        };
+        let (_, verifier_setup) = EvaluationEngine::<HyperKZGEngine>::setup(&CommitmentKey::new(
+            vec![],
+            G1Affine::generator(),
+            tau_h,
+        ));
+
         // Accessor setup
         let accessor = query_commitments(&table_refs, &self.substrate_node_url, block_ref).await?;
 
@@ -99,9 +142,9 @@ impl SxTClient {
             )
         })?;
 
-        let verified_table_result = verify_prover_response::<DynamicDoryEvaluationProof>(
+        let verified_table_result = verify_prover_response::<HyperKZGCommitmentEvaluationProof>(
             &prover_response,
-            proof_plan_with_post_processing.plan(),
+            &EVMProofPlan::new(proof_plan_with_post_processing.plan().clone()),
             &[],
             &accessor,
             &&verifier_setup,

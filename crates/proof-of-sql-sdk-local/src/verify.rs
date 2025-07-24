@@ -5,6 +5,7 @@ use proof_of_sql::{
         database::{CommitmentAccessor, LiteralValue, OwnedTable},
     },
     sql::{
+        evm_proof_plan::EVMProofPlan,
         proof::{QueryError, QueryProof},
         proof_plans::DynProofPlan,
     },
@@ -35,7 +36,7 @@ impl From<bincode::error::DecodeError> for VerifyProverResponseError {
 /// Verify a response from the prover service against the provided commitment accessor.
 pub fn verify_prover_response<'de, 's, CP: CommitmentEvaluationProof + Deserialize<'de>>(
     prover_response: &'de ProverResponse,
-    proof_plan: &DynProofPlan,
+    proof_plan: &EVMProofPlan,
     params: &[LiteralValue],
     accessor: &impl CommitmentAccessor<CP::Commitment>,
     verifier_setup: &CP::VerifierPublicSetup<'s>,

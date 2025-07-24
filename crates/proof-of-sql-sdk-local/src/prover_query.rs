@@ -4,8 +4,9 @@ use crate::{
 };
 use datafusion::config::ConfigOptions;
 use proof_of_sql::{
-    base::commitment::QueryCommitments, proof_primitive::dory::DynamicDoryCommitment,
-    sql::parse::ConversionError,
+    base::commitment::QueryCommitments,
+    proof_primitive::{dory::DynamicDoryCommitment, hyperkzg::HyperKZGCommitment},
+    sql::{evm_proof_plan::EVMProofPlan, parse::ConversionError},
 };
 use proof_of_sql_planner::{
     sql_to_proof_plans_with_postprocessing, statement_with_uppercase_identifiers, PlannerError,
@@ -47,7 +48,7 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 /// Create a query for the prover service from sql query text and commitments.
 pub fn plan_prover_query_dory(
     query: &Statement,
-    commitments: &QueryCommitments<DynamicDoryCommitment>,
+    commitments: &QueryCommitments<HyperKZGCommitment>,
 ) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
     let accessor = &UppercaseAccessor(commitments);
     let query = statement_with_uppercase_identifiers(query.clone());
@@ -57,7 +58,7 @@ pub fn plan_prover_query_dory(
         sql_to_proof_plans_with_postprocessing(&[query.clone()], accessor, &config_options)?[0]
             .clone();
     let serialized_proof_plan = bincode::serde::encode_to_vec(
-        proof_plan_with_postprocessing.plan(),
+        EVMProofPlan::new(proof_plan_with_postprocessing.plan().clone()),
         bincode::config::legacy()
             .with_fixed_int_encoding()
             .with_big_endian(),
@@ -80,7 +81,7 @@ pub fn plan_prover_query_dory(
         ProverQuery {
             proof_plan: serialized_proof_plan,
             query_context,
-            commitment_scheme: CommitmentScheme::DynamicDory.into(),
+            commitment_scheme: CommitmentScheme::HyperKzg.into(),
         },
         proof_plan_with_postprocessing,
     ))
