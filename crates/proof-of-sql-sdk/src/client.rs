@@ -2,6 +2,7 @@ use crate::{
     get_access_token, query_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
+use core::time::Duration;
 use proof_of_sql::proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof};
 use proof_of_sql::sql::evm_proof_plan::EVMProofPlan;
 use proof_of_sql::{
@@ -120,6 +121,8 @@ impl SxTClient {
 
         // Accessor setup
         let accessor = query_commitments(&table_refs, &self.substrate_node_url, block_ref).await?;
+
+        std::thread::sleep(Duration::from_secs(10));
 
         let (prover_query, proof_plan_with_post_processing) =
             plan_prover_query_dory(&query_parsed, &accessor)?;
