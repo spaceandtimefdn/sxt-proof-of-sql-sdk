@@ -1,3 +1,13 @@
+## [0.17.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.2...v0.17.3) (2025-07-29)
+
+
+### Bug Fixes
+
+* replace new-rpc with rpc ([942e3e9](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/942e3e98ae9c986730405cad04582e63ae9ffef1))
+* replace spaceandtime.dev with makeinfinite.dev in URLs ([39a76a5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/39a76a5fc2c8e7d640da2c0a2bb15e670c23acb1))
+
+
+
 ## [0.17.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.1...v0.17.2) (2025-06-12)
 
 
@@ -21,15 +31,6 @@
 
 
 ## [0.16.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.16.2...v0.16.3) (2025-05-06)
-
-
-
-## [0.16.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.16.1...v0.16.2) (2025-05-02)
-
-
-### Bug Fixes
-
-* return type of wasm verify_prover_response_dory ([93abc28](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/93abc287879f8a78cf5a087333a8ec84e206048e))
 
 
 
