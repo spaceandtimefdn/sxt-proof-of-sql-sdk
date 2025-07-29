@@ -21,7 +21,7 @@ pub struct SdkArgs {
     #[arg(
         long,
         value_name = "PROVER_ROOT_URL",
-        default_value = "https://api.spaceandtime.dev",
+        default_value = "https://api.makeinfinite.dev",
         env = "PROVER_ROOT_URL"
     )]
     pub prover_root_url: String,
@@ -33,7 +33,7 @@ pub struct SdkArgs {
     #[arg(
         long,
         value_name = "AUTH_ROOT_URL",
-        default_value = "https://proxy.api.spaceandtime.dev",
+        default_value = "https://proxy.api.makeinfinite.dev",
         env = "AUTH_ROOT_URL"
     )]
     pub auth_root_url: String,
