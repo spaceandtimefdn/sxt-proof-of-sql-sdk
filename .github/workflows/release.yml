@@ -3,20 +3,25 @@ on:
   push:
     branches:
       - main
+permissions:
+  id-token: write # This is required for requesting the JWT
 
 jobs:
   release:
     name: Run Release Manager
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
-
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Create GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
         with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
           # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
           persist-credentials: false
           # Pull all previous tags
@@ -24,9 +29,11 @@ jobs:
           fetch-tags: true
 
       - name: Conventional Changelog Action
+        if: github.ref_name == 'main'
         id: conventional-changelog
-        uses: TriPSs/conventional-changelog-action@v5
+        uses: TriPSs/conventional-changelog-action@v6
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           skip-git-pull: true
           skip-version-file: true
           git-push: false
@@ -49,16 +56,20 @@ jobs:
           git commit -m "chore(release): bump npm package version to $VERSION [skip ci]"
 
       - name: Push Conventional Changelog
+        if: github.ref_name == 'main'
         uses: ad-m/github-push-action@master
         id: push
         with:
+          github_token: ${{ steps.app-token.outputs.token }}
           branch: ${{ github.ref }}
 
       - name: Create Release
         uses: ncipollo/release-action@v1
+        if: github.ref_name == 'main'
         with:
           tag: ${{ steps.conventional-changelog.outputs.tag }}
           body: ${{ steps.conventional-changelog.outputs.changelog }}
+          token: ${{ steps.app-token.outputs.token }} # Using Github Auth token created in step above
           makeLatest: true
 
       - name: Install stable toolchain
