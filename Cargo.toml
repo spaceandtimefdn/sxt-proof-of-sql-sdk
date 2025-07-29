@@ -26,8 +26,8 @@ lazy_static = { version = "1.5.0" }
 log = "0.4.22"
 indexmap = "2.8.0"
 parity-scale-codec = { version = "3.7.0", default-features = false }
-proof-of-sql = { version = "0.99.0", default-features = false }
-proof-of-sql-planner = { version = "0.99.0", default-features = false }
+proof-of-sql = { version = "0.114.0", default-features = false }
+proof-of-sql-planner = { version = "0.114.0", default-features = false }
 prost = "0.12"
 prost-build = "0.12"
 prost-types = "0.12"
