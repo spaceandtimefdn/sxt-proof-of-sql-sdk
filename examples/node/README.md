@@ -25,8 +25,8 @@ const table = "ETHEREUM.BLOCKS";
 
 // Initialize the SxTClient instance
 const proof = new SxTSDK.SxTClient(
-    "https://api.spaceandtime.dev/v1/prove",
-    "https://proxy.api.spaceandtime.dev/auth/apikey",
+    "https://api.makeinfinite.dev/v1/prove",
+    "https://proxy.api.makeinfinite.dev/auth/apikey",
     "https://rpc.testnet.sxt.network/",
     process.env.SXT_API,
 );

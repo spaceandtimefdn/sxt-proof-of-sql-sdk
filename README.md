@@ -57,8 +57,8 @@ use sxt_proof_of_sql_sdk::SxTClient;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Initialize the SxT client with necessary URLs and API key
     let client = SxTClient::new(
-        "https://api.spaceandtime.dev".to_string(),
-        "https://proxy.api.spaceandtime.dev".to_string(),
+        "https://api.makeinfinite.dev".to_string(),
+        "https://proxy.api.makeinfinite.dev".to_string(),
         "https://rpc.testnet.sxt.network".to_string(),
         "your_sxt_api_key".to_string(),
         "path/to/verifier_setup.bin".to_string(),
