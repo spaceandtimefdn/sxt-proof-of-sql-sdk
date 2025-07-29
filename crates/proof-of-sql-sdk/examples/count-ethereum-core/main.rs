@@ -90,7 +90,7 @@ async fn main() {
     let client = Arc::new(SxTClient::new(
         env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
         env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
-        env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://new-rpc.testnet.sxt.network".to_string()),
+        env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
         env::var("VERIFIER_SETUP").unwrap_or("verifier_setup.bin".to_string()),
     ));
