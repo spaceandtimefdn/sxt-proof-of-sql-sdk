@@ -3,6 +3,7 @@ use indexmap::IndexMap;
 use proof_of_sql::base::database::OwnedColumn;
 use std::{cmp::Ordering, env, fs::File, io::BufReader, path::Path, sync::Arc};
 use sxt_proof_of_sql_sdk::SxTClient;
+use sxt_proof_of_sql_sdk_local::CommitmentScheme;
 
 const ETHEREUM_CORE_COUNTS_FILE: &str = "ethereum-core-counts.json";
 
@@ -87,12 +88,21 @@ fn save_to_file(counts: &IndexMap<String, i64>, file_path: &str) {
 async fn main() {
     env_logger::init();
     dotenv::dotenv().unwrap();
+    let commitment_scheme = match env::var("COMMITMENT_SCHEME")
+        .unwrap_or("dynamic-dory".to_string())
+        .as_str()
+    {
+        "dynamic-dory" => CommitmentScheme::DynamicDory,
+        "hyper-kzg" => CommitmentScheme::HyperKzg,
+        _ => panic!("Unsupported commitment scheme"),
+    };
     let client = Arc::new(SxTClient::new(
         env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
         env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
-        env::var("VERIFIER_SETUP").unwrap_or("verifier_setups/dynamic_dory.bin".to_string()),
+        commitment_scheme,
+        env::var("VERIFIER_SETUP").unwrap_or("verifier_setup.bin".to_string()),
     ));
 
     let current_counts: IndexMap<String, i64> = futures::stream::iter(ETHEREUM_CORE_TABLES)
