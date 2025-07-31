@@ -12,11 +12,13 @@ use sqlparser::{dialect::GenericDialect, parser::Parser};
 use std::path::Path;
 use subxt::Config;
 use sxt_proof_of_sql_sdk_local::{
-    plan_prover_query_dory, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
+    plan_prover_query_dory, prover::ProverResponse,
+    sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme::CommitmentScheme,
+    uppercase_table_ref, verify_prover_response,
 };
 
 /// Space and Time (SxT) client
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct SxTClient {
     /// Root URL for the Prover service
     pub prover_root_url: String,
@@ -33,8 +35,17 @@ pub struct SxTClient {
     /// if you do not have one.
     pub sxt_api_key: String,
 
+    /// Commitment scheme
+    pub commitment_scheme: CommitmentScheme,
+
     /// Path to the verifier setup binary file
     pub verifier_setup: String,
+}
+
+/// Resulting table with scalar values
+pub enum ScalarTable {
+    Dory(OwnedTable<DoryScalar>),
+    HyperKZG(OwnedTable<BNScalar>),
 }
 
 impl SxTClient {
@@ -44,13 +55,18 @@ impl SxTClient {
         auth_root_url: String,
         substrate_node_url: String,
         sxt_api_key: String,
+        commitment_scheme: CommitmentScheme,
         verifier_setup: String,
     ) -> Self {
+        if !matches!(commitment_scheme, CommitmentScheme::DynamicDory) {
+            panic!("Unsupported commitment scheme: {:?}", commitment_scheme);
+        }
         Self {
             prover_root_url,
             auth_root_url,
             substrate_node_url,
             sxt_api_key,
+            commitment_scheme,
             verifier_setup,
         }
     }
@@ -64,7 +80,7 @@ impl SxTClient {
         &self,
         query: &str,
         block_ref: Option<<SxtConfig as Config>::Hash>,
-    ) -> Result<OwnedTable<DoryScalar>, Box<dyn core::error::Error>> {
+    ) -> Result<ScalarTable, Box<dyn core::error::Error>> {
         let dialect = GenericDialect {};
         let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
         let table_refs = get_table_refs_from_statement(&query_parsed)?
