@@ -1,6 +1,7 @@
 use clap::Parser;
 use subxt::utils::H256;
 use sxt_proof_of_sql_sdk::SxTClient;
+use sxt_proof_of_sql_sdk_local::sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme::CommitmentScheme;
 
 /// Struct to define and parse command-line arguments for Proof of SQL Client.
 ///
@@ -65,6 +66,20 @@ pub struct SdkArgs {
     #[arg(long)]
     pub block_hash: Option<H256>,
 
+    /// Commitment scheme to use for the query
+    ///
+    /// Specifies the commitment scheme for the query.
+    /// Options are `dynamic_dory` and `hyperkzg`.
+    /// Default is `hyperkzg`.
+    #[arg(
+        long,
+        value_name = "COMMITMENT_SCHEME",
+        default_value = "hyperkzg",
+        help = "Commitment scheme to use for the query, options: dynamic_dory, hyperkzg",
+        env = "COMMITMENT_SCHEME"
+    )]
+    pub commitment_scheme: String,
+
     /// Path to the verifier setup binary file
     ///
     /// Specifies the path to the `verifier_setup.bin` file required for verification.
@@ -80,11 +95,17 @@ pub struct SdkArgs {
 
 impl From<&SdkArgs> for SxTClient {
     fn from(args: &SdkArgs) -> Self {
+        let commitment_scheme = match args.commitment_scheme.as_str() {
+            "dynamic_dory" => CommitmentScheme::DynamicDory,
+            "hyperkzg" => CommitmentScheme::HyperKzg,
+            _ => panic!("Unsupported commitment scheme: {}", args.commitment_scheme),
+        };
         Self::new(
             args.prover_root_url.clone(),
             args.auth_root_url.clone(),
             args.substrate_node_url.clone(),
             args.sxt_api_key.clone(),
+            commitment_scheme,
             args.verifier_setup.clone(),
         )
     }
