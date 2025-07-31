@@ -1,3 +1,12 @@
+# [0.18.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.3...v0.18.0) (2025-07-31)
+
+
+### Features
+
+* add shortcuts for default config for fmt ([d4df752](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d4df752dea71e8860a1919f74a42f7b7d4d96015))
+
+
+
 ## [0.17.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.2...v0.17.3) (2025-07-29)
 
 
@@ -27,10 +36,6 @@
 ### Features
 
 * rip out parser ([52e6dfd](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/52e6dfdf0b093330e5385749a9644877380e7ef0))
-
-
-
-## [0.16.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.16.2...v0.16.3) (2025-05-06)
 
 
 
