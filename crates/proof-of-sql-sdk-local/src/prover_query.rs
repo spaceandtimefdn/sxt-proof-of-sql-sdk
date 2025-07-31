@@ -1,10 +1,15 @@
 use crate::{
-    prover::{CommitmentScheme, ProverContextRange, ProverQuery},
+    prover::{ProverContextRange, ProverQuery},
     uppercase_accessor::UppercaseAccessor,
+    CommitmentEvaluationProofId,
 };
 use datafusion::config::ConfigOptions;
 use proof_of_sql::{
-    base::commitment::QueryCommitments, proof_primitive::dory::DynamicDoryCommitment,
+    base::commitment::{CommitmentEvaluationProof, QueryCommitments},
+    proof_primitive::{
+        dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
+        hyperkzg::{HyperKZGCommitment, HyperKZGCommitmentEvaluationProof},
+    },
     sql::parse::ConversionError,
 };
 use proof_of_sql_planner::{
@@ -45,9 +50,9 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 }
 
 /// Create a query for the prover service from sql query text and commitments.
-pub fn plan_prover_query_dory(
+pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     query: &Statement,
-    commitments: &QueryCommitments<DynamicDoryCommitment>,
+    commitments: &QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>,
 ) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
     let accessor = &UppercaseAccessor(commitments);
     let query = statement_with_uppercase_identifiers(query.clone());
@@ -80,8 +85,22 @@ pub fn plan_prover_query_dory(
         ProverQuery {
             proof_plan: serialized_proof_plan,
             query_context,
-            commitment_scheme: CommitmentScheme::DynamicDory.into(),
+            commitment_scheme: CPI::COMMITMENT_SCHEME_VALUE,
         },
         proof_plan_with_postprocessing,
     ))
+}
+
+pub fn plan_prover_query_dory(
+    query: &Statement,
+    commitments: &QueryCommitments<DynamicDoryCommitment>,
+) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
+    plan_prover_query::<DynamicDoryEvaluationProof>(query, commitments)
+}
+
+pub fn plan_prover_query_hyperkzg(
+    query: &Statement,
+    commitments: &QueryCommitments<HyperKZGCommitment>,
+) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
+    plan_prover_query::<HyperKZGCommitmentEvaluationProof>(query, commitments)
 }
