@@ -42,6 +42,12 @@ pub struct SxTClient {
     pub verifier_setup: String,
 }
 
+/// Resulting table with scalar values
+pub enum ScalarTable {
+    Dory(OwnedTable<DoryScalar>),
+    HyperKZG(OwnedTable<BNScalar>),
+}
+
 impl SxTClient {
     /// Create a new SxT client
     pub fn new(
@@ -74,7 +80,7 @@ impl SxTClient {
         &self,
         query: &str,
         block_ref: Option<<SxtConfig as Config>::Hash>,
-    ) -> Result<OwnedTable<DoryScalar>, Box<dyn core::error::Error>> {
+    ) -> Result<ScalarTable, Box<dyn core::error::Error>> {
         let dialect = GenericDialect {};
         let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
         let table_refs = get_table_refs_from_statement(&query_parsed)?
