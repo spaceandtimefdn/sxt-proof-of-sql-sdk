@@ -5355,6 +5355,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "futures",
+ "hex",
  "indexmap 2.9.0",
  "itertools 0.13.0",
  "log",
