@@ -1,5 +1,5 @@
 use crate::{
-    prover::{ProverContextRange, ProverQuery},
+    prover::{self, ProverContextRange, ProverQuery},
     uppercase_accessor::UppercaseAccessor,
     CommitmentEvaluationProofId,
 };
@@ -85,7 +85,7 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
         ProverQuery {
             proof_plan: serialized_proof_plan,
             query_context,
-            commitment_scheme: CPI::COMMITMENT_SCHEME.into(),
+            commitment_scheme: prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME).into(),
         },
         proof_plan_with_postprocessing,
     ))
