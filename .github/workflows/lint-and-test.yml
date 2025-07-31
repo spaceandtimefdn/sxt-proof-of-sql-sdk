@@ -68,7 +68,7 @@ jobs:
       - name: Run clippy (wasm package)
         run: cargo clippy --all-targets --package sxt-proof-of-sql-sdk-wasm -- -D warnings
  
-  # Run cargo fmt --all -- --config imports_granularity=Crate,group_imports=One --check
+  # Run cargo f --check
   format:
     name: Format
     runs-on: ubuntu-latest
@@ -80,7 +80,7 @@ jobs:
           curl https://sh.rustup.rs -sSf | bash -s -- -y --profile minimal && source ~/.cargo/env && rustup toolchain install
           rustup component add rustfmt
       - name: Run cargo fmt
-        run: cargo fmt --all -- --config imports_granularity=Crate,group_imports=One --check
+        run: cargo f --check
 
   udeps:
     name: Unused Dependencies

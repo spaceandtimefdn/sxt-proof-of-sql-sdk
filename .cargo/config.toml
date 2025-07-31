@@ -1,0 +1,2 @@
+[alias]
+f = "fmt --all -- --config imports_granularity=Crate,group_imports=One"
