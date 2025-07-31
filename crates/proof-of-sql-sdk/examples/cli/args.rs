@@ -1,6 +1,7 @@
 use clap::Parser;
 use subxt::utils::H256;
 use sxt_proof_of_sql_sdk::SxTClient;
+use sxt_proof_of_sql_sdk_local::CommitmentScheme;
 
 /// Struct to define and parse command-line arguments for Proof of SQL Client.
 ///
@@ -65,6 +66,21 @@ pub struct SdkArgs {
     #[arg(long)]
     pub block_hash: Option<H256>,
 
+    /// Commitment scheme to use for the query
+    ///
+    /// Specifies the commitment scheme for the query.
+    /// Options are `dynamic_dory` and `hyperkzg`.
+    /// Default is `hyperkzg`.
+    #[arg(
+        long,
+        value_name = "COMMITMENT_SCHEME",
+        value_enum,
+        default_value_t = CommitmentScheme::HyperKzg,
+        help = "Commitment scheme to use for the query, options: dynamic_dory, hyperkzg",
+        env = "COMMITMENT_SCHEME"
+    )]
+    pub commitment_scheme: CommitmentScheme,
+
     /// Path to the verifier setup binary file
     ///
     /// Specifies the path to the `verifier_setup.bin` file required for verification.
@@ -85,6 +101,7 @@ impl From<&SdkArgs> for SxTClient {
             args.auth_root_url.clone(),
             args.substrate_node_url.clone(),
             args.sxt_api_key.clone(),
+            args.commitment_scheme,
             args.verifier_setup.clone(),
         )
     }
