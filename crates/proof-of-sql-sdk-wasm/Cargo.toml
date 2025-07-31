@@ -17,6 +17,7 @@ gloo-utils = { workspace = true }
 hex = { workspace = true, features = ["serde"] }
 indexmap = { workspace = true }
 lazy_static = { workspace = true }
+nova-snark = { workspace = true, default-features = false }
 parity-scale-codec = { workspace = true, features = ["derive"] }
 proof-of-sql = { workspace = true }
 proof-of-sql-planner = { workspace = true }

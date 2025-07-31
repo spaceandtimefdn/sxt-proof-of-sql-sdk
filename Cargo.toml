@@ -25,9 +25,10 @@ hex = { version = "0.4.3", default-features = false }
 lazy_static = { version = "1.5.0" }
 log = "0.4.22"
 indexmap = "2.8.0"
+nova-snark = { version = "0.41.0", default-features = false }
 parity-scale-codec = { version = "3.7.0", default-features = false }
-proof-of-sql = { version = "0.114.0", default-features = false, features = ["hyperkzg_proof"] }
-proof-of-sql-planner = { version = "0.114.0", default-features = false }
+proof-of-sql = { git = "https://github.com/spaceandtimefdn/sxt-proof-of-sql.git", rev = "0783256b8ea5306ea0f5c2c4747377135ccfbdc6", default-features = false, features = ["hyperkzg_proof"] }
+proof-of-sql-planner = { git = "https://github.com/spaceandtimefdn/sxt-proof-of-sql.git", rev = "0783256b8ea5306ea0f5c2c4747377135ccfbdc6", default-features = false }
 prost = "0.12"
 prost-build = "0.12"
 prost-types = "0.12"
