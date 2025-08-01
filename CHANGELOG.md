@@ -1,3 +1,12 @@
+# [0.19.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.18.0...v0.19.0) (2025-08-01)
+
+
+### Features
+
+* make `proof-of-sql-sdk-local` crate multi-commitment scheme and add support for hyperkzg ([8f2b315](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/8f2b315a1f08186932010545de37e22dc41ea2f6))
+
+
+
 # [0.18.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.3...v0.18.0) (2025-07-31)
 
 
@@ -27,15 +36,6 @@
 ### Bug Fixes
 
 * remove timeout from post http request ([d56a6b7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d56a6b7fd48caca0143eee2913df5f16f268479f))
-
-
-
-# [0.17.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.16.3...v0.17.0) (2025-05-07)
-
-
-### Features
-
-* rip out parser ([52e6dfd](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/52e6dfdf0b093330e5385749a9644877380e7ef0))
 
 
 
