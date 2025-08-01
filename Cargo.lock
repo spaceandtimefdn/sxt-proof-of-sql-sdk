@@ -5846,6 +5846,7 @@ dependencies = [
  "hex",
  "indexmap 2.9.0",
  "lazy_static",
+ "nova-snark",
  "parity-scale-codec",
  "proof-of-sql",
  "proof-of-sql-planner",
