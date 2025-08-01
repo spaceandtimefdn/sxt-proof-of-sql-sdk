@@ -1,3 +1,12 @@
+# [0.20.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.19.0...v0.20.0) (2025-08-01)
+
+
+### Features
+
+* add `CommitmentScheme` and add conversions ([d3331d3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d3331d323abaea5557668b5346d9287e25d20b6c))
+
+
+
 # [0.19.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.18.0...v0.19.0) (2025-08-01)
 
 
@@ -27,15 +36,6 @@
 
 
 ## [0.17.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.1...v0.17.2) (2025-06-12)
-
-
-
-## [0.17.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.0...v0.17.1) (2025-05-07)
-
-
-### Bug Fixes
-
-* remove timeout from post http request ([d56a6b7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d56a6b7fd48caca0143eee2913df5f16f268479f))
 
 
 
