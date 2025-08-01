@@ -1,6 +1,7 @@
 use crate::{
     prover, sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme,
 };
+use clap::ValueEnum;
 use proof_of_sql::{
     base::commitment::CommitmentEvaluationProof,
     proof_primitive::{
@@ -10,11 +11,13 @@ use proof_of_sql::{
 use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Serialize, Deserialize)]
 pub enum CommitmentScheme {
     /// Dynamic Dory commitment scheme.
+    #[clap(name = "dynamic-dory")]
     DynamicDory,
     /// Hyper KZG commitment scheme.
+    #[clap(name = "hyperkzg")]
     HyperKzg,
 }
 

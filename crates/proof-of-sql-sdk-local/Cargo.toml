@@ -7,6 +7,7 @@ license-file.workspace = true
 
 [dependencies]
 bincode = { workspace = true, default-features = false, features = ["serde", "alloc"] }
+clap = { workspace = true }
 datafusion = { workspace = true }
 proof-of-sql = { workspace = true }
 proof-of-sql-planner = { workspace = true }
