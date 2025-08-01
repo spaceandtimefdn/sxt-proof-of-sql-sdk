@@ -4,6 +4,9 @@ mod duration_serde;
 /// subxt-generated code for interacting with the sxt-chain runtime
 pub mod sxt_chain_runtime;
 
+mod commitment_scheme;
+pub use commitment_scheme::CommitmentEvaluationProofId;
+
 mod substrate_query;
 pub use substrate_query::table_ref_to_table_id;
 
@@ -11,7 +14,10 @@ mod uppercase_accessor;
 pub use uppercase_accessor::uppercase_table_ref;
 
 mod prover_query;
-pub use prover_query::{plan_prover_query_dory, PlanProverQueryError, DEFAULT_SCHEMA};
+pub use prover_query::{
+    plan_prover_query, plan_prover_query_dory, plan_prover_query_hyperkzg, PlanProverQueryError,
+    DEFAULT_SCHEMA,
+};
 
 mod verify;
 pub use verify::{verify_prover_response, VerifyProverResponseError};
