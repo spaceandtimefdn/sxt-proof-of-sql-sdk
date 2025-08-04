@@ -1,3 +1,12 @@
+# [0.21.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.20.0...v0.21.0) (2025-08-04)
+
+
+### Features
+
+* add hyperkzg verifier setup and add `verifier_setup` directory ([00fc3a7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/00fc3a72d76b44128853815b7413f713e24186c4))
+
+
+
 # [0.20.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.19.0...v0.20.0) (2025-08-01)
 
 
@@ -32,10 +41,6 @@
 
 * replace new-rpc with rpc ([942e3e9](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/942e3e98ae9c986730405cad04582e63ae9ffef1))
 * replace spaceandtime.dev with makeinfinite.dev in URLs ([39a76a5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/39a76a5fc2c8e7d640da2c0a2bb15e670c23acb1))
-
-
-
-## [0.17.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.1...v0.17.2) (2025-06-12)
 
 
 
