@@ -23,12 +23,13 @@ use sxt_proof_of_sql_sdk_local::{
 use wasm_bindgen::prelude::*;
 
 /// Proof-of-sql verifier setup serialized as bytes.
-const VERIFIER_SETUP_BYTES: &[u8; 47472] = include_bytes!("../../../verifier_setup.bin");
+const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8; 47472] =
+    include_bytes!("../../../verifier_setups/dynamic_dory.bin");
 
 lazy_static::lazy_static! {
     /// Proof-of-sql verifier setup.
-    static ref VERIFIER_SETUP: VerifierSetup = VerifierSetup::deserialize_with_mode(
-        &VERIFIER_SETUP_BYTES[..],
+    static ref DYNAMIC_DORY_VERIFIER_SETUP: VerifierSetup = VerifierSetup::deserialize_with_mode(
+        &DYNAMIC_DORY_VERIFIER_SETUP_BYTES[..],
         Compress::No,
         Validate::No,
     )
@@ -192,7 +193,7 @@ pub fn verify_prover_response_dory(
             &proof_plan,
             &[],
             &query_commitments,
-            &&*VERIFIER_SETUP,
+            &&*DYNAMIC_DORY_VERIFIER_SETUP,
         )
         .map_err(|e| format!("verification failure: {e}"))?
         .into_inner()

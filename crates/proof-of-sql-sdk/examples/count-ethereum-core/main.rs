@@ -92,7 +92,7 @@ async fn main() {
         env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
-        env::var("VERIFIER_SETUP").unwrap_or("verifier_setup.bin".to_string()),
+        env::var("VERIFIER_SETUP").unwrap_or("verifier_setups/dynamic_dory.bin".to_string()),
     ));
 
     let current_counts: IndexMap<String, i64> = futures::stream::iter(ETHEREUM_CORE_TABLES)

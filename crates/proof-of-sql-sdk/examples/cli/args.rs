@@ -67,13 +67,13 @@ pub struct SdkArgs {
 
     /// Path to the verifier setup binary file
     ///
-    /// Specifies the path to the `verifier_setup.bin` file required for verification.
-    /// Default path is `verifier_setup.bin` in the current directory.
+    /// Specifies the path to the verifier setup binary file required for verification.
+    /// Default path is `dynamic_dory.bin` in the `verifier_setups` directory.
     #[arg(
         long,
         value_name = "VERIFIER_SETUP",
         help = "Path to the verifier setup file",
-        default_value = "verifier_setup.bin"
+        default_value = "verifier_setups/dynamic_dory.bin"
     )]
     pub verifier_setup: String,
 }
