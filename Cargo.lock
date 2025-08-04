@@ -6027,6 +6027,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sxt-posql-sdk"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "dotenv",
+ "subxt",
+ "sxt-proof-of-sql-sdk",
+ "sxt-proof-of-sql-sdk-local",
+ "tokio",
+]
+
+[[package]]
 name = "sxt-proof-of-sql-sdk"
 version = "0.1.0"
 dependencies = [
@@ -6048,7 +6060,6 @@ dependencies = [
  "subxt",
  "sxt-proof-of-sql-sdk-local",
  "tokio",
- "tonic",
 ]
 
 [[package]]
@@ -6477,11 +6488,7 @@ dependencies = [
  "percent-encoding",
  "pin-project",
  "prost",
- "rustls-native-certs 0.7.3",
- "rustls-pemfile 2.2.0",
- "rustls-pki-types",
  "tokio",
- "tokio-rustls 0.25.0",
  "tokio-stream",
  "tower 0.4.13",
  "tower-layer",
