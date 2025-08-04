@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "https://proxy.api.makeinfinite.dev".to_string(),
         "https://rpc.testnet.sxt.network".to_string(),
         "your_sxt_api_key".to_string(),
-        "path/to/verifier_setup.bin".to_string(),
+        "path/to/verifier_setups/dynamic_dory.bin".to_string(),
     );
 
     // Execute and verify a SQL query
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Note: Replace "your_sxt_api_key" with your actual SxT API key, and ensure the `verifier_setup.bin` file is correctly specified. You can use the [file here](./verifier_setup.bin) or fetch the files [here](https://github.com/spaceandtimelabs/sxt-proof-of-sql/releases/tag/dory-prover-params-nu-16).
+Note: Replace "your_sxt_api_key" with your actual SxT API key, and ensure the verifier setup binary file is correctly specified. For example for Dynamic Dory you can use the [file here](./verifier_setups/dynamic_dory.bin) or fetch the files [here](https://github.com/spaceandtimelabs/sxt-proof-of-sql/releases/tag/dory-prover-params-nu-16).
 
 ## JavaScript Support
 
