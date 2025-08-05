@@ -1,3 +1,12 @@
+# [0.24.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.23.0...v0.24.0) (2025-08-05)
+
+
+### Features
+
+* add `CommitmentScheme` to `SxTClient` and CLI ([41cc75e](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/41cc75ee4fa73a23e06025adb4fa02c8dc76d259))
+
+
+
 # [0.23.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.22.0...v0.23.0) (2025-08-05)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add `CommitmentScheme` and add conversions ([d3331d3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d3331d323abaea5557668b5346d9287e25d20b6c))
-
-
-
-# [0.19.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.18.0...v0.19.0) (2025-08-01)
-
-
-### Features
-
-* make `proof-of-sql-sdk-local` crate multi-commitment scheme and add support for hyperkzg ([8f2b315](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/8f2b315a1f08186932010545de37e22dc41ea2f6))
 
 
 
