@@ -11,6 +11,7 @@ clap = { workspace = true, features = ["derive", "env"] }
 dotenv = { workspace = true }
 env_logger = { workspace = true }
 futures = { workspace = true }
+hex = { workspace = true }
 log = { workspace = true }
 indexmap.workspace = true
 proof-of-sql = { workspace = true, features = ["std"] }
