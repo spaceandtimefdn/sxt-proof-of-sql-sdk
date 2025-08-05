@@ -13,10 +13,11 @@ use std::path::Path;
 use subxt::Config;
 use sxt_proof_of_sql_sdk_local::{
     plan_prover_query_dory, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
+    CommitmentScheme,
 };
 
 /// Space and Time (SxT) client
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct SxTClient {
     /// Root URL for the Prover service
     pub prover_root_url: String,
@@ -33,6 +34,9 @@ pub struct SxTClient {
     /// if you do not have one.
     pub sxt_api_key: String,
 
+    /// Commitment scheme
+    pub commitment_scheme: CommitmentScheme,
+
     /// Path to the verifier setup binary file
     pub verifier_setup: String,
 }
@@ -44,13 +48,18 @@ impl SxTClient {
         auth_root_url: String,
         substrate_node_url: String,
         sxt_api_key: String,
+        commitment_scheme: CommitmentScheme,
         verifier_setup: String,
     ) -> Self {
+        if !matches!(commitment_scheme, CommitmentScheme::DynamicDory) {
+            panic!("Unsupported commitment scheme: {:?}", commitment_scheme);
+        }
         Self {
             prover_root_url,
             auth_root_url,
             substrate_node_url,
             sxt_api_key,
+            commitment_scheme,
             verifier_setup,
         }
     }
