@@ -1,3 +1,12 @@
+# [0.23.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.22.0...v0.23.0) (2025-08-05)
+
+
+### Features
+
+* proof plan cli command ([303d12c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/303d12c6202f09518a6744477bc7a52bba92c52e))
+
+
+
 # [0.22.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.21.0...v0.22.0) (2025-08-04)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * make `proof-of-sql-sdk-local` crate multi-commitment scheme and add support for hyperkzg ([8f2b315](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/8f2b315a1f08186932010545de37e22dc41ea2f6))
-
-
-
-# [0.18.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.17.3...v0.18.0) (2025-07-31)
-
-
-### Features
-
-* add shortcuts for default config for fmt ([d4df752](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/d4df752dea71e8860a1919f74a42f7b7d4d96015))
 
 
 
