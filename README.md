@@ -31,18 +31,46 @@ cargo build
 ```
 
 ## Usage
-### Running Examples
+### SXT PoSQL CLI
 
-To run the provided example that counts entries in the Ethereum core table:
+To use the CLI:
 
 ```bash
-cargo run --example cli -- -q "select * from ethereum.blocks" --sxt-api-key "your_sxt_api_key"
+cargo run --bin sxt-posql-cli -- -q "select * from ethereum.blocks" --sxt-api-key "your_sxt_api_key"
 ```
 Alternatively you may set your SxT API key via the environment variable `SXT_API_KEY`.
 
 For more options, you can view the help text with:
 ```bash
-cargo run --example cli -- --help
+cargo run --bin sxt-posql-cli -- --help
+```
+
+### SXT PoSQL Plan Producer
+
+To use the SXT PoSQL Plan Producer:
+
+```bash
+cargo run --example produce-plan -- -q "select * from ethereum.blocks" --sxt-api-key "your_sxt_api_key"
+```
+Alternatively you may set your SxT API key via the environment variable `SXT_API_KEY`.
+
+For more options, you can view the help text with:
+```bash
+cargo run --bin sxt-posql-cli -- --help
+```
+
+### Running Example
+
+To run the provided example that counts entries in the Ethereum core tables:
+
+```bash
+cargo run --example count-ethereum-core --sxt-api-key "your_sxt_api_key"
+```
+Alternatively you may set your SxT API key via the environment variable `SXT_API_KEY`.
+
+For more options, you can view the help text with:
+```bash
+cargo run --example count-ethereum-core -- --help
 ```
 
 ### Basic Usage in Code

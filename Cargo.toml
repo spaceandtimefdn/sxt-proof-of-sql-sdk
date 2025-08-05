@@ -1,9 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk-wasm", "crates/proof-of-sql-sdk/"]
+members = ["crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk-wasm", "crates/proof-of-sql-sdk/", "crates/sxt-posql-cli"]
 # the wasm and sdk crates enable mutually exclusive features on subxt
 # this default avoids the compilation issue for typical development
-default-members = [ "crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk"]
+default-members = [ "crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk", "crates/sxt-posql-cli" ]
 
 [workspace.package]
 edition = "2021"
@@ -40,6 +40,7 @@ subxt = { version = "0.37.0", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
 sqlparser = { version = "0.45.0", default-features = false }
 sxt-proof-of-sql-sdk-local = { path = "crates/proof-of-sql-sdk-local", default-features = false }
+sxt-proof-of-sql-sdk = { path = "crates/proof-of-sql-sdk", default-features = false }
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
 tonic = { version = "0.11", default-features = false }
 tonic-build = { version = "0.11" }
