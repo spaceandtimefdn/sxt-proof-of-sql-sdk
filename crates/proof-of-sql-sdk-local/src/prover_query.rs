@@ -4,12 +4,13 @@ use crate::{
     CommitmentEvaluationProofId,
 };
 use datafusion::config::ConfigOptions;
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::proof_primitive::hyperkzg::{
+    HyperKZGCommitment, HyperKZGCommitmentEvaluationProof,
+};
 use proof_of_sql::{
     base::commitment::{CommitmentEvaluationProof, QueryCommitments},
-    proof_primitive::{
-        dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
-        hyperkzg::{HyperKZGCommitment, HyperKZGCommitmentEvaluationProof},
-    },
+    proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
     sql::parse::ConversionError,
 };
 use proof_of_sql_planner::{
@@ -100,6 +101,7 @@ pub fn plan_prover_query_dory(
 }
 
 /// Create a query for the prover service from sql query text and HyperKZG commitments.
+#[cfg(feature = "hyperkzg")]
 pub fn plan_prover_query_hyperkzg(
     query: &Statement,
     commitments: &QueryCommitments<HyperKZGCommitment>,

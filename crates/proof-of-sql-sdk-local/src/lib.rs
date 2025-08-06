@@ -17,9 +17,10 @@ mod uppercase_accessor;
 pub use uppercase_accessor::uppercase_table_ref;
 
 mod prover_query;
+#[cfg(feature = "hyperkzg")]
+pub use prover_query::plan_prover_query_hyperkzg;
 pub use prover_query::{
-    plan_prover_query, plan_prover_query_dory, plan_prover_query_hyperkzg, PlanProverQueryError,
-    DEFAULT_SCHEMA,
+    plan_prover_query, plan_prover_query_dory, PlanProverQueryError, DEFAULT_SCHEMA,
 };
 
 mod verify;

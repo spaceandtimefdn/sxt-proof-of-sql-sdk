@@ -28,7 +28,7 @@ log = "0.4.22"
 indexmap = "2.8.0"
 nova-snark = { version = "0.41.0", default-features = false }
 parity-scale-codec = { version = "3.7.0", default-features = false }
-proof-of-sql = { version = "0.114.0", default-features = false, features = ["hyperkzg_proof"] }
+proof-of-sql = { version = "0.114.0", default-features = false }
 proof-of-sql-planner = { version = "0.114.0", default-features = false }
 prost = "0.12"
 prost-build = "0.12"

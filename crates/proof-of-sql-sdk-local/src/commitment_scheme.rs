@@ -4,13 +4,13 @@ use crate::{
 use ark_serialize::{CanonicalDeserialize, Compress, Validate};
 use bumpalo::Bump;
 use clap::ValueEnum;
+#[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine};
 use proof_of_sql::{
     base::commitment::CommitmentEvaluationProof,
-    proof_primitive::{
-        dory::{DynamicDoryEvaluationProof, VerifierSetup},
-        hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
-    },
+    proof_primitive::dory::{DynamicDoryEvaluationProof, VerifierSetup},
 };
 use serde::{Deserialize, Serialize};
 
@@ -20,6 +20,7 @@ pub enum CommitmentScheme {
     /// Dynamic Dory commitment scheme.
     DynamicDory,
     /// Hyper KZG commitment scheme.
+    #[cfg(feature = "hyperkzg")]
     HyperKzg,
 }
 
@@ -28,6 +29,7 @@ impl From<CommitmentScheme> for prover::CommitmentScheme {
     fn from(scheme: CommitmentScheme) -> Self {
         match scheme {
             CommitmentScheme::DynamicDory => Self::DynamicDory,
+            #[cfg(feature = "hyperkzg")]
             CommitmentScheme::HyperKzg => Self::HyperKzg,
         }
     }
@@ -38,6 +40,7 @@ impl From<CommitmentScheme> for commitment_scheme::CommitmentScheme {
     fn from(scheme: CommitmentScheme) -> Self {
         match scheme {
             CommitmentScheme::DynamicDory => Self::DynamicDory,
+            #[cfg(feature = "hyperkzg")]
             CommitmentScheme::HyperKzg => Self::HyperKzg,
         }
     }
@@ -63,6 +66,7 @@ pub trait CommitmentEvaluationProofId:
     >;
 }
 
+#[cfg(feature = "hyperkzg")]
 impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::HyperKzg;
     type DeserializationError = bincode::error::DecodeError;
