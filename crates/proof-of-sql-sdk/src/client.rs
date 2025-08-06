@@ -2,18 +2,18 @@ use crate::{
     get_access_token, query_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
+use bumpalo::Bump;
 use proof_of_sql::{
     base::database::OwnedTable,
-    proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
+    proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof},
 };
 use proof_of_sql_planner::{get_table_refs_from_statement, postprocessing::PostprocessingStep};
 use reqwest::Client;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
-use std::path::Path;
 use subxt::Config;
 use sxt_proof_of_sql_sdk_local::{
     plan_prover_query_dory, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    CommitmentScheme,
+    CommitmentEvaluationProofId, CommitmentScheme,
 };
 
 /// Space and Time (SxT) client
@@ -82,8 +82,16 @@ impl SxTClient {
             .collect::<Vec<_>>();
 
         // Load verifier setup
-        let verifier_setup_path = Path::new(&self.verifier_setup);
-        let verifier_setup = VerifierSetup::load_from_file(verifier_setup_path)?;
+        let bump = Bump::new();
+        let verifier_setup = DynamicDoryEvaluationProof::deserialize_verifier_setup(
+            &std::fs::read(&self.verifier_setup).map_err(|e| {
+                format!(
+                    "Failed to read verifier setup from {:?}: {:?}",
+                    &self.verifier_setup, e
+                )
+            })?,
+            &bump,
+        )?;
         // Accessor setup
         let accessor = query_commitments(&table_refs, &self.substrate_node_url, block_ref).await?;
 
@@ -113,7 +121,7 @@ impl SxTClient {
             proof_plan_with_post_processing.plan(),
             &[],
             &accessor,
-            &&verifier_setup,
+            &verifier_setup,
         )?;
 
         // Apply postprocessing steps
