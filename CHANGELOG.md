@@ -1,3 +1,12 @@
+## [0.26.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.26.0...v0.26.1) (2025-08-06)
+
+
+### Bug Fixes
+
+* add hyperkzg feature to local crate ([06e38f7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/06e38f7b68c61320ab168668b049e2534b460f01))
+
+
+
 # [0.26.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.25.0...v0.26.0) (2025-08-06)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * proof plan cli command ([303d12c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/303d12c6202f09518a6744477bc7a52bba92c52e))
-
-
-
-# [0.22.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.21.0...v0.22.0) (2025-08-04)
-
-
-### Features
-
-* add *.log to .gitignore ([104ccea](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/104cceae9d8a6882d6fcfd0c6c79753d9710650d))
 
 
 
