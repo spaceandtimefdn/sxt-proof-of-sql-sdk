@@ -11,7 +11,7 @@ bincode = { workspace = true, default-features = false, features = ["serde", "al
 bumpalo = { workspace = true }
 clap = { workspace = true }
 datafusion = { workspace = true }
-nova-snark = { workspace = true, default-features = false }
+nova-snark = { workspace = true, default-features = false, optional = true }
 proof-of-sql = { workspace = true }
 proof-of-sql-planner = { workspace = true }
 prost = { workspace = true }
@@ -38,3 +38,4 @@ default = ["native", "prover-client"]
 prover-client = ["tonic/transport"]
 native = ["subxt/native"]
 web = ["subxt/web"]
+hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]

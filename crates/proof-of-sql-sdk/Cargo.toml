@@ -21,7 +21,7 @@ reqwest = { workspace = true, features = ["json"] }
 serde_json.workspace = true
 sqlparser = { workspace = true, features = ["visitor", "std"] }
 subxt = { workspace = true, features = ["jsonrpsee"] }
-sxt-proof-of-sql-sdk-local = { workspace = true, features = ["native", "prover-client"] }
+sxt-proof-of-sql-sdk-local = { workspace = true, features = ["hyperkzg", "native", "prover-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
 snafu = { workspace = true }
 itertools = { workspace = true }
