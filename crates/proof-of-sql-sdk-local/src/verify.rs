@@ -1,4 +1,6 @@
-use crate::{prover::ProverResponse, uppercase_accessor::UppercaseAccessor};
+use crate::{
+    prover::ProverResponse, uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId,
+};
 use proof_of_sql::{
     base::{
         commitment::CommitmentEvaluationProof,
@@ -9,7 +11,6 @@ use proof_of_sql::{
         proof_plans::DynProofPlan,
     },
 };
-use serde::Deserialize;
 use snafu::Snafu;
 
 /// Errors that can occur when verifying a prover response.
@@ -33,32 +34,33 @@ impl From<bincode::error::DecodeError> for VerifyProverResponseError {
 }
 
 /// Verify a response from the prover service against the provided commitment accessor.
-pub fn verify_prover_response<'de, 's, CP: CommitmentEvaluationProof + Deserialize<'de>>(
-    prover_response: &'de ProverResponse,
+pub fn verify_prover_response<CPI: CommitmentEvaluationProofId>(
+    prover_response: &ProverResponse,
     proof_plan: &DynProofPlan,
     params: &[LiteralValue],
-    accessor: &impl CommitmentAccessor<CP::Commitment>,
-    verifier_setup: &CP::VerifierPublicSetup<'s>,
-) -> Result<OwnedTable<CP::Scalar>, VerifyProverResponseError> {
+    accessor: &impl CommitmentAccessor<<CPI as CommitmentEvaluationProof>::Commitment>,
+    verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
+) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, VerifyProverResponseError> {
     let accessor = UppercaseAccessor(accessor);
-    let proof: QueryProof<CP> = bincode::serde::borrow_decode_from_slice(
+    let proof: QueryProof<CPI> = bincode::serde::borrow_decode_from_slice(
         &prover_response.proof,
         bincode::config::legacy()
             .with_fixed_int_encoding()
             .with_big_endian(),
     )?
     .0;
-    let result: OwnedTable<CP::Scalar> = bincode::serde::borrow_decode_from_slice(
-        &prover_response.result,
-        bincode::config::legacy()
-            .with_fixed_int_encoding()
-            .with_big_endian(),
-    )?
-    .0;
+    let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
+        bincode::serde::borrow_decode_from_slice(
+            &prover_response.result,
+            bincode::config::legacy()
+                .with_fixed_int_encoding()
+                .with_big_endian(),
+        )?
+        .0;
 
     // Verify the proof
     proof.verify(
-        proof_plan,
+        &CPI::associated_proof_plan(proof_plan),
         &accessor,
         result.clone(),
         verifier_setup,

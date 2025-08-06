@@ -62,11 +62,12 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     let proof_plan_with_postprocessing =
         sql_to_proof_plans_with_postprocessing(&[query.clone()], accessor, &config_options)?[0]
             .clone();
+    let bincode_config = bincode::config::legacy()
+        .with_fixed_int_encoding()
+        .with_big_endian();
     let serialized_proof_plan = bincode::serde::encode_to_vec(
-        proof_plan_with_postprocessing.plan(),
-        bincode::config::legacy()
-            .with_fixed_int_encoding()
-            .with_big_endian(),
+        CPI::associated_proof_plan(proof_plan_with_postprocessing.plan()),
+        bincode_config,
     )?;
 
     let query_context = commitments
