@@ -7,6 +7,7 @@ license-file = { workspace = true }
 
 [dependencies]
 bincode = { workspace = true, default-features = false, features = ["serde", "alloc"] }
+bumpalo = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 dotenv = { workspace = true }
 env_logger = { workspace = true }

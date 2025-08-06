@@ -6043,6 +6043,7 @@ name = "sxt-proof-of-sql-sdk"
 version = "0.1.0"
 dependencies = [
  "bincode 2.0.1",
+ "bumpalo",
  "clap",
  "dotenv",
  "env_logger",
@@ -6066,12 +6067,14 @@ dependencies = [
 name = "sxt-proof-of-sql-sdk-local"
 version = "0.1.0"
 dependencies = [
+ "ark-serialize",
  "ark-std",
  "bincode 2.0.1",
  "bumpalo",
  "clap",
  "datafusion",
  "k256",
+ "nova-snark",
  "proof-of-sql",
  "proof-of-sql-planner",
  "prost",

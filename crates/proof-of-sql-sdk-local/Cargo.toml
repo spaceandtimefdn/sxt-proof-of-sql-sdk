@@ -6,9 +6,12 @@ version.workspace = true
 license-file.workspace = true
 
 [dependencies]
+ark-serialize = { workspace = true }
 bincode = { workspace = true, default-features = false, features = ["serde", "alloc"] }
+bumpalo = { workspace = true }
 clap = { workspace = true }
 datafusion = { workspace = true }
+nova-snark = { workspace = true, default-features = false }
 proof-of-sql = { workspace = true }
 proof-of-sql-planner = { workspace = true }
 prost = { workspace = true }
