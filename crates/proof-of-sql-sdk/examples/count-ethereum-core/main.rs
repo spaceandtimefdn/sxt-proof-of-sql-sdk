@@ -1,9 +1,12 @@
 use futures::StreamExt;
 use indexmap::IndexMap;
-use proof_of_sql::base::database::OwnedColumn;
+use proof_of_sql::base::{
+    database::{OwnedColumn, OwnedTable},
+    scalar::Scalar,
+};
 use std::{cmp::Ordering, env, fs::File, io::BufReader, path::Path, sync::Arc};
 use sxt_proof_of_sql_sdk::SxTClient;
-use sxt_proof_of_sql_sdk_local::CommitmentScheme;
+use sxt_proof_of_sql_sdk_local::{CommitmentScheme, DynOwnedTable};
 
 const ETHEREUM_CORE_COUNTS_FILE: &str = "ethereum-core-counts.json";
 
@@ -21,23 +24,32 @@ const ETHEREUM_CORE_TABLES: [&str; 11] = [
     "ETHEREUM.ERC1155_OWNERS",
 ];
 
-/// Count the number of rows in a table
-async fn count_table(
-    client: &SxTClient,
-    table_ref: &str,
-) -> Result<i64, Box<dyn core::error::Error>> {
-    let uppercased_table_ref = table_ref.to_uppercase();
-    let query = format!("SELECT COUNT(*) FROM {uppercased_table_ref}");
-    let table = client.query_and_verify(&query, None).await?;
+/// Extract the count from the count query result.
+fn extract_count<S: Scalar>(table: OwnedTable<S>) -> i64 {
     assert_eq!(table.num_columns(), 1);
     assert_eq!(table.num_rows(), 1);
-
     let column = table.into_inner().swap_remove_index(0).unwrap().1;
     let OwnedColumn::BigInt(int_column) = column else {
         panic!("count query should return an int64 column")
     };
+    int_column[0]
+}
 
-    Ok(int_column[0])
+/// Count the number of rows in a table
+async fn count_table(
+    client: &SxTClient,
+    table_ref: &str,
+    commitment_scheme: CommitmentScheme,
+) -> Result<i64, Box<dyn core::error::Error>> {
+    let uppercased_table_ref = table_ref.to_uppercase();
+    let query = format!("SELECT COUNT(*) FROM {uppercased_table_ref}");
+    let table = client
+        .query_and_verify(&query, None, commitment_scheme)
+        .await?;
+    match table {
+        DynOwnedTable::Dory(table) => Ok(extract_count(table)),
+        DynOwnedTable::BN(table) => Ok(extract_count(table)),
+    }
 }
 
 /// Compare current and previous counts and warn if current is less than previous or if current is absent while previous is present
@@ -101,7 +113,6 @@ async fn main() {
         env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
-        commitment_scheme,
         env::var("VERIFIER_SETUP").unwrap_or("verifier_setup.bin".to_string()),
     ));
 
@@ -110,7 +121,7 @@ async fn main() {
             let client = client.clone();
             async move {
                 log::info!("querying count of {table_ref}");
-                let count = count_table(client.as_ref(), table_ref)
+                let count = count_table(client.as_ref(), table_ref, commitment_scheme)
                     .await
                     .inspect_err(|e| log::error!("failed to query count for {table_ref}: {e}"))
                     .ok()?;

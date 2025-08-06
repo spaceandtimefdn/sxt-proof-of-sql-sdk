@@ -7,10 +7,12 @@ use clap::ValueEnum;
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
 #[cfg(feature = "hyperkzg")]
-use proof_of_sql::proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine};
+use proof_of_sql::proof_primitive::hyperkzg::{
+    BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine,
+};
 use proof_of_sql::{
-    base::commitment::CommitmentEvaluationProof,
-    proof_primitive::dory::{DynamicDoryEvaluationProof, VerifierSetup},
+    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
+    proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
 };
 use serde::{Deserialize, Serialize};
 
@@ -44,6 +46,16 @@ impl From<CommitmentScheme> for commitment_scheme::CommitmentScheme {
             CommitmentScheme::HyperKzg => Self::HyperKzg,
         }
     }
+}
+
+/// Enum of [`OwnedTable`]s with different scalar types.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum DynOwnedTable {
+    /// Owned table with a [`DoryScalar`]. Used for Dynamic Dory.
+    Dory(OwnedTable<DoryScalar>),
+    /// Owned table with a [`BNScalar`]. Used for HyperKZG.
+    #[cfg(feature = "hyperkzg")]
+    BN(OwnedTable<BNScalar>),
 }
 
 /// Trait for commitment evaluation proofs that defines their associated [`CommitmentScheme`].
