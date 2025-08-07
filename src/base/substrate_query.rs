@@ -1,6 +1,8 @@
-use super::DEFAULT_SCHEMA;
-use crate::sxt_chain_runtime::api::runtime_types::{
-    bounded_collections::bounded_vec::BoundedVec, sxt_core::tables::TableIdentifier,
+use super::{
+    sxt_chain_runtime::api::runtime_types::{
+        bounded_collections::bounded_vec::BoundedVec, sxt_core::tables::TableIdentifier,
+    },
+    DEFAULT_SCHEMA,
 };
 use proof_of_sql::base::database::TableRef;
 use sqlparser::ast::Ident;

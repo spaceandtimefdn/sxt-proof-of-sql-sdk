@@ -1,7 +1,6 @@
+use crate::{base::CommitmentScheme, native::SxTClient};
 use clap::Args;
 use subxt::utils::H256;
-use sxt_proof_of_sql_sdk::SxTClient;
-use sxt_proof_of_sql_sdk_local::CommitmentScheme;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct QueryAndVerifySdkArgs {
@@ -93,7 +92,7 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
     }
 }
 
-pub(super) async fn query_and_verify(
+pub async fn query_and_verify(
     args: QueryAndVerifySdkArgs,
 ) -> Result<(), Box<dyn core::error::Error>> {
     let (client, commitment_scheme) = (&args).into();

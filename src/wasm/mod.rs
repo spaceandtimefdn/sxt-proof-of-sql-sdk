@@ -1,5 +1,11 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("README.md")]
 
+use crate::base::{
+    sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::{
+        commitment_scheme::CommitmentScheme, commitment_storage_map::TableCommitmentBytes,
+    },
+    table_ref_to_table_id,
+};
 use ark_serialize::{CanonicalDeserialize, Compress, Validate};
 use gloo_utils::format::JsValueSerdeExt;
 use indexmap::IndexMap;
@@ -14,17 +20,11 @@ use serde::Deserialize;
 use sp_crypto_hashing::{blake2_128, twox_128};
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::ext::codec::{Decode, Encode};
-use sxt_proof_of_sql_sdk_local::{
-    sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::{
-        commitment_scheme::CommitmentScheme, commitment_storage_map::TableCommitmentBytes,
-    },
-    table_ref_to_table_id,
-};
 use wasm_bindgen::prelude::*;
 
 /// Proof-of-sql verifier setup serialized as bytes.
 const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8; 47472] =
-    include_bytes!("../../../verifier_setups/dynamic_dory.bin");
+    include_bytes!("../../verifier_setups/dynamic_dory.bin");
 
 lazy_static::lazy_static! {
     /// Proof-of-sql verifier setup.
@@ -151,7 +151,7 @@ pub fn plan_prover_query_dory(
         .map_err(|e| format!("failed to construct QueryCommitments: {e}"))?;
 
     let (prover_query, proof_plan_with_post_processing) =
-        sxt_proof_of_sql_sdk_local::plan_prover_query_dory(&query_parsed, &query_commitments)
+        crate::base::plan_prover_query_dory(&query_parsed, &query_commitments)
             .map_err(|e| format!("failed to plan prover query: {e}"))?;
 
     let prover_query_json = JsValue::from_serde(&prover_query)
@@ -188,7 +188,7 @@ pub fn verify_prover_response_dory(
         .map_err(|e| format!("failed to construct QueryCommitments: {e}"))?;
 
     let verified_table_result: IndexMap<_, _> =
-        sxt_proof_of_sql_sdk_local::verify_prover_response::<DynamicDoryEvaluationProof>(
+        crate::base::verify_prover_response::<DynamicDoryEvaluationProof>(
             &prover_response,
             &proof_plan,
             &[],

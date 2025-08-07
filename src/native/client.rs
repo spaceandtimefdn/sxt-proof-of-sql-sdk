@@ -1,22 +1,22 @@
-use crate::{
+use super::{
     get_access_token, query_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
+use crate::base::{
+    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
+    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+};
 use bumpalo::Bump;
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
     base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
-    proof_primitive::{
-        dory::DynamicDoryEvaluationProof, hyperkzg::HyperKZGCommitmentEvaluationProof,
-    },
+    proof_primitive::dory::DynamicDoryEvaluationProof,
 };
 use proof_of_sql_planner::{get_table_refs_from_statement, postprocessing::PostprocessingStep};
 use reqwest::Client;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::Config;
-use sxt_proof_of_sql_sdk_local::{
-    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
-};
 
 /// Space and Time (SxT) client
 #[derive(Debug, Clone)]
@@ -145,6 +145,7 @@ impl SxTClient {
                 .query_and_verify_by_cpi::<DynamicDoryEvaluationProof>(query, block_ref, &bump)
                 .await
                 .map(DynOwnedTable::Dory),
+            #[cfg(feature = "hyperkzg")]
             CommitmentScheme::HyperKzg => self
                 .query_and_verify_by_cpi::<HyperKZGCommitmentEvaluationProof>(
                     query, block_ref, &bump,

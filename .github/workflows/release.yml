@@ -82,12 +82,12 @@ jobs:
         run: cargo install wasm-pack
 
       - name: Build wasm binary
-        run: wasm-pack build --release --target deno --no-typescript crates/proof-of-sql-sdk-wasm
+        run: wasm-pack build --release --target deno --no-typescript -- --no-default-features --features wasm
 
       - name: Build javascript index
         run: |
           chmod +x ./node/src/build_index.sh
-          ./node/src/build_index.sh crates/proof-of-sql-sdk-wasm/pkg
+          ./node/src/build_index.sh wasm/pkg
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3

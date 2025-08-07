@@ -36,10 +36,10 @@ jobs:
         run: curl https://sh.rustup.rs -sSf | bash -s -- -y --profile minimal && source ~/.cargo/env && rustup toolchain install
       - name: Install Dependencies
         run: export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
-      - name: Run cargo check (default features and packages)
+      - name: Run cargo check (default features)
         run: cargo check --all-targets
-      - name: Run cargo check (wasm package)
-        run: cargo check --all-targets --package sxt-proof-of-sql-sdk-wasm
+      - name: Run cargo check (wasm feature)
+        run: cargo check --target wasm32-unknown-unknown --no-default-features --features wasm
 
   clippy:
     name: Clippy
@@ -63,11 +63,11 @@ jobs:
           rustup component add clippy
       - name: Install Dependencies
         run: export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
-      - name: Run clippy (default features and packages)
+      - name: Run clippy (default features)
         run: cargo clippy --all-targets -- -D warnings
-      - name: Run clippy (wasm package)
-        run: cargo clippy --all-targets --package sxt-proof-of-sql-sdk-wasm -- -D warnings
- 
+      - name: Run clippy (wasm feature)
+        run: cargo clippy --target wasm32-unknown-unknown --no-default-features --features wasm -- -D warnings
+
   # Run cargo f --check
   format:
     name: Format

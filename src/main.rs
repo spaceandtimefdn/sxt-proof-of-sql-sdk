@@ -1,12 +1,9 @@
-mod args;
-mod query_and_verify;
-
-use crate::{
+use clap::Parser;
+use dotenv::dotenv;
+use sxt_proof_of_sql_sdk::{
     args::{ProofOfSqlSdkArgs, ProofOfSqlSdkSubcommands},
     query_and_verify::query_and_verify,
 };
-use clap::Parser;
-use dotenv::dotenv;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn core::error::Error>> {

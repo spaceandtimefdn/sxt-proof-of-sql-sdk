@@ -1,11 +1,11 @@
-use crate::{query_commitments, substrate::SxtConfig};
+use super::{query_commitments, substrate::SxtConfig};
+use crate::base::{get_plan_from_accessor_and_query, uppercase_table_ref};
 use proof_of_sql::{
     proof_primitive::dory::DynamicDoryEvaluationProof, sql::proof_plans::DynProofPlan,
 };
 use proof_of_sql_planner::get_table_refs_from_statement;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::Config;
-use sxt_proof_of_sql_sdk_local::{get_plan_from_accessor_and_query, uppercase_table_ref};
 
 /// Produces a plan given the substrate url and the query
 ///

@@ -1,19 +1,17 @@
-[workspace]
+[package]
 resolver = "2"
-members = ["crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk-wasm", "crates/proof-of-sql-sdk/", "crates/sxt-posql-cli"]
-# the wasm and sdk crates enable mutually exclusive features on subxt
-# this default avoids the compilation issue for typical development
-default-members = [ "crates/proof-of-sql-sdk-local", "crates/proof-of-sql-sdk", "crates/sxt-posql-cli" ]
-
-[workspace.package]
+name = "sxt-proof-of-sql-sdk"
 edition = "2021"
 repository = "https://github.com/spaceandtimelabs/sxt-proof-of-sql-sdk"
 version = "0.1.0"
 license-file = "LICENSE"
 
-[workspace.dependencies]
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
 ark-serialize = { version = "0.5.0", default-features = false }
-bincode = { version = "2.0.1", default-features = false }
+bincode = { version = "2.0.1", default-features = false, features = ["serde", "alloc"] }
 bumpalo = { version = "3.19.0" }
 chrono="0.4.39"
 clap = { version = "4.5.20", features = ["derive", "env"] }
@@ -22,32 +20,61 @@ dotenv = "0.15"
 env_logger = "0.11.5"
 futures = { version = "0.3.31"}
 gloo-utils = { version = "0.2.0" }
-hex = { version = "0.4.3", default-features = false }
+hex = { version = "0.4.3", default-features = false, features = ["serde"] }
 lazy_static = { version = "1.5.0" }
 log = "0.4.22"
 indexmap = "2.8.0"
-nova-snark = { version = "0.41.0", default-features = false }
-parity-scale-codec = { version = "3.7.0", default-features = false }
+nova-snark = { version = "0.41.0", default-features = false, optional = true }
+parity-scale-codec = { version = "3.7.0", default-features = false, features = ["derive"] }
 proof-of-sql = { version = "0.114.0", default-features = false }
 proof-of-sql-planner = { version = "0.114.0", default-features = false }
 prost = "0.12"
 prost-build = "0.12"
 prost-types = "0.12"
-rand = "0.8.5"
 reqwest = { version = "0.12", features = ["json"] }
 serde = { version = "1.0", features = ["serde_derive"] }
 serde_json = "1.0"
 snafu = { version = "0.8.5", default-features = false }
-subxt = { version = "0.37.0", default-features = false }
+subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee"]  }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
-sqlparser = { version = "0.45.0", default-features = false }
-sxt-proof-of-sql-sdk-local = { path = "crates/proof-of-sql-sdk-local", default-features = false }
-sxt-proof-of-sql-sdk = { path = "crates/proof-of-sql-sdk", default-features = false }
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-tonic = { version = "0.11", default-features = false }
-tonic-build = { version = "0.11" }
+sqlparser = { version = "0.45.0", default-features = false, features = ["visitor"] }
+tokio = { version = "1.0", features = ["macros"] }
+tonic = { version = "0.11", default-features = false, features = ["codegen", "prost"] }
 wasm-bindgen = { version = "0.2.95" }
 k256 = { version = "0.13.4" }
 sha3 = { version = "0.10.8" }
 sp-core = "34.0.0"
 itertools = "0.13.0"
+
+[build-dependencies]
+tonic-build = { version = "0.11" }
+
+[dev-dependencies]
+ark-std = { version = "0.5.0", default-features = false }
+rand = "0.8.5"
+
+[features]
+default = ["native", "prover-client", "hyperkzg"]
+prover-client = ["tonic/transport"]
+# Do not use the `native` feature unless you are building for the native environment.
+# It can not be used with the `wasm` feature.
+native = ["subxt/native", "proof-of-sql/std", "sqlparser/std", "tokio/rt-multi-thread"]
+# Currently the `hyperkzg` and `wasm` features are incompatible.
+hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
+
+# Do not use the `wasm` feature unless you are building for the web.
+# It can not be used with the `native` feature.
+wasm = ["subxt/web"]
+
+[[bin]]
+name = "sxt-proof-of-sql-cli"
+path = "src/main.rs"
+required-features = ["native"]
+
+[[example]]
+name = "count-ethereum-core"
+path = "examples/count-ethereum-core/main.rs"
+
+[[example]]
+name = "produce-plan"
+path = "examples/produce-plan/main.rs"
