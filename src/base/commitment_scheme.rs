@@ -1,4 +1,4 @@
-use crate::{
+use super::{
     prover, sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme,
 };
 use ark_serialize::{CanonicalDeserialize, Compress, Validate};

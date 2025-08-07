@@ -1,4 +1,4 @@
-use crate::{
+use super::{
     prover::{self, ProverContextRange, ProverQuery},
     uppercase_accessor::UppercaseAccessor,
     CommitmentEvaluationProofId,

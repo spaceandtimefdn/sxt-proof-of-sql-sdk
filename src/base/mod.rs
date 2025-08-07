@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("README.md")]
 
 mod duration_serde;
 /// subxt-generated code for interacting with the sxt-chain runtime

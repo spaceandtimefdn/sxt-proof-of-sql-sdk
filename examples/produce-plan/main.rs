@@ -2,7 +2,7 @@ mod args;
 use crate::args::ProducePlanArgs;
 use clap::Parser;
 use proof_of_sql::{base::try_standard_binary_serialization, sql::evm_proof_plan::EVMProofPlan};
-use sxt_proof_of_sql_sdk::produce_plan;
+use sxt_proof_of_sql_sdk::native::produce_plan;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn core::error::Error>> {

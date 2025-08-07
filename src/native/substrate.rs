@@ -1,12 +1,4 @@
-use futures::future::try_join_all;
-use itertools::Itertools;
-use proof_of_sql::base::{
-    commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
-    database::TableRef,
-};
-use snafu::{ResultExt, Snafu};
-use subxt::{blocks::BlockRef, Config, OnlineClient, PolkadotConfig};
-use sxt_proof_of_sql_sdk_local::{
+use crate::base::{
     attestation::{self, create_attestation_message, verify_signature},
     sxt_chain_runtime::{
         self,
@@ -19,6 +11,14 @@ use sxt_proof_of_sql_sdk_local::{
     },
     table_ref_to_table_id, CommitmentEvaluationProofId,
 };
+use futures::future::try_join_all;
+use itertools::Itertools;
+use proof_of_sql::base::{
+    commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
+    database::TableRef,
+};
+use snafu::{ResultExt, Snafu};
+use subxt::{blocks::BlockRef, Config, OnlineClient, PolkadotConfig};
 
 /// Use the standard PolkadotConfig
 pub type SxtConfig = PolkadotConfig;

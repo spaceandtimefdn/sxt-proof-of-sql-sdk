@@ -1,4 +1,4 @@
-use crate::uppercase_accessor::UppercaseAccessor;
+use super::uppercase_accessor::UppercaseAccessor;
 use datafusion::config::ConfigOptions;
 use proof_of_sql::{base::database::SchemaAccessor, sql::proof_plans::DynProofPlan};
 use proof_of_sql_planner::{

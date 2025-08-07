@@ -1,4 +1,4 @@
-use crate::sxt_chain_runtime as runtime;
+use super::sxt_chain_runtime as runtime;
 use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};

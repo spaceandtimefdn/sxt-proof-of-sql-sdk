@@ -1,4 +1,4 @@
-use crate::{
+use super::{
     prover::ProverResponse, uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId,
 };
 use proof_of_sql::{

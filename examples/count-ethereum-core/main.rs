@@ -5,8 +5,10 @@ use proof_of_sql::base::{
     scalar::Scalar,
 };
 use std::{cmp::Ordering, env, fs::File, io::BufReader, path::Path, sync::Arc};
-use sxt_proof_of_sql_sdk::SxTClient;
-use sxt_proof_of_sql_sdk_local::{CommitmentScheme, DynOwnedTable};
+use sxt_proof_of_sql_sdk::{
+    base::{CommitmentScheme, DynOwnedTable},
+    native::SxTClient,
+};
 
 const ETHEREUM_CORE_COUNTS_FILE: &str = "ethereum-core-counts.json";
 

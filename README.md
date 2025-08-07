@@ -36,13 +36,13 @@ cargo build
 To use the CLI:
 
 ```bash
-cargo run --bin sxt-posql-cli -- -q "select * from ethereum.blocks" --sxt-api-key "your_sxt_api_key"
+cargo run --bin proof-of-sql-cli -- -q "select * from ethereum.blocks" --sxt-api-key "your_sxt_api_key"
 ```
 Alternatively you may set your SxT API key via the environment variable `SXT_API_KEY`.
 
 For more options, you can view the help text with:
 ```bash
-cargo run --bin sxt-posql-cli -- --help
+cargo run --bin proof-of-sql-cli -- --help
 ```
 
 ### SXT PoSQL Plan Producer
@@ -56,7 +56,7 @@ Alternatively you may set your SxT API key via the environment variable `SXT_API
 
 For more options, you can view the help text with:
 ```bash
-cargo run --bin sxt-posql-cli -- --help
+cargo run --example produce-plan -- --help
 ```
 
 ### Running Example
@@ -79,7 +79,7 @@ Here's how you can use the `SxTClient` in your Rust application:
 
 ```rust
 
-use sxt_proof_of_sql_sdk::SxTClient;
+use sxt_proof_of_sql_sdk::native::SxTClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
