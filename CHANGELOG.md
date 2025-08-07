@@ -1,3 +1,12 @@
+# [0.29.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.5...v0.29.0) (2025-08-07)
+
+
+### Features
+
+* add produce_plan_subcommand ([67fc478](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/67fc478dc3de83d44f6193bc963557ee22dd3667))
+
+
+
 ## [0.28.5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.4...v0.28.5) (2025-08-07)
 
 
@@ -21,10 +30,6 @@
 
 
 ## [0.28.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.1...v0.28.2) (2025-08-07)
-
-
-
-## [0.28.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.0...v0.28.1) (2025-08-07)
 
 
 
