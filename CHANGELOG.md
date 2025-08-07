@@ -1,3 +1,12 @@
+# [0.27.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.26.1...v0.27.0) (2025-08-07)
+
+
+### Features
+
+* add `DynOwnedTable` and allow multiple schemes in SDK ([0f19289](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0f19289a3b94974048e9c9416a33691891d63d1a))
+
+
+
 ## [0.26.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.26.0...v0.26.1) (2025-08-06)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add `CommitmentScheme` to `SxTClient` and CLI ([41cc75e](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/41cc75ee4fa73a23e06025adb4fa02c8dc76d259))
-
-
-
-# [0.23.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.22.0...v0.23.0) (2025-08-05)
-
-
-### Features
-
-* proof plan cli command ([303d12c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/303d12c6202f09518a6744477bc7a52bba92c52e))
 
 
 
