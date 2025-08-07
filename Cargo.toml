@@ -78,3 +78,6 @@ path = "examples/count-ethereum-core/main.rs"
 [[example]]
 name = "produce-plan"
 path = "examples/produce-plan/main.rs"
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["gloo-utils", "wasm-bindgen"]
