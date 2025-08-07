@@ -6,13 +6,15 @@ use bumpalo::Bump;
 use clap::ValueEnum;
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
-#[cfg(feature = "hyperkzg")]
-use proof_of_sql::proof_primitive::hyperkzg::{
-    BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine,
-};
 use proof_of_sql::{
     base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
     proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
+    sql::{proof::ProofPlan, proof_plans::DynProofPlan},
+};
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::{
+    proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
+    sql::evm_proof_plan::EVMProofPlan,
 };
 use serde::{Deserialize, Serialize};
 
@@ -68,6 +70,9 @@ pub trait CommitmentEvaluationProofId:
     /// Error type for deserialization failures.
     type DeserializationError: core::error::Error;
 
+    /// Type for the Proof Plan associated with this commitment type.
+    type AssociatedProofPlan: ProofPlan + Serialize + for<'de> Deserialize<'de>;
+
     /// Deserialize the verifier public setup from bytes.
     fn deserialize_verifier_setup<'a>(
         bytes: &[u8],
@@ -76,12 +81,16 @@ pub trait CommitmentEvaluationProofId:
         <Self as CommitmentEvaluationProof>::VerifierPublicSetup<'a>,
         Self::DeserializationError,
     >;
+
+    /// Produce an associated proof plan from a [`ProofPlanWithPostprocessing`].
+    fn associated_proof_plan(plan: &DynProofPlan) -> Self::AssociatedProofPlan;
 }
 
 #[cfg(feature = "hyperkzg")]
 impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::HyperKzg;
     type DeserializationError = bincode::error::DecodeError;
+    type AssociatedProofPlan = EVMProofPlan;
 
     fn deserialize_verifier_setup<'a>(
         bytes: &[u8],
@@ -96,11 +105,16 @@ impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
         .map(|(setup, _)| setup)?;
         Ok(alloc.alloc(setup) as &'a VerifierKey<HyperKZGEngine>)
     }
+
+    fn associated_proof_plan(plan: &DynProofPlan) -> Self::AssociatedProofPlan {
+        EVMProofPlan::new(plan.clone())
+    }
 }
 
 impl CommitmentEvaluationProofId for DynamicDoryEvaluationProof {
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::DynamicDory;
     type DeserializationError = ark_serialize::SerializationError;
+    type AssociatedProofPlan = DynProofPlan;
 
     fn deserialize_verifier_setup<'a>(
         bytes: &[u8],
@@ -108,5 +122,9 @@ impl CommitmentEvaluationProofId for DynamicDoryEvaluationProof {
     ) -> Result<&'a VerifierSetup, Self::DeserializationError> {
         let setup = VerifierSetup::deserialize_with_mode(bytes, Compress::No, Validate::No)?;
         Ok(alloc.alloc(setup) as &'a VerifierSetup)
+    }
+
+    fn associated_proof_plan(plan: &DynProofPlan) -> Self::AssociatedProofPlan {
+        plan.clone()
     }
 }
