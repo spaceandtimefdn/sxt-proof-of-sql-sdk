@@ -1,3 +1,7 @@
+## [0.28.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.1...v0.28.2) (2025-08-07)
+
+
+
 ## [0.28.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.0...v0.28.1) (2025-08-07)
 
 
@@ -26,15 +30,6 @@
 ### Bug Fixes
 
 * add hyperkzg feature to local crate ([06e38f7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/06e38f7b68c61320ab168668b049e2534b460f01))
-
-
-
-# [0.26.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.25.0...v0.26.0) (2025-08-06)
-
-
-### Features
-
-* add `CommitmentEvaluationProofId::deserialize_verifier_setup` and use it in `SxtClient::query_and_verify` ([624baf5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/624baf5e74c32d49d42cc69578297173d4c1233f))
 
 
 
