@@ -1,3 +1,12 @@
+## [0.28.5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.4...v0.28.5) (2025-08-07)
+
+
+### Bug Fixes
+
+* fix some WASM-related issues ([9afe315](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/9afe3156d583ebea2c8d5a6db778e1b7944b104f))
+
+
+
 ## [0.28.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.3...v0.28.4) (2025-08-07)
 
 
@@ -16,15 +25,6 @@
 
 
 ## [0.28.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.0...v0.28.1) (2025-08-07)
-
-
-
-# [0.28.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.27.0...v0.28.0) (2025-08-07)
-
-
-### Features
-
-* add `CommitmentEvaluationProofId::AssociatedProofPlan` and switch hyperkzg to using `EVMProofPlan` ([f70c460](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/f70c460e9b15616b5f9ac7653e2e309b0ead7a82))
 
 
 
