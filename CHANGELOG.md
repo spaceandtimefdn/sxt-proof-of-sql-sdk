@@ -1,3 +1,12 @@
+# [0.28.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.27.0...v0.28.0) (2025-08-07)
+
+
+### Features
+
+* add `CommitmentEvaluationProofId::AssociatedProofPlan` and switch hyperkzg to using `EVMProofPlan` ([f70c460](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/f70c460e9b15616b5f9ac7653e2e309b0ead7a82))
+
+
+
 # [0.27.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.26.1...v0.27.0) (2025-08-07)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * make example cli a new bin crate ([5c35e7b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/5c35e7b5f398598d3692206b67dd291c282f29d2))
-
-
-
-# [0.24.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.23.0...v0.24.0) (2025-08-05)
-
-
-### Features
-
-* add `CommitmentScheme` to `SxTClient` and CLI ([41cc75e](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/41cc75ee4fa73a23e06025adb4fa02c8dc76d259))
 
 
 
