@@ -2,6 +2,7 @@ use clap::Parser;
 use dotenv::dotenv;
 use sxt_proof_of_sql_sdk::{
     args::{ProofOfSqlSdkArgs, ProofOfSqlSdkSubcommands},
+    produce_plan_subcommand::produce_plan_command,
     query_and_verify::query_and_verify,
 };
 
@@ -14,5 +15,6 @@ async fn main() -> Result<(), Box<dyn core::error::Error>> {
     let sdk_args = ProofOfSqlSdkArgs::parse();
     match sdk_args.command {
         ProofOfSqlSdkSubcommands::QueryAndVerify(args) => query_and_verify(args).await,
+        ProofOfSqlSdkSubcommands::ProducePlan(args) => produce_plan_command(args).await,
     }
 }

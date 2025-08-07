@@ -1,4 +1,4 @@
-use crate::query_and_verify::QueryAndVerifySdkArgs;
+use crate::{produce_plan_subcommand::ProducePlanArgs, query_and_verify::QueryAndVerifySdkArgs};
 use clap::{Parser, Subcommand};
 
 /// Struct to define and parse command-line arguments for Proof of SQL Client.
@@ -20,4 +20,5 @@ pub struct ProofOfSqlSdkArgs {
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum ProofOfSqlSdkSubcommands {
     QueryAndVerify(QueryAndVerifySdkArgs),
+    ProducePlan(ProducePlanArgs),
 }
