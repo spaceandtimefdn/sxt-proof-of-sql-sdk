@@ -38,6 +38,8 @@ jobs:
         run: export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
       - name: Run cargo check (default features)
         run: cargo check --all-targets
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
       - name: Run cargo check (wasm feature)
         run: cargo check --target wasm32-unknown-unknown --no-default-features --features wasm
 
@@ -65,6 +67,8 @@ jobs:
         run: export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
       - name: Run clippy (default features)
         run: cargo clippy --all-targets -- -D warnings
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
       - name: Run clippy (wasm feature)
         run: cargo clippy --target wasm32-unknown-unknown --no-default-features --features wasm -- -D warnings
 
