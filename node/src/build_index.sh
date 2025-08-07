@@ -17,7 +17,7 @@ trap error_handler ERR
 truncate_js_file() {
     local input_js_file=$1
     local output_js_file=$2
-    if ! sed '/^const wasm_url = new URL('\''sxt_proof_of_sql_sdk_wasm_bg.wasm'\'', import.meta.url);/,$d' "$input_js_file" > "$output_js_file"; then
+    if ! sed '/^const wasm_url = new URL('\''sxt_proof_of_sql_sdk_bg.wasm'\'', import.meta.url);/,$d' "$input_js_file" > "$output_js_file"; then
         echo "Error: Failed to truncate the JavaScript file."
         return 1
     fi
@@ -48,8 +48,8 @@ append_wasm_instantiation_code() {
 
 # Main logic
 main() {
-    local input_js_file="$1/sxt_proof_of_sql_sdk_wasm.js"
-    local wasm_file="$1/sxt_proof_of_sql_sdk_wasm_bg.wasm"
+    local input_js_file="$1/sxt_proof_of_sql_sdk.js"
+    local wasm_file="$1/sxt_proof_of_sql_sdk_bg.wasm"
     local output_js_file="$SCRIPT_DIR/index.js"
 
     if [[ ! -f "$input_js_file" ]]; then
