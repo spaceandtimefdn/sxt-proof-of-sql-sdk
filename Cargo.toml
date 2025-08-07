@@ -6,11 +6,6 @@ repository = "https://github.com/spaceandtimelabs/sxt-proof-of-sql-sdk"
 version = "0.1.0"
 license-file = "LICENSE"
 
-[target.wasm32-unknown-unknown]
-rustflags = [
-  "-C", "opt-level=z",
-]
-
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -72,7 +67,7 @@ hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
 wasm = ["subxt/web"]
 
 [[bin]]
-name = "sxt-proof-of-sql-cli"
+name = "proof-of-sql-cli"
 path = "src/main.rs"
 required-features = ["native"]
 

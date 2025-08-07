@@ -10,7 +10,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "Proof of SQL Client",
     version = "1.0",
-    about = "Runs a SQL query and verifies the result using Dynamic Dory."
+    about = "Proof of SQL SDK Command Line Interface"
 )]
 pub struct ProofOfSqlSdkArgs {
     #[command(subcommand)]
