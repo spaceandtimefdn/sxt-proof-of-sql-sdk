@@ -6,6 +6,7 @@
 !examples/node/package.json
 !examples/chainlink/package.json
 !examples/chainlink/abi/functionsClient.json
+!package.json
 
 # Ignore .env.enc files anywhere in the repo
 **/.env.enc
