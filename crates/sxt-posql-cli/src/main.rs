@@ -1,6 +1,10 @@
 mod args;
+mod query_and_verify;
 
-use crate::args::{ProofOfSqlSdkArgs, ProofOfSqlSdkSubcommands};
+use crate::{
+    args::{ProofOfSqlSdkArgs, ProofOfSqlSdkSubcommands},
+    query_and_verify::query_and_verify,
+};
 use clap::Parser;
 use dotenv::dotenv;
 
@@ -12,18 +16,6 @@ async fn main() -> Result<(), Box<dyn core::error::Error>> {
     // Parse command-line arguments
     let sdk_args = ProofOfSqlSdkArgs::parse();
     match sdk_args.command {
-        ProofOfSqlSdkSubcommands::QueryAndVerify(args) => {
-            let (client, commitment_scheme) = (&args).into();
-
-            // Execute the query and verify the result
-            let result = client
-                .query_and_verify(&args.query, args.block_hash, commitment_scheme)
-                .await?;
-
-            // Print the result of the query
-            println!("Query result: {:?}", result);
-        }
+        ProofOfSqlSdkSubcommands::QueryAndVerify(args) => query_and_verify(args).await,
     }
-
-    Ok(())
 }
