@@ -88,15 +88,17 @@ pub struct SdkArgs {
     pub verifier_setup: String,
 }
 
-impl From<&SdkArgs> for SxTClient {
+impl From<&SdkArgs> for (SxTClient, CommitmentScheme) {
     fn from(args: &SdkArgs) -> Self {
-        Self::new(
-            args.prover_root_url.clone(),
-            args.auth_root_url.clone(),
-            args.substrate_node_url.clone(),
-            args.sxt_api_key.clone(),
+        (
+            SxTClient::new(
+                args.prover_root_url.clone(),
+                args.auth_root_url.clone(),
+                args.substrate_node_url.clone(),
+                args.sxt_api_key.clone(),
+                args.verifier_setup.clone(),
+            ),
             args.commitment_scheme,
-            args.verifier_setup.clone(),
         )
     }
 }

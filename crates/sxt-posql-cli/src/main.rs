@@ -3,7 +3,6 @@ mod args;
 use crate::args::SdkArgs;
 use clap::Parser;
 use dotenv::dotenv;
-use sxt_proof_of_sql_sdk::SxTClient;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn core::error::Error>> {
@@ -12,11 +11,11 @@ async fn main() -> Result<(), Box<dyn core::error::Error>> {
 
     // Parse command-line arguments
     let args = SdkArgs::parse();
-    let client: SxTClient = (&args).into();
+    let (client, commitment_scheme) = (&args).into();
 
     // Execute the query and verify the result
     let result = client
-        .query_and_verify(&args.query, args.block_hash)
+        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
         .await?;
 
     // Print the result of the query

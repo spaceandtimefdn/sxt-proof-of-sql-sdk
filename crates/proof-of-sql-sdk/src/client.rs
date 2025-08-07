@@ -4,20 +4,22 @@ use crate::{
 };
 use bumpalo::Bump;
 use proof_of_sql::{
-    base::database::OwnedTable,
-    proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof},
+    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
+    proof_primitive::{
+        dory::DynamicDoryEvaluationProof, hyperkzg::HyperKZGCommitmentEvaluationProof,
+    },
 };
 use proof_of_sql_planner::{get_table_refs_from_statement, postprocessing::PostprocessingStep};
 use reqwest::Client;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::Config;
 use sxt_proof_of_sql_sdk_local::{
-    plan_prover_query_dory, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    CommitmentEvaluationProofId, CommitmentScheme,
+    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
+    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
 };
 
 /// Space and Time (SxT) client
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SxTClient {
     /// Root URL for the Prover service
     pub prover_root_url: String,
@@ -34,9 +36,6 @@ pub struct SxTClient {
     /// if you do not have one.
     pub sxt_api_key: String,
 
-    /// Commitment scheme
-    pub commitment_scheme: CommitmentScheme,
-
     /// Path to the verifier setup binary file
     pub verifier_setup: String,
 }
@@ -48,32 +47,32 @@ impl SxTClient {
         auth_root_url: String,
         substrate_node_url: String,
         sxt_api_key: String,
-        commitment_scheme: CommitmentScheme,
         verifier_setup: String,
     ) -> Self {
-        if !matches!(commitment_scheme, CommitmentScheme::DynamicDory) {
-            panic!("Unsupported commitment scheme: {:?}", commitment_scheme);
-        }
         Self {
             prover_root_url,
             auth_root_url,
             substrate_node_url,
             sxt_api_key,
-            commitment_scheme,
             verifier_setup,
         }
     }
 
-    /// Query and verify a SQL query at the given SxT block.
+    /// Query and verify a SQL query at the given SxT block by commitment evaluation proof.
     ///
-    /// Run a SQL query and verify the result using Dynamic Dory.
+    /// Run a SQL query and verify the result.
     ///
     /// If `block_ref` is `None`, the latest block is used.
-    pub async fn query_and_verify(
+    pub async fn query_and_verify_by_cpi<CPI>(
         &self,
         query: &str,
         block_ref: Option<<SxtConfig as Config>::Hash>,
-    ) -> Result<OwnedTable<DoryScalar>, Box<dyn core::error::Error>> {
+        bump: &Bump,
+    ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>>
+    where
+        CPI: CommitmentEvaluationProofId,
+        <CPI as CommitmentEvaluationProofId>::DeserializationError: 'static,
+    {
         let dialect = GenericDialect {};
         let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
         let table_refs = get_table_refs_from_statement(&query_parsed)?
@@ -82,21 +81,18 @@ impl SxTClient {
             .collect::<Vec<_>>();
 
         // Load verifier setup
-        let bump = Bump::new();
-        let verifier_setup = DynamicDoryEvaluationProof::deserialize_verifier_setup(
-            &std::fs::read(&self.verifier_setup).map_err(|e| {
-                format!(
-                    "Failed to read verifier setup from {:?}: {:?}",
-                    &self.verifier_setup, e
-                )
-            })?,
-            &bump,
-        )?;
+        let verifier_setup =
+            CPI::deserialize_verifier_setup(&std::fs::read(&self.verifier_setup)?, bump)?;
         // Accessor setup
-        let accessor = query_commitments(&table_refs, &self.substrate_node_url, block_ref).await?;
+        let accessor = query_commitments::<<SxtConfig as Config>::Hash, CPI>(
+            &table_refs,
+            &self.substrate_node_url,
+            block_ref,
+        )
+        .await?;
 
         let (prover_query, proof_plan_with_post_processing) =
-            plan_prover_query_dory(&query_parsed, &accessor)?;
+            plan_prover_query::<CPI>(&query_parsed, &accessor)?;
 
         let client = Client::new();
         let access_token = get_access_token(&self.sxt_api_key, &self.auth_root_url).await?;
@@ -116,7 +112,7 @@ impl SxTClient {
             )
         })?;
 
-        let verified_table_result = verify_prover_response::<DynamicDoryEvaluationProof>(
+        let verified_table_result = verify_prover_response::<CPI>(
             &prover_response,
             proof_plan_with_post_processing.plan(),
             &[],
@@ -129,6 +125,32 @@ impl SxTClient {
             Ok(post_processing.apply(verified_table_result)?)
         } else {
             Ok(verified_table_result)
+        }
+    }
+
+    /// Query and verify a SQL query at the given SxT block
+    ///
+    /// Run a SQL query and verify the result.
+    ///
+    /// If `block_ref` is `None`, the latest block is used.
+    pub async fn query_and_verify(
+        &self,
+        query: &str,
+        block_ref: Option<<SxtConfig as Config>::Hash>,
+        commitment_scheme: CommitmentScheme,
+    ) -> Result<DynOwnedTable, Box<dyn core::error::Error>> {
+        let bump = Bump::new();
+        match commitment_scheme {
+            CommitmentScheme::DynamicDory => self
+                .query_and_verify_by_cpi::<DynamicDoryEvaluationProof>(query, block_ref, &bump)
+                .await
+                .map(DynOwnedTable::Dory),
+            CommitmentScheme::HyperKzg => self
+                .query_and_verify_by_cpi::<HyperKZGCommitmentEvaluationProof>(
+                    query, block_ref, &bump,
+                )
+                .await
+                .map(DynOwnedTable::BN),
         }
     }
 
