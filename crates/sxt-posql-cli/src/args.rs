@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use subxt::utils::H256;
 use sxt_proof_of_sql_sdk::SxTClient;
 use sxt_proof_of_sql_sdk_local::CommitmentScheme;
@@ -14,7 +14,18 @@ use sxt_proof_of_sql_sdk_local::CommitmentScheme;
     version = "1.0",
     about = "Runs a SQL query and verifies the result using Dynamic Dory."
 )]
-pub struct SdkArgs {
+pub struct ProofOfSqlSdkArgs {
+    #[command(subcommand)]
+    pub command: ProofOfSqlSdkSubcommands,
+}
+
+#[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
+pub enum ProofOfSqlSdkSubcommands {
+    QueryAndVerify(QueryAndVerifySdkArgs),
+}
+
+#[derive(Args, Debug, Clone, PartialEq, Eq)]
+pub struct QueryAndVerifySdkArgs {
     /// Root URL for the Prover service
     ///
     /// This URL is used for interacting with the prover service.
@@ -88,8 +99,8 @@ pub struct SdkArgs {
     pub verifier_setup: String,
 }
 
-impl From<&SdkArgs> for (SxTClient, CommitmentScheme) {
-    fn from(args: &SdkArgs) -> Self {
+impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
+    fn from(args: &QueryAndVerifySdkArgs) -> Self {
         (
             SxTClient::new(
                 args.prover_root_url.clone(),
