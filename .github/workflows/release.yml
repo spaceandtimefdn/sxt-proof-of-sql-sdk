@@ -87,7 +87,7 @@ jobs:
       - name: Build javascript index
         run: |
           chmod +x ./node/src/build_index.sh
-          ./node/src/build_index.sh wasm/pkg
+          ./node/src/build_index.sh pkg
 
       - name: Set Up Node.js
         uses: actions/setup-node@v3
