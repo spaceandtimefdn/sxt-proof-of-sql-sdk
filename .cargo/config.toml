@@ -1,2 +1,7 @@
 [alias]
 f = "fmt --all -- --config imports_granularity=Crate,group_imports=One"
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+  "-C", "opt-level=z",
+]
