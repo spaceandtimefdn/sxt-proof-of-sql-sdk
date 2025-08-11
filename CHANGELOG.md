@@ -1,3 +1,12 @@
+# [0.30.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.4...v0.30.0) (2025-08-11)
+
+
+### Features
+
+* make default verifier_setup dynamic based on commitment scheme ([75addd2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/75addd215d2b16b56f0a6e9875c70ff864be940f))
+
+
+
 ## [0.29.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.3...v0.29.4) (2025-08-11)
 
 
@@ -21,15 +30,6 @@
 
 
 ## [0.29.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.0...v0.29.1) (2025-08-08)
-
-
-
-# [0.29.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.28.5...v0.29.0) (2025-08-07)
-
-
-### Features
-
-* add produce_plan_subcommand ([67fc478](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/67fc478dc3de83d44f6193bc963557ee22dd3667))
 
 
 
