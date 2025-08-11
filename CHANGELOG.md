@@ -1,3 +1,7 @@
+## [0.30.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.0...v0.30.1) (2025-08-11)
+
+
+
 # [0.30.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.4...v0.30.0) (2025-08-11)
 
 
@@ -26,10 +30,6 @@
 ### Bug Fixes
 
 * fix ./node/src/build_index.sh $1 path in ci ([8fd6eae](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/8fd6eae0f9faf473beafc15cfcad2bd90db7ae48))
-
-
-
-## [0.29.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.0...v0.29.1) (2025-08-08)
 
 
 
