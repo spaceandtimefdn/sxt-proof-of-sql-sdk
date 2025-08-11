@@ -24,7 +24,7 @@ use wasm_bindgen::prelude::*;
 
 /// Proof-of-sql verifier setup serialized as bytes.
 const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8; 47472] =
-    include_bytes!("../../verifier_setups/dynamic_dory.bin");
+    include_bytes!("../../verifier_setups/dynamic-dory.bin");
 
 lazy_static::lazy_static! {
     /// Proof-of-sql verifier setup.
