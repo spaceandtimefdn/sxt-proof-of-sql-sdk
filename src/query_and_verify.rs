@@ -60,19 +60,19 @@ pub struct QueryAndVerifySdkArgs {
         long,
         value_enum,
         env,
-        default_value_t = CommitmentScheme::DynamicDory,
+        default_value_t = CommitmentScheme::HyperKzg,
     )]
     pub commitment_scheme: CommitmentScheme,
 
     /// Path to the verifier setup binary file
     ///
     /// Specifies the path to the verifier setup binary file required for verification.
-    /// Default path is `dynamic_dory.bin` in the `verifier_setups` directory.
+    /// Default path is `hyper-kzg.bin` in the `verifier_setups` directory.
     #[arg(
         long,
         value_name = "VERIFIER_SETUP",
         help = "Path to the verifier setup file",
-        default_value = "verifier_setups/dynamic_dory.bin"
+        default_value = "verifier_setups/hyper-kzg.bin"
     )]
     pub verifier_setup: String,
 }
