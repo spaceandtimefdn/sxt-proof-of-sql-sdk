@@ -1,3 +1,7 @@
+## [0.32.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.32.0...v0.32.1) (2025-08-14)
+
+
+
 # [0.32.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.31.0...v0.32.0) (2025-08-14)
 
 
@@ -21,15 +25,6 @@
 
 
 ## [0.30.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.0...v0.30.1) (2025-08-11)
-
-
-
-# [0.30.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.4...v0.30.0) (2025-08-11)
-
-
-### Features
-
-* make default verifier_setup dynamic based on commitment scheme ([75addd2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/75addd215d2b16b56f0a6e9875c70ff864be940f))
 
 
 
