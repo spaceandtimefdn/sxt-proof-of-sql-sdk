@@ -1,5 +1,6 @@
 use crate::{base::CommitmentScheme, native::SxTClient};
 use clap::Args;
+use datafusion::arrow::{record_batch::RecordBatch, util::pretty::pretty_format_batches};
 use subxt::utils::H256;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
@@ -96,11 +97,12 @@ pub async fn query_and_verify(
     let (client, commitment_scheme) = (&args).into();
 
     // Execute the query and verify the result
-    let result = client
+    let result: RecordBatch = client
         .query_and_verify(&args.query, args.block_hash, commitment_scheme)
-        .await?;
+        .await?
+        .try_into()?;
 
     // Print the result of the query
-    println!("Query result: {:?}", result);
+    println!("Query result:\n{}", pretty_format_batches(&[result])?);
     Ok(())
 }
