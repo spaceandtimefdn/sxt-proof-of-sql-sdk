@@ -13,7 +13,7 @@ use proof_of_sql::{
     base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
     proof_primitive::dory::DynamicDoryEvaluationProof,
 };
-use proof_of_sql_planner::{get_table_refs_from_statement, postprocessing::PostprocessingStep};
+use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::Config;
@@ -94,8 +94,7 @@ impl SxTClient {
         )
         .await?;
 
-        let (prover_query, proof_plan_with_post_processing) =
-            plan_prover_query::<CPI>(&query_parsed, &accessor)?;
+        let (prover_query, proof_plan) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
 
         let client = Client::new();
         let access_token = get_access_token(&self.sxt_api_key, &self.auth_root_url).await?;
@@ -117,18 +116,13 @@ impl SxTClient {
 
         let verified_table_result = verify_prover_response::<CPI>(
             &prover_response,
-            proof_plan_with_post_processing.plan(),
+            &proof_plan,
             &[],
             &accessor,
             &verifier_setup,
         )?;
 
-        // Apply postprocessing steps
-        if let Some(post_processing) = proof_plan_with_post_processing.postprocessing() {
-            Ok(post_processing.apply(verified_table_result)?)
-        } else {
-            Ok(verified_table_result)
-        }
+        Ok(verified_table_result)
     }
 
     /// Query and verify a SQL query at the given SxT block

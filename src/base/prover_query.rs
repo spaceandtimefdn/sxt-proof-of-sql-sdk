@@ -11,11 +11,10 @@ use proof_of_sql::proof_primitive::hyperkzg::{
 use proof_of_sql::{
     base::commitment::{CommitmentEvaluationProof, QueryCommitments},
     proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
-    sql::parse::ConversionError,
+    sql::{parse::ConversionError, proof_plans::DynProofPlan},
 };
 use proof_of_sql_planner::{
-    sql_to_proof_plans_with_postprocessing, statement_with_uppercase_identifiers, PlannerError,
-    ProofPlanWithPostprocessing,
+    sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
 };
 use snafu::Snafu;
 use sqlparser::{ast::Statement, parser::ParserError};
@@ -54,21 +53,17 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     query: &Statement,
     commitments: &QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>,
-) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
+) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
     let accessor = &UppercaseAccessor(commitments);
     let query = statement_with_uppercase_identifiers(query.clone());
     let mut config_options = ConfigOptions::default();
     config_options.sql_parser.enable_ident_normalization = false;
-    let proof_plan_with_postprocessing =
-        sql_to_proof_plans_with_postprocessing(&[query.clone()], accessor, &config_options)?[0]
-            .clone();
+    let proof_plan = sql_to_proof_plans(&[query.clone()], accessor, &config_options)?[0].clone();
     let bincode_config = bincode::config::legacy()
         .with_fixed_int_encoding()
         .with_big_endian();
-    let serialized_proof_plan = bincode::serde::encode_to_vec(
-        CPI::associated_proof_plan(proof_plan_with_postprocessing.plan()),
-        bincode_config,
-    )?;
+    let serialized_proof_plan =
+        bincode::serde::encode_to_vec(CPI::associated_proof_plan(&proof_plan), bincode_config)?;
 
     let query_context = commitments
         .iter()
@@ -89,7 +84,7 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
             query_context,
             commitment_scheme: prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME).into(),
         },
-        proof_plan_with_postprocessing,
+        proof_plan,
     ))
 }
 
@@ -97,7 +92,7 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
 pub fn plan_prover_query_dory(
     query: &Statement,
     commitments: &QueryCommitments<DynamicDoryCommitment>,
-) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
+) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
     plan_prover_query::<DynamicDoryEvaluationProof>(query, commitments)
 }
 
@@ -106,6 +101,6 @@ pub fn plan_prover_query_dory(
 pub fn plan_prover_query_hyperkzg(
     query: &Statement,
     commitments: &QueryCommitments<HyperKZGCommitment>,
-) -> Result<(ProverQuery, ProofPlanWithPostprocessing), PlanProverQueryError> {
+) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
     plan_prover_query::<HyperKZGCommitmentEvaluationProof>(query, commitments)
 }
