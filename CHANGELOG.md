@@ -1,3 +1,12 @@
+# [0.31.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.2...v0.31.0) (2025-08-14)
+
+
+### Features
+
+* add public keys ([43dbbe9](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/43dbbe91a733c39389594418238317355d6d71b4))
+
+
+
 ## [0.30.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.1...v0.30.2) (2025-08-14)
 
 
@@ -21,10 +30,6 @@
 ### Bug Fixes
 
 * use hyper-kzg as default ([31cfda8](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/31cfda893f28a4158792f3b2c71c4b5f4de4d086))
-
-
-
-## [0.29.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.2...v0.29.3) (2025-08-08)
 
 
 
