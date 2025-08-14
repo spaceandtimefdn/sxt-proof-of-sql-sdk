@@ -67,30 +67,23 @@ pub struct QueryAndVerifySdkArgs {
     /// Path to the verifier setup binary file
     ///
     /// Specifies the path to the verifier setup binary file required for verification.
-    /// If commitment_scheme is HyperKZG, the default is "verifier_setups/hyper-kzg.bin".
-    /// If commitment_scheme is DynamicDory, the default is "verifier_setups/dynamic-dory.bin".
     #[arg(
         long,
         value_name = "VERIFIER_SETUP",
-        help = "Path to the verifier setup file. Defaults to verifier_setups/hyper-kzg.bin for HyperKZG or verifier_setups/dynamic-dory.bin for DynamicDory."
+        help = "Path to the verifier setup file. If not provided, defaults to the appropriate verifier setup for the selected commitment scheme."
     )]
     pub verifier_setup: Option<String>,
 }
 
 impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
     fn from(args: &QueryAndVerifySdkArgs) -> Self {
-        let verifier_setup = match (args.verifier_setup.as_deref(), args.commitment_scheme) {
-            (Some(path), _) => path.to_string(),
-            (None, CommitmentScheme::HyperKzg) => "verifier_setups/hyper-kzg.bin".to_string(),
-            (None, CommitmentScheme::DynamicDory) => "verifier_setups/dynamic-dory.bin".to_string(),
-        };
         (
             SxTClient::new(
                 args.prover_root_url.clone(),
                 args.auth_root_url.clone(),
                 args.substrate_node_url.clone(),
                 args.sxt_api_key.clone(),
-                verifier_setup,
+                args.verifier_setup.clone(),
             ),
             args.commitment_scheme,
         )
