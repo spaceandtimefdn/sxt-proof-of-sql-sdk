@@ -27,7 +27,7 @@ pub struct ProducePlanArgs {
     #[arg(long, default_value = "false")]
     pub debug_plan: bool,
     /// Display the result as serialized hex code of the evm plan
-    #[arg(long, default_value = "false")]
+    #[arg(long, default_value = "true")]
     pub evm: bool,
 }
 
