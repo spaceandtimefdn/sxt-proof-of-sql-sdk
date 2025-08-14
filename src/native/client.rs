@@ -36,8 +36,8 @@ pub struct SxTClient {
     /// if you do not have one.
     pub sxt_api_key: String,
 
-    /// Path to the verifier setup binary file
-    pub verifier_setup: String,
+    /// Path to the verifier setup binary file. If `None`, the default verifier setup is used.
+    pub verifier_setup: Option<String>,
 }
 
 impl SxTClient {
@@ -47,7 +47,7 @@ impl SxTClient {
         auth_root_url: String,
         substrate_node_url: String,
         sxt_api_key: String,
-        verifier_setup: String,
+        verifier_setup: Option<String>,
     ) -> Self {
         Self {
             prover_root_url,
@@ -81,8 +81,11 @@ impl SxTClient {
             .collect::<Vec<_>>();
 
         // Load verifier setup
-        let verifier_setup =
-            CPI::deserialize_verifier_setup(&std::fs::read(&self.verifier_setup)?, bump)?;
+        let verifier_setup_bytes = match &self.verifier_setup {
+            Some(path) => &std::fs::read(path)?,
+            None => CPI::DEFAULT_VERIFIER_SETUP_BYTES,
+        };
+        let verifier_setup = CPI::deserialize_verifier_setup(verifier_setup_bytes, bump)?;
         // Accessor setup
         let accessor = query_commitments::<<SxtConfig as Config>::Hash, CPI>(
             &table_refs,

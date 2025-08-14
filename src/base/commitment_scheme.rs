@@ -28,6 +28,17 @@ pub enum CommitmentScheme {
     HyperKzg,
 }
 
+// Default verifier setups for different commitment schemes.
+const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/verifier_setups/dynamic-dory.bin"
+));
+#[cfg(feature = "hyperkzg")]
+const HYPER_KZG_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/verifier_setups/hyper-kzg.bin"
+));
+
 /// Convert a `CommitmentScheme` to a `prover::CommitmentScheme`.
 impl From<CommitmentScheme> for prover::CommitmentScheme {
     fn from(scheme: CommitmentScheme) -> Self {
@@ -67,6 +78,9 @@ pub trait CommitmentEvaluationProofId:
     /// The [`CommitmentScheme`] associated with this commitment type.
     const COMMITMENT_SCHEME: CommitmentScheme;
 
+    /// The default verifier setup for this commitment type in bytes.
+    const DEFAULT_VERIFIER_SETUP_BYTES: &'static [u8];
+
     /// Error type for deserialization failures.
     type DeserializationError: core::error::Error;
 
@@ -89,6 +103,7 @@ pub trait CommitmentEvaluationProofId:
 #[cfg(feature = "hyperkzg")]
 impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::HyperKzg;
+    const DEFAULT_VERIFIER_SETUP_BYTES: &'static [u8] = HYPER_KZG_VERIFIER_SETUP_BYTES;
     type DeserializationError = bincode::error::DecodeError;
     type AssociatedProofPlan = EVMProofPlan;
 
@@ -113,6 +128,7 @@ impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
 
 impl CommitmentEvaluationProofId for DynamicDoryEvaluationProof {
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::DynamicDory;
+    const DEFAULT_VERIFIER_SETUP_BYTES: &'static [u8] = DYNAMIC_DORY_VERIFIER_SETUP_BYTES;
     type DeserializationError = ark_serialize::SerializationError;
     type AssociatedProofPlan = DynProofPlan;
 
