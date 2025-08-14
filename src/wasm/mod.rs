@@ -150,14 +150,14 @@ pub fn plan_prover_query_dory(
     let query_commitments = query_commitments_from_table_ref_and_commitment_iter(&commitments)
         .map_err(|e| format!("failed to construct QueryCommitments: {e}"))?;
 
-    let (prover_query, proof_plan_with_post_processing) =
+    let (prover_query, proof_plan) =
         crate::base::plan_prover_query_dory(&query_parsed, &query_commitments)
             .map_err(|e| format!("failed to plan prover query: {e}"))?;
 
     let prover_query_json = JsValue::from_serde(&prover_query)
         .map_err(|e| format!("failed to convert prover query to json: {e}"))?;
 
-    let proof_plan_json = JsValue::from_serde(&proof_plan_with_post_processing.plan())
+    let proof_plan_json = JsValue::from_serde(&proof_plan)
         .map_err(|e| format!("failed to convert query expr to json: {e}"))?;
 
     let result = ProverQueryAndQueryExprAndCommitments {
