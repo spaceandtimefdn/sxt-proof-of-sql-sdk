@@ -1,3 +1,12 @@
+# [0.32.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.31.0...v0.32.0) (2025-08-14)
+
+
+### Features
+
+* set default plan display to be the evm plan ([4efe483](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/4efe48326a7eabe1959ace6706428ea75ae03b84))
+
+
+
 # [0.31.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.2...v0.31.0) (2025-08-14)
 
 
@@ -21,15 +30,6 @@
 ### Features
 
 * make default verifier_setup dynamic based on commitment scheme ([75addd2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/75addd215d2b16b56f0a6e9875c70ff864be940f))
-
-
-
-## [0.29.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.29.3...v0.29.4) (2025-08-11)
-
-
-### Bug Fixes
-
-* use hyper-kzg as default ([31cfda8](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/31cfda893f28a4158792f3b2c71c4b5f4de4d086))
 
 
 
