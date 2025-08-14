@@ -4,6 +4,7 @@ use super::{
 use ark_serialize::{CanonicalDeserialize, Compress, Validate};
 use bumpalo::Bump;
 use clap::ValueEnum;
+use datafusion::arrow::{error::ArrowError, record_batch::RecordBatch};
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
 use proof_of_sql::{
@@ -69,6 +70,18 @@ pub enum DynOwnedTable {
     /// Owned table with a [`BNScalar`]. Used for HyperKZG.
     #[cfg(feature = "hyperkzg")]
     BN(OwnedTable<BNScalar>),
+}
+
+impl TryFrom<DynOwnedTable> for RecordBatch {
+    type Error = ArrowError;
+
+    fn try_from(value: DynOwnedTable) -> Result<Self, Self::Error> {
+        match value {
+            DynOwnedTable::Dory(table) => table.try_into(),
+            #[cfg(feature = "hyperkzg")]
+            DynOwnedTable::BN(table) => table.try_into(),
+        }
+    }
 }
 
 /// Trait for commitment evaluation proofs that defines their associated [`CommitmentScheme`].
