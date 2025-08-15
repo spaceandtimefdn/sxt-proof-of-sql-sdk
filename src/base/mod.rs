@@ -24,7 +24,9 @@ pub use prover_query::{
 };
 
 mod verify;
-pub use verify::{verify_prover_response, VerifyProverResponseError};
+pub use verify::{
+    verify_prover_response, verify_prover_response_for_wasm, VerifyProverResponseError,
+};
 
 /// tonic-generated code for interacting with the prover service
 pub mod prover {
@@ -33,3 +35,5 @@ pub mod prover {
 
 /// types for verifying attestations
 pub mod attestation;
+
+pub mod zk_query_api;
