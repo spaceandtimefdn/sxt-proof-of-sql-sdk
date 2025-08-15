@@ -188,7 +188,7 @@ pub fn verify_prover_response_dory(
         .map_err(|e| format!("failed to construct QueryCommitments: {e}"))?;
 
     let verified_table_result: IndexMap<_, _> =
-        crate::base::verify_prover_response::<DynamicDoryEvaluationProof>(
+        crate::base::verify_prover_response_for_wasm::<DynamicDoryEvaluationProof>(
             &prover_response,
             &proof_plan,
             &[],
