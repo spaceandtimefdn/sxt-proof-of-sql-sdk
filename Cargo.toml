@@ -21,6 +21,7 @@ env_logger = "0.11.5"
 futures = { version = "0.3.31"}
 gloo-utils = { version = "0.2.0" }
 hex = { version = "0.4.3", default-features = false, features = ["serde"] }
+jsonrpsee = { version = "0.26.0", default-features = false, features = ["client-core", "ws-client"] }
 lazy_static = { version = "1.5.0" }
 log = "0.4.22"
 indexmap = "2.8.0"

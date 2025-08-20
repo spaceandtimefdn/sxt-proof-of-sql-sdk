@@ -1,4 +1,5 @@
 use super::sxt_chain_runtime as runtime;
+use jsonrpsee::{core::{rpc_params, client::ClientT}, ws_client::WsClient};
 use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};
@@ -32,6 +33,12 @@ impl EthereumSignature {
 /// Top-level error type for the attestation module.
 #[derive(Debug, Snafu)]
 pub enum AttestationError {
+    /// Invalid RPC response
+    #[snafu(display("Invalid RPC response"))]
+    InvalidRpcResponseError {
+        /// Source of the error.
+        source: InvalidRpcResponseError,
+    },
     /// Error during verification.
     #[snafu(display("Verification error: {:?}", source))]
     VerificationError {
@@ -48,6 +55,8 @@ pub enum AttestationError {
     #[snafu(display("Public key parsing error"))]
     PublicKeyError,
 }
+
+/// Snafu context for verification errors.
 
 /// Specialized `Result` type for the attestation module.
 type Result<T, E = AttestationError> = core::result::Result<T, E>;
@@ -255,3 +264,33 @@ pub fn verify_signature(
 
     Ok(())
 }
+
+/// Fetch attestations for a block number
+pub async fn fetch_attestation_for_block(
+    client: &WsClient,
+    block_number: u32,
+) -> Result<Vec<&str>, AttestationError> {
+    let hash: String = client
+        .request("chain_getBlockHash", rpc_params![block_number])
+        .await?;
+    client
+        .request("attestation_v1_getByBlockHash", rpc_params![hash])
+        .await
+        .get("attestations")
+        .and_then(|v| v.as_array())
+        .and_then(|arr| {
+            arr.iter()
+                .map(|att| att.as_str())
+                .collect::<Option<Vec<&str>>>()
+        })
+        .ok_or(AttestationVerificationError::InvalidRpcResponseError.into())?
+        .collect()
+}
+
+// Fetch best recent attestation
+// pub async fn fetch_best_recent_attestation(
+//     client: &HttpClient,
+// ) -> Vec<Attestation> {
+//     let attestations = client.request("attestation_v1_bestRecentAttestations", rpc_params![]).await?
+//     []
+// }
