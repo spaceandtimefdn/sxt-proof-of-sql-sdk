@@ -1,23 +1,17 @@
 use crate::base::{
-    attestation::{self, create_attestation_message, verify_signature},
-    sxt_chain_runtime::{
-        self,
-        api::{
-            runtime_types::proof_of_sql_commitment_map::{
-                commitment_scheme, commitment_storage_map::TableCommitmentBytes,
-            },
-            storage,
+    sxt_chain_runtime::api::{
+        runtime_types::proof_of_sql_commitment_map::{
+            commitment_scheme, commitment_storage_map::TableCommitmentBytes,
         },
+        storage,
     },
     table_ref_to_table_id, CommitmentEvaluationProofId,
 };
 use futures::future::try_join_all;
-use itertools::Itertools;
 use proof_of_sql::base::{
     commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
     database::TableRef,
 };
-use snafu::{ResultExt, Snafu};
 use subxt::{blocks::BlockRef, Config, OnlineClient, PolkadotConfig};
 
 /// Use the standard PolkadotConfig
@@ -83,118 +77,4 @@ where
         .into_iter()
         .collect::<QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>>();
     Ok(results)
-}
-
-/// Errors that may occur during the attestation process.
-#[derive(Debug, Snafu)]
-#[allow(dead_code)]
-pub enum AttestationError {
-    /// Represents an error originating from the Subxt library.
-    #[snafu(display("Subxt error: {source}"))]
-    SubxtError { source: subxt::Error },
-
-    /// Represents an error fetching attestations for a specific block.
-    #[snafu(display(
-        "There was an error reading the attestations for block {block_number} on chain"
-    ))]
-    ErrorFetchingAttestations { block_number: u32 },
-
-    /// Error indicating that attestations for a block have inconsistent state roots.
-    #[snafu(display("The attestations have different state roots, impossible to verify"))]
-    StateRootMismatch,
-
-    #[snafu(display("Attestation error: {source}"))]
-    LocalError {
-        source: attestation::AttestationError,
-    },
-}
-
-/// Verifies the attestations for a given block by checking their validity and consistency.
-///
-/// This function performs the following steps:
-/// 1. Connects to a blockchain node using the provided `url`.
-/// 2. Fetches the attestations for the specified `block_number`.
-/// 3. Ensures all attestations have consistent `state_root` values.
-/// 4. Verifies the signature for each attestation.
-///
-/// # Arguments
-///
-/// * `url` - The URL of the blockchain node to connect to.
-/// * `block_number` - The block number for which attestations need to be verified.
-///
-/// # Returns
-///
-/// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
-/// `AttestationError` describing the failure.
-///
-/// # Errors
-///
-/// This function can return the following errors:
-/// - `AttestationError::SubxtError`: If there is an error communicating with the blockchain node.
-/// - `AttestationError::ErrorFetchingAttestations`: If the attestations for the block cannot be fetched.
-/// - `AttestationError::StateRootMismatch`: If the attestations have inconsistent state roots.
-/// - `AttestationError::InvalidSignature`: If a signature verification fails.
-///
-/// # Examples
-///
-/// ```rust
-/// use your_crate::{verify_attestations_for_block, AttestationError};
-///
-/// #[tokio::main]
-/// async fn main() -> Result<(), AttestationError> {
-///     let url = "http://localhost:9933";
-///     let block_number = 12345;
-///
-///     verify_attestations_for_block(url, block_number).await?;
-///     println!("Attestations verified successfully!");
-///     Ok(())
-/// }
-/// ```
-#[allow(dead_code)]
-pub async fn verify_attestations_for_block(
-    url: &str,
-    block_number: u32,
-) -> Result<(), AttestationError> {
-    let api = OnlineClient::<SxtConfig>::from_insecure_url(url)
-        .await
-        .context(SubxtSnafu)?; // Updated to SubxtErrorSnafu
-
-    let attestations_addr = sxt_chain_runtime::api::storage()
-        .attestations()
-        .attestations(block_number);
-
-    let attestations = api
-        .storage()
-        .at_latest()
-        .await
-        .context(SubxtSnafu)? // Updated to SubxtErrorSnafu
-        .fetch(&attestations_addr)
-        .await
-        .context(SubxtSnafu)? // Updated to SubxtErrorSnafu
-        .ok_or_else(|| ErrorFetchingAttestationsSnafu { block_number }.build())?;
-
-    let attestations = attestations.0;
-
-    if !attestations
-        .iter()
-        .map(|attestation| {
-            let sxt_chain_runtime::api::runtime_types::sxt_core::attestation::Attestation::EthereumAttestation { state_root, ..}  = attestation;
-            Some(state_root.0.as_slice())
-        })
-        .all_equal()
-    {
-        return Err(AttestationError::StateRootMismatch);
-    }
-    attestations
-         .iter().try_for_each(|attestation| {
-             let sxt_chain_runtime::api::runtime_types::sxt_core::attestation::Attestation::EthereumAttestation {
-                signature,
-                proposed_pub_key,
-                state_root,
-                ..
-           } = attestation;
-        let msg = create_attestation_message(state_root.0.as_slice(), block_number);
-           verify_signature(&msg, signature, proposed_pub_key)
-             .map_err(|err| AttestationError::LocalError { source: err })
-    })
 }
