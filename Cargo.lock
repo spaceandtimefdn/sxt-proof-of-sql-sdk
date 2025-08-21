@@ -3715,7 +3715,6 @@ dependencies = [
  "once_cell",
  "serdect",
  "sha2 0.10.9",
- "signature",
 ]
 
 [[package]]
@@ -6421,7 +6420,6 @@ dependencies = [
  "hex",
  "indexmap 2.10.0",
  "itertools 0.13.0",
- "k256",
  "lazy_static",
  "log",
  "nova-snark",

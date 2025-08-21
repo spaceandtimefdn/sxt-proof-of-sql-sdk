@@ -30,6 +30,3 @@ pub use verify::{verify_prover_response, VerifyProverResponseError};
 pub mod prover {
     tonic::include_proto!("sxt.core");
 }
-
-/// types for verifying attestations
-pub mod attestation;
