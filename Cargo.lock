@@ -4741,9 +4741,9 @@ dependencies = [
 
 [[package]]
 name = "proof-of-sql"
-version = "0.117.4"
+version = "0.118.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7dc2095129c41df1f9236eae6e2ce27bfb9c8a533fba35f155495b4ee3e84520"
+checksum = "40f8e239f684a637cd22359eb394538429b179176548060ebcd114fa48728254"
 dependencies = [
  "ahash",
  "ark-bls12-381 0.5.0",
@@ -4787,9 +4787,9 @@ dependencies = [
 
 [[package]]
 name = "proof-of-sql-parser"
-version = "0.117.4"
+version = "0.118.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "450245d87a38135e04b47c169eb43197d2ed8a9be0a90a8a911ffb85fae6dec5"
+checksum = "ab7d3932a44c6ef16e872e76c032196d8a5846875806c694b5ac0faed3262b97"
 dependencies = [
  "arrayvec 0.7.6",
  "bigdecimal",
@@ -4803,9 +4803,9 @@ dependencies = [
 
 [[package]]
 name = "proof-of-sql-planner"
-version = "0.117.4"
+version = "0.118.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3f52154604b4b6cb1ba26da2d619e08d4ae54e5fd4639c69a9adab4dd1fc816"
+checksum = "25e28b2e804eeeafbd16e51bbfde6b89786dee02cdf0a6f246860bead2621505"
 dependencies = [
  "ahash",
  "arrow",
