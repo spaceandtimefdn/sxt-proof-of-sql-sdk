@@ -1,3 +1,7 @@
+## [0.33.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.33.0...v0.33.1) (2025-08-21)
+
+
+
 # [0.33.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.32.1...v0.33.0) (2025-08-14)
 
 
@@ -26,10 +30,6 @@
 ### Features
 
 * add public keys ([43dbbe9](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/43dbbe91a733c39389594418238317355d6d71b4))
-
-
-
-## [0.30.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.1...v0.30.2) (2025-08-14)
 
 
 
