@@ -29,6 +29,16 @@ pub enum CommitmentScheme {
     HyperKzg,
 }
 
+impl core::fmt::Display for CommitmentScheme {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.write_str(match self {
+            CommitmentScheme::DynamicDory => "DynamicDory",
+            #[cfg(feature = "hyperkzg")]
+            CommitmentScheme::HyperKzg => "HyperKzg",
+        })
+    }
+}
+
 // Default verifier setups for different commitment schemes.
 const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),

@@ -33,3 +33,4 @@ pub mod prover {
 
 /// types for verifying attestations
 pub mod attestation;
+pub mod verifiable_commitment;
