@@ -1,12 +1,37 @@
 use super::sxt_chain_runtime as runtime;
 use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};
+use sp_core::Bytes;
+use subxt::utils::H256;
+
+/// Hex serialization function.
+///
+/// Can be used in `#[serde(serialize_with = "")]` attributes for any `AsRef<[u8]>` type.
+fn serialize_bytes_hex<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    Bytes(bytes.to_vec()).serialize(serializer)
+}
+
+/// Hex deserialization function.
+///
+/// Can be used in `#[serde(deserialize_with = "deserialize_bytes_hex")]`
+/// for any `Vec<u8>` type.
+fn deserialize_bytes_hex<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let b = Bytes::deserialize(deserializer)?;
+    Ok(b.0)
+}
 
 /// Represents an Ethereum-style ECDSA signature, broken into its components.
 ///
 /// Wrapper around the [`k256::ecdsa::Signature`] type.
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Debug, Copy, Eq, PartialEq, Serialize, Deserialize)]
 pub struct EthereumSignature {
     /// The `r` component of the signature.
     pub r: [u8; 32],
@@ -254,4 +279,52 @@ pub fn verify_signature(
     verify_eth_signature(msg, &signature, proposed_pub_key)?;
 
     Ok(())
+}
+
+/// Represents attestations stored on-chain.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Attestation {
+    /// An Ethereum-style attestation.
+    #[serde(rename_all = "camelCase")]
+    EthereumAttestation {
+        /// The signature.
+        signature: EthereumSignature,
+        /// The public key used to sign the attestation.
+        #[serde(
+            serialize_with = "serialize_bytes_hex",
+            deserialize_with = "deserialize_bytes_hex"
+        )]
+        proposed_pub_key: Vec<u8>,
+        /// The ethereum address for this public key
+        #[serde(
+            serialize_with = "serialize_bytes_hex",
+            deserialize_with = "deserialize_bytes_hex"
+        )]
+        address20: Vec<u8>,
+        /// The state root included in the attestation.
+        #[serde(
+            serialize_with = "serialize_bytes_hex",
+            deserialize_with = "deserialize_bytes_hex"
+        )]
+        state_root: Vec<u8>,
+        /// The block number that was attested
+        block_number: u64,
+        /// The hash of the block that was attested
+        block_hash: H256,
+    },
+}
+
+/// Response containing attestation info used by the attestation RPCs.
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AttestationsResponse {
+    /// The attestations for the `attestations_for` block.
+    pub attestations: Vec<Attestation>,
+    /// The block hash that was attested.
+    pub attestations_for: H256,
+    /// The block number that was attested.
+    pub attestations_for_block_number: u32,
+    /// The block that was used to query storage.
+    pub at: H256,
 }
