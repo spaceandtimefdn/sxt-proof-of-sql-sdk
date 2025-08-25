@@ -1,3 +1,12 @@
+# [0.34.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.33.1...v0.34.0) (2025-08-25)
+
+
+### Features
+
+* add JSON-RPC calls for getting attestations and commitments ([beb7cf4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/beb7cf467b4b2396c82f4060dad70d66253dac2f))
+
+
+
 ## [0.33.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.33.0...v0.33.1) (2025-08-21)
 
 
@@ -21,15 +30,6 @@
 ### Features
 
 * set default plan display to be the evm plan ([4efe483](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/4efe48326a7eabe1959ace6706428ea75ae03b84))
-
-
-
-# [0.31.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.30.2...v0.31.0) (2025-08-14)
-
-
-### Features
-
-* add public keys ([43dbbe9](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/43dbbe91a733c39389594418238317355d6d71b4))
 
 
 
