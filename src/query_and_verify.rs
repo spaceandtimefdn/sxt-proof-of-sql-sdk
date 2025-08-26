@@ -74,6 +74,10 @@ pub struct QueryAndVerifySdkArgs {
         help = "Path to the verifier setup file. If not provided, defaults to the appropriate verifier setup for the selected commitment scheme."
     )]
     pub verifier_setup: Option<String>,
+
+    /// Query the prover via the gateway
+    #[arg(long, default_value = "false")]
+    pub via_gateway: bool,
 }
 
 impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
@@ -98,7 +102,12 @@ pub async fn query_and_verify(
 
     // Execute the query and verify the result
     let result: RecordBatch = client
-        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
+        .query_and_verify(
+            &args.query,
+            args.block_hash,
+            commitment_scheme,
+            args.via_gateway,
+        )
         .await?
         .try_into()?;
 
