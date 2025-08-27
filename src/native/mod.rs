@@ -1,6 +1,8 @@
 mod auth;
 pub use auth::get_access_token;
 
+mod commitment;
+
 mod plan;
 pub use plan::produce_plan;
 
