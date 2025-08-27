@@ -315,6 +315,16 @@ pub enum Attestation {
     },
 }
 
+impl Attestation {
+    /// Get the state_root if this variant has one.
+    pub fn state_root(&self) -> Option<Vec<u8>> {
+        match self {
+            Attestation::EthereumAttestation { state_root, .. } => Some(state_root.clone()),
+            // more variants later → return None by default
+        }
+    }
+}
+
 /// Response containing attestation info used by the attestation RPCs.
 #[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
