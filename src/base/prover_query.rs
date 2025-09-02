@@ -11,7 +11,7 @@ use proof_of_sql::proof_primitive::hyperkzg::{
 use proof_of_sql::{
     base::commitment::{CommitmentEvaluationProof, QueryCommitments},
     proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
-    sql::{parse::ConversionError, proof_plans::DynProofPlan},
+    sql::proof_plans::DynProofPlan,
 };
 use proof_of_sql_planner::{
     sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
@@ -29,12 +29,6 @@ pub enum PlanProverQueryError {
     /// Unable to parse sql.
     #[snafu(display("unable to parse sql: {source}"), context(false))]
     ParseIdentifier { source: ParserError },
-    /// Unable to create a provable AST from query.
-    #[snafu(
-        display("unable to create a provable AST from query: {source}"),
-        context(false)
-    )]
-    ProvableAst { source: ConversionError },
     /// Unable to serialize proof plan.
     #[snafu(display("unable to serialize proof plan: {error}"))]
     ProofPlanSerialization { error: bincode::error::EncodeError },
