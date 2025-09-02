@@ -1,3 +1,7 @@
+## [0.34.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.1...v0.34.2) (2025-09-02)
+
+
+
 ## [0.34.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.0...v0.34.1) (2025-09-02)
 
 
@@ -21,10 +25,6 @@
 ### Features
 
 * use arrow pretty-print ([556ff3a](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/556ff3adda0610dee689e607da14814d4c3c93dd))
-
-
-
-## [0.32.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.32.0...v0.32.1) (2025-08-14)
 
 
 
