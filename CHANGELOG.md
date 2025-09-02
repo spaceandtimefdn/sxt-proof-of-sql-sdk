@@ -1,3 +1,7 @@
+## [0.34.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.0...v0.34.1) (2025-09-02)
+
+
+
 # [0.34.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.33.1...v0.34.0) (2025-08-25)
 
 
@@ -21,15 +25,6 @@
 
 
 ## [0.32.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.32.0...v0.32.1) (2025-08-14)
-
-
-
-# [0.32.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.31.0...v0.32.0) (2025-08-14)
-
-
-### Features
-
-* set default plan display to be the evm plan ([4efe483](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/4efe48326a7eabe1959ace6706428ea75ae03b84))
 
 
 
