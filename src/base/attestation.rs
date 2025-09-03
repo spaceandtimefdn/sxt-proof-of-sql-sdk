@@ -339,3 +339,415 @@ pub struct AttestationsResponse {
     /// The block that was used to query storage.
     pub at: H256,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json;
+
+    #[test]
+    fn test_ethereum_signature_new_with_v() {
+        let r = [1u8; 32];
+        let s = [2u8; 32];
+        let v = 27;
+
+        let sig = EthereumSignature::new(r, s, Some(v));
+
+        assert_eq!(sig.r, r);
+        assert_eq!(sig.s, s);
+        assert_eq!(sig.v, v);
+    }
+
+    #[test]
+    fn test_ethereum_signature_new_without_v() {
+        let r = [1u8; 32];
+        let s = [2u8; 32];
+
+        let sig = EthereumSignature::new(r, s, None);
+
+        assert_eq!(sig.r, r);
+        assert_eq!(sig.s, s);
+        assert_eq!(sig.v, 28); // Default value
+    }
+
+    #[test]
+    fn test_serialize_bytes_hex() {
+        let bytes = vec![0xde, 0xad, 0xbe, 0xef];
+        let serialized = serde_json::to_string(&Bytes(bytes.clone())).unwrap();
+        assert_eq!(serialized, "\"0xdeadbeef\"");
+    }
+
+    #[test]
+    fn test_deserialize_bytes_hex() {
+        let json = "\"0xdeadbeef\"";
+        let bytes: Bytes = serde_json::from_str(json).unwrap();
+        assert_eq!(bytes.0, vec![0xde, 0xad, 0xbe, 0xef]);
+    }
+
+    #[test]
+    fn test_hash_eth_msg() {
+        let message = b"test message";
+        let hash = hash_eth_msg(message);
+        let hash_bytes = hash.finalize();
+
+        // The hash should include the Ethereum prefix
+        let expected_prefix = format!("\x19Ethereum Signed Message:\n{}", message.len());
+        let mut expected_hasher = Keccak256::new();
+        expected_hasher.update(expected_prefix.as_bytes());
+        expected_hasher.update(message);
+        let expected_hash = expected_hasher.finalize();
+
+        assert_eq!(hash_bytes.as_slice(), expected_hash.as_slice());
+    }
+
+    #[test]
+    fn test_slice_to_scalar_valid() {
+        let slice = [0u8; 32];
+        let result = slice_to_scalar(&slice);
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), slice);
+    }
+
+    #[test]
+    fn test_slice_to_scalar_invalid_length() {
+        let slice_short = [0u8; 31];
+        let result = slice_to_scalar(&slice_short);
+        assert!(result.is_none());
+
+        let slice_long = [0u8; 33];
+        let result = slice_to_scalar(&slice_long);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_create_attestation_message() {
+        let state_root = [0xaau8; 32];
+        let block_number: u64 = 12345;
+
+        let message = create_attestation_message(state_root, block_number);
+
+        assert_eq!(message.len(), 40); // 32 bytes state_root + 8 bytes block_number
+        assert_eq!(&message[..32], &state_root[..]);
+        assert_eq!(&message[32..], &block_number.to_be_bytes()[..]);
+    }
+
+    #[test]
+    fn test_create_attestation_message_different_types() {
+        let state_root = vec![0xbbu8; 32];
+        let block_number: u32 = 67890;
+
+        let message = create_attestation_message(&state_root, block_number);
+
+        assert_eq!(message.len(), 40);
+        assert_eq!(&message[..32], &state_root[..]);
+        assert_eq!(&message[32..], &(block_number as u64).to_be_bytes()[..]);
+    }
+
+    #[test]
+    fn test_sign_eth_message_valid_key() {
+        // Using a known test private key (DO NOT USE IN PRODUCTION)
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message";
+
+        let result = sign_eth_message(&private_key, message);
+        assert!(result.is_ok());
+
+        let signature = result.unwrap();
+        assert_eq!(signature.r.len(), 32);
+        assert_eq!(signature.s.len(), 32);
+        assert!(signature.v == 0 || signature.v == 1 || signature.v == 27 || signature.v == 28);
+    }
+
+    #[test]
+    fn test_sign_eth_message_empty_message() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"";
+
+        let result = sign_eth_message(&private_key, message);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_verify_eth_signature_valid() {
+        // Generate a signature and verify it
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message for verification";
+
+        // Sign the message
+        let signature = sign_eth_message(&private_key, message).unwrap();
+
+        // Get the public key from the private key
+        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+        let verifying_key = signing_key.verifying_key();
+        let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+
+        // Verify the signature
+        let result = verify_eth_signature(message, &signature, &pub_key_bytes);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_verify_eth_signature_wrong_message() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"original message";
+        let wrong_message = b"wrong message";
+
+        // Sign the original message
+        let signature = sign_eth_message(&private_key, message).unwrap();
+
+        // Get the public key
+        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+        let verifying_key = signing_key.verifying_key();
+        let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+
+        // Try to verify with wrong message
+        let result = verify_eth_signature(wrong_message, &signature, &pub_key_bytes);
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidPublicKeyRecovered
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_eth_signature_wrong_public_key() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let wrong_private_key = [
+            0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45,
+            0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01,
+            0x23, 0x45, 0x67, 0x89,
+        ];
+        let message = b"test message";
+
+        // Sign with one key
+        let signature = sign_eth_message(&private_key, message).unwrap();
+
+        // Get public key from different private key
+        let wrong_signing_key = SigningKey::from_bytes(&wrong_private_key.into()).unwrap();
+        let wrong_verifying_key = wrong_signing_key.verifying_key();
+        let wrong_pub_key_bytes = wrong_verifying_key
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec();
+
+        // Try to verify with wrong public key
+        let result = verify_eth_signature(message, &signature, &wrong_pub_key_bytes);
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidPublicKeyRecovered
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_eth_signature_invalid_signature() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message";
+
+        // Create an invalid signature with all zeros
+        let invalid_signature = EthereumSignature::new([0u8; 32], [0u8; 32], Some(27));
+
+        // Get the public key
+        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+        let verifying_key = signing_key.verifying_key();
+        let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+
+        // Try to verify invalid signature
+        let result = verify_eth_signature(message, &invalid_signature, &pub_key_bytes);
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::SignatureRecoveryError
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_eth_signature_invalid_recovery_id() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message";
+
+        // Sign the message
+        let mut signature = sign_eth_message(&private_key, message).unwrap();
+        // Set invalid recovery ID
+        signature.v = 255;
+
+        // Get the public key
+        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+        let verifying_key = signing_key.verifying_key();
+        let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+
+        // Try to verify with invalid recovery ID
+        let result = verify_eth_signature(message, &signature, &pub_key_bytes);
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidRecoveryIdError { recovery_id: 255 }
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_eth_signature_invalid_public_key_format() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message";
+
+        // Sign the message
+        let signature = sign_eth_message(&private_key, message).unwrap();
+
+        // Invalid public key (wrong length)
+        let invalid_pub_key = vec![0u8; 10];
+
+        // Try to verify with invalid public key format
+        let result = verify_eth_signature(message, &signature, &invalid_pub_key);
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::PublicKeyParsingError
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_signature_wrapper() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let message = b"test message";
+
+        // Sign the message
+        let eth_signature = sign_eth_message(&private_key, message).unwrap();
+
+        // Convert to runtime signature type
+        let runtime_sig = runtime::api::runtime_types::sxt_core::attestation::EthereumSignature {
+            r: eth_signature.r,
+            s: eth_signature.s,
+            v: eth_signature.v,
+        };
+
+        // Get the public key (compressed format)
+        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+        let verifying_key = signing_key.verifying_key();
+        let pub_key_compressed = verifying_key.to_encoded_point(true).as_bytes().to_vec();
+        let mut pub_key_array = [0u8; 33];
+        pub_key_array.copy_from_slice(&pub_key_compressed);
+
+        // Verify the signature
+        let result = verify_signature(message, &runtime_sig, &pub_key_array);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_attestation_serialization() {
+        let attestation = Attestation::EthereumAttestation {
+            signature: EthereumSignature::new([1u8; 32], [2u8; 32], Some(27)),
+            proposed_pub_key: vec![3u8; 33],
+            address20: vec![4u8; 20],
+            state_root: vec![5u8; 32],
+            block_number: 12345,
+            block_hash: H256::from([6u8; 32]),
+        };
+
+        // Serialize to JSON
+        let json = serde_json::to_string(&attestation).unwrap();
+
+        // Deserialize back
+        let deserialized: Attestation = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(attestation, deserialized);
+    }
+
+    #[test]
+    fn test_attestation_response_serialization() {
+        let response = AttestationsResponse {
+            attestations: vec![Attestation::EthereumAttestation {
+                signature: EthereumSignature::new([1u8; 32], [2u8; 32], Some(27)),
+                proposed_pub_key: vec![3u8; 33],
+                address20: vec![4u8; 20],
+                state_root: vec![5u8; 32],
+                block_number: 12345,
+                block_hash: H256::from([6u8; 32]),
+            }],
+            attestations_for: H256::from([7u8; 32]),
+            attestations_for_block_number: 67890,
+            at: H256::from([8u8; 32]),
+        };
+
+        // Serialize to JSON
+        let json = serde_json::to_string(&response).unwrap();
+
+        // Deserialize back
+        let deserialized: AttestationsResponse = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(response, deserialized);
+    }
+
+    #[test]
+    fn test_sign_and_verify_roundtrip() {
+        let private_key = [
+            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
+            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
+            0x89, 0xab, 0xcd, 0xef,
+        ];
+        let messages: &[&[u8]] = &[
+            b"short",
+            b"a longer message with more content",
+            b"",
+            &[0u8; 1000],
+        ];
+
+        for message in messages.iter() {
+            // Sign the message
+            let signature = sign_eth_message(&private_key, message).unwrap();
+
+            // Get the public key
+            let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+            let verifying_key = signing_key.verifying_key();
+            let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+
+            // Verify the signature
+            let result = verify_eth_signature(message, &signature, &pub_key_bytes);
+            assert!(
+                result.is_ok(),
+                "Failed to verify signature for message length {}",
+                message.len()
+            );
+        }
+    }
+}
