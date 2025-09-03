@@ -1,7 +1,7 @@
 use crate::base::{
     attestation::{Attestation, AttestationsResponse},
     verifiable_commitment::VerifiableCommitmentsResponse,
-    CommitmentScheme,
+    CommitmentScheme, ProofPlanResponse,
 };
 use jsonrpsee::{
     core::{client::ClientT, params::ArrayParams, rpc_params, ClientError},
@@ -66,6 +66,21 @@ pub async fn fetch_verified_commitments(
                 commitment_scheme.to_string(),
                 format!("{block_hash:#x}")
             ],
+        )
+        .await?;
+    Ok(response)
+}
+
+/// Fetch proof plan for a given query at a given block.
+pub async fn get_proof_plan(
+    client: &WsClient,
+    query: String,
+    block_hash: Option<H256>,
+) -> Result<ProofPlanResponse, ClientError> {
+    let response = client
+        .request::<ProofPlanResponse, ArrayParams>(
+            "commitments_v1_proofPlan",
+            rpc_params![query, block_hash.map(|h| format!("{h:#x}"))],
         )
         .await?;
     Ok(response)

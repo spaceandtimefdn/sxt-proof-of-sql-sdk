@@ -4,7 +4,19 @@ use proof_of_sql::{base::database::SchemaAccessor, sql::proof_plans::DynProofPla
 use proof_of_sql_planner::{
     sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
 };
+use serde::{Deserialize, Serialize};
+use sp_core::Bytes;
 use sqlparser::ast::Statement;
+use subxt::utils::H256;
+
+#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProofPlanResponse {
+    /// The verifiable commitments.
+    pub proof_plan: Bytes,
+    /// The block hash that this query accessed storage with.
+    pub at: H256,
+}
 
 /// Retrieves a `DynProofPlan` given a query and the commitments for the relevant tables
 pub fn get_plan_from_accessor_and_query(
