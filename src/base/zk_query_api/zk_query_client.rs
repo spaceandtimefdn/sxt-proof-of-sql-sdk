@@ -1,4 +1,4 @@
-use super::models::{QuerySubmitRequest, QuerySubmitResponse};
+use super::models::{QueryPlanRequest, QueryPlanResponse, QuerySubmitRequest, QuerySubmitResponse};
 use crate::base::zk_query_api::models::{QueryResultsResponse, QueryStatusResponse, ZkQueryStatus};
 use reqwest::Client;
 use std::{future::Future, pin::Pin};
@@ -75,6 +75,29 @@ impl ZkQueryClient {
             serde_json::from_str::<QueryResultsResponse>(&serialized_response).map_err(|_e| {
                 format!(
                     "Failed to parse query status response: {}",
+                    &serialized_response
+                )
+            })?,
+        )
+    }
+
+    pub async fn get_zk_query_plan(
+        &self,
+        request: QueryPlanRequest,
+    ) -> Result<QueryPlanResponse, Box<dyn core::error::Error>> {
+        let response = self
+            .client
+            .post(format!("{}/v1/zkquery/build-plan", &self.base_url))
+            .bearer_auth(&self.access_token)
+            .json(&request)
+            .send()
+            .await?
+            .error_for_status()?;
+        let serialized_response = response.text().await?;
+        Ok(
+            serde_json::from_str::<QueryPlanResponse>(&serialized_response).map_err(|_e| {
+                format!(
+                    "Failed to parse query plan response: {}",
                     &serialized_response
                 )
             })?,

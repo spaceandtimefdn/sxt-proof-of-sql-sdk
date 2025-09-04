@@ -38,6 +38,34 @@ pub struct QueryStatusResponse {
     pub status: ZkQueryStatus,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct QueryPlanRequest {
+    pub sql_text: String,
+    #[serde(default)]
+    pub source_network: SxtNetwork,
+    #[serde(default = "default_evm_compatible")]
+    pub evm_compatible: bool,
+}
+
+fn default_evm_compatible() -> bool {
+    true
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct QueryPlanResponse {
+    pub plan: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default)]
+#[serde(rename_all = "camelCase")]
+pub enum SxtNetwork {
+    #[default]
+    Mainnet,
+    Testnet,
+}
+
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum ZkQueryStatus {
