@@ -86,6 +86,16 @@ jobs:
       - name: Run cargo fmt
         run: cargo f --check
 
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run:  export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
+      - run: cargo test
+
   udeps:
     name: Unused Dependencies
     runs-on: ubuntu-latest

@@ -163,7 +163,7 @@ pub enum SignatureError {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// let msg = b"Example message";
 /// let signature = EthereumSignature { r: ..., s: ..., v: ... };
 /// let pub_key = [0x04, ...]; // Compressed or uncompressed public key bytes.
@@ -290,7 +290,7 @@ pub fn create_attestation_message<BN: Into<u64>>(
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// let msg = b"Example attestation message";
 /// let signature = EthereumSignature { r: ..., s: ..., v: ... };
 /// let proposed_pub_key = [0x02, ...]; // Compressed public key bytes.
