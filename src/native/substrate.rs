@@ -137,7 +137,7 @@ pub enum AttestationError {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,ignore
 /// use your_crate::{verify_attestations_for_block, AttestationError};
 ///
 /// #[tokio::main]
