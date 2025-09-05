@@ -84,7 +84,7 @@ where
 /// Errors that may occur during the attestation process.
 #[derive(Debug, Snafu)]
 #[allow(dead_code)]
-pub enum AttestationError {
+pub enum SubxtAttestationError {
     /// Represents an error originating from the Subxt library.
     #[snafu(display("Subxt error: {source}"))]
     SubxtError { source: subxt::Error },
@@ -121,36 +121,35 @@ pub enum AttestationError {
 /// # Returns
 ///
 /// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
-/// `AttestationError` describing the failure.
+/// `SubxtAttestationError` describing the failure.
 ///
 /// # Errors
 ///
 /// This function can return the following errors:
-/// - `AttestationError::SubxtError`: If there is an error communicating with the blockchain node.
-/// - `AttestationError::ErrorFetchingAttestations`: If the attestations for the block cannot be fetched.
-/// - `AttestationError::StateRootMismatch`: If the attestations have inconsistent state roots.
-/// - `AttestationError::InvalidSignature`: If a signature verification fails.
+/// - `SubxtAttestationError::SubxtError`: If there is an error communicating with the blockchain node.
+/// - `SubxtAttestationError::ErrorFetchingAttestations`: If the attestations for the block cannot be fetched.
+/// - `SubxtAttestationError::StateRootMismatch`: If the attestations have inconsistent state roots.
+/// - `SubxtAttestationError::InvalidSignature`: If a signature verification fails.
 ///
 /// # Examples
 ///
 /// ```rust
-/// use your_crate::{verify_attestations_for_block, AttestationError};
+/// use sxt_proof_of_sql_sdk::native::{verify_attestations_for_block, SubxtAttestationError};
 ///
 /// #[tokio::main]
-/// async fn main() -> Result<(), AttestationError> {
-///     let url = "http://localhost:9933";
-///     let block_number = 12345;
+/// async fn main() -> Result<(), SubxtAttestationError> {
+///     let url = "wss://rpc.testnet.sxt.network";
+///     let block_number = 3871761;
 ///
 ///     verify_attestations_for_block(url, block_number).await?;
 ///     println!("Attestations verified successfully!");
 ///     Ok(())
 /// }
 /// ```
-#[allow(dead_code)]
 pub async fn verify_attestations_for_block(
     url: &str,
     block_number: u32,
-) -> Result<(), AttestationError> {
+) -> Result<(), SubxtAttestationError> {
     let api = OnlineClient::<SxtConfig>::from_insecure_url(url)
         .await
         .context(SubxtSnafu)?; // Updated to SubxtErrorSnafu
@@ -179,7 +178,7 @@ pub async fn verify_attestations_for_block(
         })
         .all_equal()
     {
-        return Err(AttestationError::StateRootMismatch);
+        return Err(SubxtAttestationError::StateRootMismatch);
     }
     attestations
          .iter().try_for_each(|attestation| {
@@ -191,6 +190,6 @@ pub async fn verify_attestations_for_block(
            } = attestation;
         let msg = create_attestation_message(state_root.0.as_slice(), block_number);
            verify_signature(&msg, signature, proposed_pub_key)
-             .map_err(|err| AttestationError::LocalError { source: err })
+             .map_err(|err| SubxtAttestationError::LocalError { source: err })
     })
 }
