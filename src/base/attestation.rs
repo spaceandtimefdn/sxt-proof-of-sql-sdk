@@ -35,14 +35,35 @@ where
     Ok(b.0)
 }
 
+/// Hex deserialization function.
+///
+/// Can be used in `#[serde(deserialize_with = "deserialize_bytes_hex32")]`
+/// for any `[u8; 32]` type.
+fn deserialize_bytes_hex32<'de, D>(deserializer: D) -> Result<[u8; 32], D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let b = Bytes::deserialize(deserializer)?;
+    b.0.try_into()
+        .map_err(|_| serde::de::Error::custom("Invalid length"))
+}
+
 /// Represents an Ethereum-style ECDSA signature, broken into its components.
 ///
 /// Wrapper around the [`k256::ecdsa::Signature`] type.
 #[derive(Clone, Debug, Copy, Eq, PartialEq, Serialize, Deserialize)]
 pub struct EthereumSignature {
     /// The `r` component of the signature.
+    #[serde(
+        serialize_with = "serialize_bytes_hex",
+        deserialize_with = "deserialize_bytes_hex32"
+    )]
     pub r: [u8; 32],
     /// The `s` component of the signature.
+    #[serde(
+        serialize_with = "serialize_bytes_hex",
+        deserialize_with = "deserialize_bytes_hex32"
+    )]
     pub s: [u8; 32],
     /// The recovery ID, usually 27 or 28 for Ethereum.
     pub v: u8,
@@ -861,6 +882,77 @@ mod tests {
                 message.len()
             );
         }
+    }
+
+    #[test]
+    fn test_attestations_response_deserialization() {
+        let json_data = r#"{
+            "attestations": [
+                {
+                    "signature": {
+                        "r": "0x3237b93564178a49a6fa9cc96f0a3df5e27fa53a28cf1a88ac64a17f73d2944a",
+                        "s": "0x09a97f7a405ef418c98dd663fb5fd56f1c0862d1193a3d028c18d368d166347e",
+                        "v": 1
+                    },
+                    "proposedPubKey": "0x0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
+                    "address20": "0x813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace",
+                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
+                    "blockNumber": 3871761,
+                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
+                },
+                {
+                    "signature": {
+                        "r": "0x96a8b2f3b0012e1b07d7fa45ef262089897820e9169c39ee6615369ca7c97a59",
+                        "s": "0x0de1c99c2237d53009081595c6e44377b10d04c426a2e3c61719aeaab9552010",
+                        "v": 0
+                    },
+                    "proposedPubKey": "0x03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
+                    "address20": "0x8c2b9f40a674ca91f8ac5ff30eb17b80d768f209",
+                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
+                    "blockNumber": 3871761,
+                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
+                },
+                {
+                    "signature": {
+                        "r": "0xcf557caac3a7468fbff30bdbcbce6c6f74d047b4f7ca58ba3db013e3c6e28952",
+                        "s": "0x32fb4912195e408ee5e662b1cf93fc9426d157dbcd82963028872fef2d1f8989",
+                        "v": 1
+                    },
+                    "proposedPubKey": "0x02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
+                    "address20": "0xe7c9f4d5b48920f6e561b4889bb9bef9874c57e0",
+                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
+                    "blockNumber": 3871761,
+                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
+                }
+            ],
+            "attestationsFor": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8",
+            "attestationsForBlockNumber": 3871761,
+            "at": "0xd269eca553be9eb838bd6d8de6bcfab88ec0491de2eb05c2d6f9606696c9f6bc"
+        }"#;
+
+        let response: AttestationsResponse = serde_json::from_str(json_data).unwrap();
+        assert_eq!(response.attestations.len(), 3);
+        assert_eq!(response.attestations_for_block_number, 3871761);
+    }
+
+    #[test]
+    fn test_single_attestation_deserialization() {
+        let json_data = r#"{
+            "signature": {
+                "r": "0x3237b93564178a49a6fa9cc96f0a3df5e27fa53a28cf1a88ac64a17f73d2944a",
+                "s": "0x09a97f7a405ef418c98dd663fb5fd56f1c0862d1193a3d028c18d368d166347e",
+                "v": 1
+            },
+            "proposedPubKey": "0x0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
+            "address20": "0x813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace",
+            "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
+            "blockNumber": 3871761,
+            "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
+        }"#;
+
+        let attestation: Attestation = serde_json::from_str(json_data).unwrap();
+        assert_eq!(attestation.block_number().unwrap(), 3871761);
+        assert_eq!(attestation.signature().unwrap().v, 1);
     }
 
     #[test]
