@@ -1,3 +1,12 @@
+# [0.36.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.35.0...v0.36.0) (2025-09-05)
+
+
+### Features
+
+* add `verify_attestation` ([#131](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/131)) ([3b456ad](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/3b456ad813bf68c859092bf805b64cbf45c2f080))
+
+
+
 # [0.35.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.4...v0.35.0) (2025-09-05)
 
 
@@ -16,10 +25,6 @@
 
 
 ## [0.34.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.1...v0.34.2) (2025-09-02)
-
-
-
-## [0.34.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.34.0...v0.34.1) (2025-09-02)
 
 
 
