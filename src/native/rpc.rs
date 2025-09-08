@@ -70,3 +70,54 @@ pub async fn fetch_verified_commitments(
         .await?;
     Ok(response)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::base::CommitmentScheme;
+    use jsonrpsee::ws_client::WsClientBuilder;
+
+    const TEST_WSS_ENDPOINT: &str = "wss://rpc.testnet.sxt.network";
+
+    #[ignore] // This test requires network access & a functional chain and may be slow
+    #[tokio::test]
+    async fn test_fetch_attestation_from_testnet() {
+        // Test connecting to the WSS endpoint and fetching attestation
+        let client = WsClientBuilder::new()
+            .build(TEST_WSS_ENDPOINT)
+            .await
+            .expect("Failed to connect to testnet");
+
+        // Fetch attestation from latest block
+        let (block_hash, _attestations) = fetch_attestation(&client, None)
+            .await
+            .expect("Failed to fetch attestation");
+
+        assert!(!block_hash.is_zero(), "Block hash should not be zero");
+    }
+
+    #[ignore] // This test requires network access & a functional chain and may be slow
+    #[tokio::test]
+    async fn test_query_commitments_from_testnet() {
+        // Test connecting to the WSS endpoint and fetching attestation
+        let client = WsClientBuilder::new()
+            .build(TEST_WSS_ENDPOINT)
+            .await
+            .expect("Failed to connect to testnet");
+
+        // Fetch query commitments from a given block
+        let serialized_proof_plan = "0x0000000000000001000000000000000f455448455245554d2e424c4f434b5300000000000000010000000000000000000000000000000c424c4f434b5f4e554d424552000000050000000000000001000000000000000c424c4f434b5f4e554d42455200000000000000000000000000000002000000000000000000000000000000010000000500000000015617d20000000000000001000000000000000000000000".to_string();
+        let (best_block_hash, _) = fetch_attestation(&client, None)
+            .await
+            .expect("Failed to fetch attestation");
+
+        let _result = fetch_verified_commitments(
+            &client,
+            serialized_proof_plan,
+            CommitmentScheme::HyperKzg,
+            best_block_hash,
+        )
+        .await
+        .expect("Failed to fetch verified commitments");
+    }
+}
