@@ -1,6 +1,6 @@
 use super::{
     get_access_token, query_commitments,
-    substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
+    substrate::{verify_attestations_for_block, SubxtAttestationError, SxtConfig},
 };
 use crate::base::{
     plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
@@ -164,8 +164,8 @@ impl SxTClient {
     /// # Returns
     ///
     /// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
-    /// `AttestationError` describing the failure.
-    pub async fn verify_attestations(&self, block_number: u32) -> Result<(), AttestationError> {
+    /// `SubxtAttestationError` describing the failure.
+    pub async fn verify_attestations(&self, block_number: u32) -> Result<(), SubxtAttestationError> {
         verify_attestations_for_block(&self.substrate_node_url, block_number).await
     }
 }

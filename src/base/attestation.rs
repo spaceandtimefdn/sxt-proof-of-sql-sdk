@@ -150,11 +150,27 @@ pub enum SignatureError {
 /// # Examples
 ///
 /// ```rust
+/// use sxt_proof_of_sql_sdk::base::attestation::{sign_eth_message, verify_eth_signature};
+/// use k256::ecdsa::SigningKey;
+/// 
+/// let private_key = [
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+/// ];
 /// let msg = b"Example message";
-/// let signature = EthereumSignature { r: ..., s: ..., v: ... };
-/// let pub_key = [0x04, ...]; // Compressed or uncompressed public key bytes.
-///
-/// match verify_eth_signature(msg, &signature, &pub_key) {
+/// 
+/// // Sign the message
+/// let signature = sign_eth_message(&private_key, msg).unwrap();
+/// 
+/// // Get the public key from the private key
+/// let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+/// let verifying_key = signing_key.verifying_key();
+/// let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+/// 
+/// // Verify the signature
+/// match verify_eth_signature(msg, &signature, &pub_key_bytes) {
 ///     Ok(_) => println!("Signature is valid."),
 ///     Err(e) => println!("Signature verification failed: {:?}", e),
 /// }
@@ -277,12 +293,36 @@ pub fn create_attestation_message<BN: Into<u64>>(
 /// # Examples
 ///
 /// ```rust
+/// use sxt_proof_of_sql_sdk::base::attestation::{sign_eth_message, verify_signature};
+/// use sxt_proof_of_sql_sdk::base::sxt_chain_runtime as runtime;
+/// use k256::ecdsa::SigningKey;
+/// 
+/// let private_key = [
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 
+///     0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+/// ];
 /// let msg = b"Example attestation message";
-/// let signature = EthereumSignature { r: ..., s: ..., v: ... };
-/// let proposed_pub_key = [0x02, ...]; // Compressed public key bytes.
-/// let block_number = 42;
-///
-/// match verify_signature(msg, &signature, &proposed_pub_key, block_number) {
+/// 
+/// // Sign the message
+/// let eth_signature = sign_eth_message(&private_key, msg).unwrap();
+/// 
+/// // Convert to runtime signature type
+/// let runtime_sig = runtime::api::runtime_types::sxt_core::attestation::EthereumSignature {
+///     r: eth_signature.r,
+///     s: eth_signature.s,
+///     v: eth_signature.v,
+/// };
+/// 
+/// // Get the public key (compressed format)
+/// let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
+/// let verifying_key = signing_key.verifying_key();
+/// let pub_key_compressed = verifying_key.to_encoded_point(true).as_bytes().to_vec();
+/// let mut proposed_pub_key = [0u8; 33];
+/// proposed_pub_key.copy_from_slice(&pub_key_compressed);
+/// 
+/// match verify_signature(msg, &runtime_sig, &proposed_pub_key) {
 ///     Ok(_) => println!("Attestation signature is valid."),
 ///     Err(e) => println!("Attestation signature verification failed: {:?}", e),
 /// }

@@ -13,4 +13,4 @@ mod client;
 pub use client::SxTClient;
 
 mod substrate;
-pub use substrate::query_commitments;
+pub use substrate::{query_commitments, verify_attestations_for_block, SubxtAttestationError};
