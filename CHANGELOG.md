@@ -1,3 +1,12 @@
+## [0.38.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.1...v0.38.2) (2025-09-08)
+
+
+### Bug Fixes
+
+* rename `native::commitment::query_commitments` to `query_verified_commitments` ([#138](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/138)) ([e010470](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e0104706f0cfd955abd97d4aa1180e5764b7f9f1))
+
+
+
 ## [0.38.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.0...v0.38.1) (2025-09-08)
 
 
@@ -21,10 +30,6 @@
 ### Bug Fixes
 
 * fix `Attestation` deserialization && add tests to RPC and deser-related code ([#134](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/134)) ([be6d603](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/be6d6035f058cf919dfe88d10fb9c78a3839cb5f))
-
-
-
-## [0.37.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.0...v0.37.1) (2025-09-08)
 
 
 
