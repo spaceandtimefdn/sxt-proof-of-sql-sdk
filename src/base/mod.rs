@@ -1,6 +1,6 @@
 #![doc = include_str!("README.md")]
 
-mod duration_serde;
+mod serde;
 /// subxt-generated code for interacting with the sxt-chain runtime
 pub mod sxt_chain_runtime;
 
