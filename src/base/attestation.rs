@@ -434,7 +434,7 @@ pub fn verify_attestations(
                         table_id,
                         commitment_scheme,
                         verified_commitment.commitment.0,
-                    )?))?;
+                    )))?;
                     Ok(verify_proof(
                         verified_commitment.merkle_proof.clone(),
                         &encoded_root,
