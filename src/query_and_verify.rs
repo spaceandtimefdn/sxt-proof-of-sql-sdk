@@ -1,4 +1,7 @@
-use crate::{base::CommitmentScheme, native::SxTClient};
+use crate::{
+    base::{zk_query_api::models::SxtNetwork, CommitmentScheme},
+    native::SxTClient,
+};
 use arrow_csv::WriterBuilder;
 use clap::Args;
 use datafusion::arrow::{
@@ -85,6 +88,14 @@ pub struct QueryAndVerifySdkArgs {
     /// The results will be put in a csv at the output path. If `None`, no csv will be saved
     #[arg(long)]
     pub csv_file_path: Option<PathBuf>,
+
+    /// Query the prover via the gateway
+    #[arg(long, default_value = "false")]
+    pub via_gateway: bool,
+
+    /// The source of the data
+    #[arg(long, value_enum, env, default_value_t=SxtNetwork::Mainnet)]
+    pub source_network: SxtNetwork,
 }
 
 impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
@@ -152,7 +163,12 @@ pub async fn query_and_verify(
 
     // Execute the query and verify the result
     let result: RecordBatch = client
-        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
+        .query_and_verify(
+            &args.query,
+            args.block_hash,
+            commitment_scheme,
+            args.via_gateway,
+        )
         .await?
         .try_into()?;
 
