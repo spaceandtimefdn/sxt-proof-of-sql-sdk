@@ -1,4 +1,5 @@
 use super::{
+    serde::hex::{deserialize_bytes_hex, deserialize_bytes_hex32, serialize_bytes_hex},
     sxt_chain_runtime as runtime,
     verifiable_commitment::{generate_commitment_leaf, VerifiableCommitment},
     CommitmentScheme,
@@ -7,46 +8,10 @@ use eth_merkle_tree::utils::{errors::BytesError, keccak::keccak256, verify::veri
 use indexmap::IndexMap;
 use itertools::{process_results, Itertools};
 use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};
-use sp_core::Bytes;
 use subxt::utils::H256;
-
-/// Hex serialization function.
-///
-/// Can be used in `#[serde(serialize_with = "")]` attributes for any `AsRef<[u8]>` type.
-fn serialize_bytes_hex<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    Bytes(bytes.to_vec()).serialize(serializer)
-}
-
-/// Hex deserialization function.
-///
-/// Can be used in `#[serde(deserialize_with = "deserialize_bytes_hex")]`
-/// for any `Vec<u8>` type.
-fn deserialize_bytes_hex<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let b = Bytes::deserialize(deserializer)?;
-    Ok(b.0)
-}
-
-/// Hex deserialization function.
-///
-/// Can be used in `#[serde(deserialize_with = "deserialize_bytes_hex32")]`
-/// for any `[u8; 32]` type.
-fn deserialize_bytes_hex32<'de, D>(deserializer: D) -> Result<[u8; 32], D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let b = Bytes::deserialize(deserializer)?;
-    b.0.try_into()
-        .map_err(|_| serde::de::Error::custom("Invalid length"))
-}
 
 /// Represents an Ethereum-style ECDSA signature, broken into its components.
 ///
@@ -477,6 +442,7 @@ pub fn verify_attestations(
 mod tests {
     use super::*;
     use serde_json;
+    use sp_core::Bytes;
 
     #[test]
     fn test_ethereum_signature_new_with_v() {
@@ -501,20 +467,6 @@ mod tests {
         assert_eq!(sig.r, r);
         assert_eq!(sig.s, s);
         assert_eq!(sig.v, 28); // Default value
-    }
-
-    #[test]
-    fn test_serialize_bytes_hex() {
-        let bytes = vec![0xde, 0xad, 0xbe, 0xef];
-        let serialized = serde_json::to_string(&Bytes(bytes.clone())).unwrap();
-        assert_eq!(serialized, "\"0xdeadbeef\"");
-    }
-
-    #[test]
-    fn test_deserialize_bytes_hex() {
-        let json = "\"0xdeadbeef\"";
-        let bytes: Bytes = serde_json::from_str(json).unwrap();
-        assert_eq!(bytes.0, vec![0xde, 0xad, 0xbe, 0xef]);
     }
 
     #[test]
