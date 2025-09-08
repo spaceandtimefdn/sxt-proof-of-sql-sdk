@@ -8,11 +8,11 @@ use jsonrpsee::ws_client::WsClientBuilder;
 use proof_of_sql::base::commitment::{CommitmentEvaluationProof, QueryCommitments};
 use sp_core::H256;
 
-/// Get the commitments for the given tables at the given SxT block.
+/// Get the verified commitments for the given tables at the given SxT block.
 ///
 /// If `block_ref` is `None`, the latest block is used.
 #[cfg_attr(not(test), expect(dead_code))]
-pub async fn query_commitments<CPI: CommitmentEvaluationProofId>(
+pub async fn query_verified_commitments<CPI: CommitmentEvaluationProofId>(
     url: &str,
     serialized_proof_plan: String,
     commitment_scheme: CommitmentScheme,
@@ -53,11 +53,11 @@ mod tests {
 
     #[ignore] // This test requires network access & a functional chain and may be slow
     #[tokio::test]
-    async fn test_query_commitments_from_testnet() {
+    async fn test_query_verified_commitments_from_testnet() {
         // Test connecting to testnet and fetching query commitments
         let serialized_proof_plan = "0x0000000000000001000000000000000f455448455245554d2e424c4f434b5300000000000000010000000000000000000000000000000c424c4f434b5f4e554d424552000000050000000000000001000000000000000c424c4f434b5f4e554d42455200000000000000000000000000000002000000000000000000000000000000010000000500000000015617d20000000000000001000000000000000000000000".to_string();
 
-        let query_commitments = query_commitments::<HyperKZGCommitmentEvaluationProof>(
+        let query_commitments = query_verified_commitments::<HyperKZGCommitmentEvaluationProof>(
             TEST_WSS_ENDPOINT,
             serialized_proof_plan,
             CommitmentScheme::HyperKzg,
