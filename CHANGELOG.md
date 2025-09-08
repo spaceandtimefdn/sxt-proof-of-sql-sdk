@@ -1,3 +1,12 @@
+# [0.38.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.3...v0.38.0) (2025-09-08)
+
+
+### Features
+
+* add new `query_commitments` ([#123](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/123)) ([dd6e585](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/dd6e585545ea8e7262265de93e2b7f9a726b72a0))
+
+
+
 ## [0.37.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.2...v0.37.3) (2025-09-08)
 
 
@@ -21,15 +30,6 @@
 ### Features
 
 * add \`extract_query_commitments_from_verifiable_commitments\` ([#132](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/132)) ([675fd65](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/675fd6534e1a63ba8cd6eca41230fd82920498fd))
-
-
-
-# [0.36.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.35.0...v0.36.0) (2025-09-05)
-
-
-### Features
-
-* add `verify_attestation` ([#131](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/131)) ([3b456ad](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/3b456ad813bf68c859092bf805b64cbf45c2f080))
 
 
 
