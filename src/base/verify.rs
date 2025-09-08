@@ -5,6 +5,7 @@ use proof_of_sql::{
     base::{
         commitment::CommitmentEvaluationProof,
         database::{CommitmentAccessor, LiteralValue, OwnedTable},
+        try_standard_binary_deserialization,
     },
     sql::{
         proof::{QueryError, QueryProof},
@@ -42,21 +43,9 @@ pub fn verify_prover_response<CPI: CommitmentEvaluationProofId>(
     verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
 ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, VerifyProverResponseError> {
     let accessor = UppercaseAccessor(accessor);
-    let proof: QueryProof<CPI> = bincode::serde::borrow_decode_from_slice(
-        &prover_response.proof,
-        bincode::config::legacy()
-            .with_fixed_int_encoding()
-            .with_big_endian(),
-    )?
-    .0;
+    let proof: QueryProof<CPI> = try_standard_binary_deserialization(&prover_response.proof)?.0;
     let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
-        bincode::serde::borrow_decode_from_slice(
-            &prover_response.result,
-            bincode::config::legacy()
-                .with_fixed_int_encoding()
-                .with_big_endian(),
-        )?
-        .0;
+        try_standard_binary_deserialization(&prover_response.result)?.0;
 
     // Verify the proof
     proof.verify(

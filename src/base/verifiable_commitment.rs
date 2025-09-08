@@ -7,6 +7,7 @@ use indexmap::IndexMap;
 use proof_of_sql::base::{
     commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
     database::TableRef,
+    try_standard_binary_deserialization,
 };
 use serde::{Deserialize, Serialize};
 use sp_core::Bytes;
@@ -82,11 +83,8 @@ pub fn extract_query_commitments_from_verifiable_commitments<CPI: CommitmentEval
                     let table_ref = TableRef::try_from(table_id.as_str())?;
                     let table_commitment: TableCommitment<
                         <CPI as CommitmentEvaluationProof>::Commitment,
-                    > = bincode::serde::decode_from_slice(
+                    > = try_standard_binary_deserialization(
                         &verified_commitment.commitment, // or the correct bytes field
-                        bincode::config::legacy()
-                            .with_fixed_int_encoding()
-                            .with_big_endian(),
                     )?
                     .0;
                     Ok((table_ref, table_commitment))

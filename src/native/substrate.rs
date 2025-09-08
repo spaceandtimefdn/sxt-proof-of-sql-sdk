@@ -16,6 +16,7 @@ use itertools::Itertools;
 use proof_of_sql::base::{
     commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
     database::TableRef,
+    try_standard_binary_deserialization,
 };
 use snafu::{ResultExt, Snafu};
 use subxt::{blocks::BlockRef, Config, OnlineClient, PolkadotConfig};
@@ -60,13 +61,8 @@ where
                 .fetch(&commitments_query)
                 .await?
                 .ok_or("Commitment not found")?;
-            let table_commitments = bincode::serde::decode_from_slice(
-                &table_commitment_bytes.data.0,
-                bincode::config::legacy()
-                    .with_fixed_int_encoding()
-                    .with_big_endian(),
-            )?
-            .0;
+            let table_commitments =
+                try_standard_binary_deserialization(&table_commitment_bytes.data.0)?.0;
             Ok::<
                 (
                     TableRef,

@@ -9,7 +9,10 @@ use proof_of_sql::proof_primitive::hyperkzg::{
     HyperKZGCommitment, HyperKZGCommitmentEvaluationProof,
 };
 use proof_of_sql::{
-    base::commitment::{CommitmentEvaluationProof, QueryCommitments},
+    base::{
+        commitment::{CommitmentEvaluationProof, QueryCommitments},
+        try_standard_binary_serialization,
+    },
     proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
     sql::proof_plans::DynProofPlan,
 };
@@ -53,11 +56,8 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     let mut config_options = ConfigOptions::default();
     config_options.sql_parser.enable_ident_normalization = false;
     let proof_plan = sql_to_proof_plans(&[query.clone()], accessor, &config_options)?[0].clone();
-    let bincode_config = bincode::config::legacy()
-        .with_fixed_int_encoding()
-        .with_big_endian();
     let serialized_proof_plan =
-        bincode::serde::encode_to_vec(CPI::associated_proof_plan(&proof_plan), bincode_config)?;
+        try_standard_binary_serialization(CPI::associated_proof_plan(&proof_plan))?;
 
     let query_context = commitments
         .iter()

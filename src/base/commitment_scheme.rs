@@ -7,15 +7,16 @@ use clap::ValueEnum;
 use datafusion::arrow::{error::ArrowError, record_batch::RecordBatch};
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::{
+    base::try_standard_binary_deserialization,
+    proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
+    sql::evm_proof_plan::EVMProofPlan,
+};
 use proof_of_sql::{
     base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
     proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
     sql::{proof::ProofPlan, proof_plans::DynProofPlan},
-};
-#[cfg(feature = "hyperkzg")]
-use proof_of_sql::{
-    proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
-    sql::evm_proof_plan::EVMProofPlan,
 };
 use serde::{Deserialize, Serialize};
 
@@ -134,13 +135,8 @@ impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
         bytes: &[u8],
         alloc: &'a Bump,
     ) -> Result<&'a VerifierKey<HyperKZGEngine>, Self::DeserializationError> {
-        let setup: VerifierKey<HyperKZGEngine> = bincode::serde::decode_from_slice(
-            bytes,
-            bincode::config::legacy()
-                .with_fixed_int_encoding()
-                .with_big_endian(),
-        )
-        .map(|(setup, _)| setup)?;
+        let setup: VerifierKey<HyperKZGEngine> =
+            try_standard_binary_deserialization(bytes).map(|(setup, _)| setup)?;
         Ok(alloc.alloc(setup) as &'a VerifierKey<HyperKZGEngine>)
     }
 

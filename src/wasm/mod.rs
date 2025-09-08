@@ -13,6 +13,7 @@ use proof_of_sql::{
     base::{
         commitment::{Commitment, QueryCommitments},
         database::TableRef,
+        try_standard_binary_deserialization,
     },
     proof_primitive::dory::{DynamicDoryEvaluationProof, VerifierSetup},
 };
@@ -108,14 +109,12 @@ where
                 )
                 .map_err(|e| format!("failed to decode table commitment bytes: {e}"))?;
 
-                let table_commitment = bincode::serde::decode_from_slice(
-                    &table_commitment_bytes.data.0,
-                    bincode::config::legacy()
-                        .with_fixed_int_encoding()
-                        .with_big_endian(),
-                )
-                .map_err(|e| format!("failed to deserialize table commitment using bincode: {e}"))?
-                .0;
+                let table_commitment =
+                    try_standard_binary_deserialization(&table_commitment_bytes.data.0)
+                        .map_err(|e| {
+                            format!("failed to deserialize table commitment using bincode: {e}")
+                        })?
+                        .0;
                 Ok((table_ref, table_commitment))
             },
         )
