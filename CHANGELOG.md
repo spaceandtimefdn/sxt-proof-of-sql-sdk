@@ -1,3 +1,12 @@
+# [0.39.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.2...v0.39.0) (2025-09-09)
+
+
+### Features
+
+* csv ([#124](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/124)) ([b23d5b2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/b23d5b2438295a0df07ce308974fcb05f6435de6))
+
+
+
 ## [0.38.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.1...v0.38.2) (2025-09-08)
 
 
@@ -21,15 +30,6 @@
 
 
 ## [0.37.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.2...v0.37.3) (2025-09-08)
-
-
-
-## [0.37.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.1...v0.37.2) (2025-09-08)
-
-
-### Bug Fixes
-
-* fix `Attestation` deserialization && add tests to RPC and deser-related code ([#134](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/134)) ([be6d603](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/be6d6035f058cf919dfe88d10fb9c78a3839cb5f))
 
 
 
