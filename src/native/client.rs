@@ -23,7 +23,7 @@ use url::Url;
 #[derive(Debug, Clone)]
 pub struct SxTClient {
     /// Root URL for the Prover service
-    pub prover_root_url: Url,
+    pub prover_url: Url,
 
     /// Root URL for the Auth service
     pub auth_root_url: Url,
@@ -44,14 +44,14 @@ pub struct SxTClient {
 impl SxTClient {
     /// Create a new SxT client
     pub fn new(
-        prover_root_url: Url,
+        prover_url: Url,
         auth_root_url: Url,
         substrate_node_url: Url,
         sxt_api_key: String,
         verifier_setup: Option<String>,
     ) -> Self {
         Self {
-            prover_root_url,
+            prover_url,
             auth_root_url,
             substrate_node_url,
             sxt_api_key,
@@ -100,7 +100,7 @@ impl SxTClient {
         let client = Client::new();
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
         let response = client
-            .post(self.prover_root_url.join("v1/prove")?)
+            .post(self.prover_url.clone())
             .bearer_auth(&access_token)
             .json(&prover_query)
             .send()
