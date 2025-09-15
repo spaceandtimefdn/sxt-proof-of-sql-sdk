@@ -34,3 +34,4 @@ pub mod prover {
 /// types for verifying attestations
 pub mod attestation;
 pub mod verifiable_commitment;
+pub mod zk_query_api;
