@@ -3,15 +3,21 @@ use super::{
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
 use crate::base::{
-    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response, verify_prover_via_gateway_response, zk_query_api::{
+        models::{QuerySubmitRequest, SxtNetwork},
+        zk_query_client::ZkQueryClient,
+    }, CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable
 };
 use bumpalo::Bump;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
-    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
+    base::{
+        commitment::CommitmentEvaluationProof, database::OwnedTable,
+        try_standard_binary_deserialization, try_standard_binary_serialization,
+    },
     proof_primitive::dory::DynamicDoryEvaluationProof,
+    sql::{proof::QueryProof, proof_plans::DynProofPlan},
 };
 use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
@@ -94,10 +100,31 @@ impl SxTClient {
         )
         .await?;
 
-        let (prover_query, proof_plan) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
+        let access_token = get_access_token(&self.sxt_api_key, &self.auth_root_url).await?;
+        let zk_client = ZkQueryClient {
+            base_url: self.prover_root_url.clone(),
+            client: Client::new(),
+            access_token: access_token.clone(),
+        };
+        let scheme = crate::base::prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME);
+        let query_results = zk_client
+            .run_zk_query(QuerySubmitRequest {
+                sql_text: query.to_string(),
+                source_network: SxtNetwork::Mainnet,
+                timeout: None,
+                commitment_scheme: Some(scheme),
+            })
+            .await?;
+        let proof_plan: DynProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
+        
+
+
+
+
+        let (mut prover_query, _) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
+        prover_query.proof_plan = try_standard_binary_serialization(CPI::associated_proof_plan(&proof_plan)).unwrap();
 
         let client = Client::new();
-        let access_token = get_access_token(&self.sxt_api_key, &self.auth_root_url).await?;
         let response = client
             .post(format!("{}/v1/prove", &self.prover_root_url))
             .bearer_auth(&access_token)

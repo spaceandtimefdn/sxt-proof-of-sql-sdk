@@ -24,7 +24,9 @@ pub use prover_query::{
 };
 
 mod verify;
-pub use verify::{verify_prover_response, VerifyProverResponseError};
+pub use verify::{
+    verify_prover_response, verify_prover_via_gateway_response, VerifyProverResponseError,
+};
 
 /// tonic-generated code for interacting with the prover service
 pub mod prover {
