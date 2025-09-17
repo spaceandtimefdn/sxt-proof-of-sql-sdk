@@ -6369,6 +6369,7 @@ dependencies = [
  "tokio",
  "tonic",
  "tonic-build",
+ "url",
  "wasm-bindgen",
 ]
 

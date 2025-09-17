@@ -14,3 +14,6 @@ pub use client::SxTClient;
 
 mod substrate;
 pub use substrate::query_commitments;
+
+mod zk_query_client;
+pub use zk_query_client::ZkQueryClient;
