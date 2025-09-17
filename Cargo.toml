@@ -48,6 +48,7 @@ k256 = { version = "0.13.4" }
 sha3 = { version = "0.10.8" }
 sp-core = "34.0.0"
 itertools = "0.13.0"
+uuid = { version = "=1.12.1", default-features = false, features=["serde"] }
 
 [build-dependencies]
 tonic-build = { version = "0.11" }
