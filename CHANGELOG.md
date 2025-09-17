@@ -1,3 +1,12 @@
+# [0.40.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.39.0...v0.40.0) (2025-09-17)
+
+
+### Features
+
+* ignore all **/*.env files and remove allow ([#141](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/141)) ([f6e6c8b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/f6e6c8b46cd70f5925eae358eccff75cd14c0f76))
+
+
+
 # [0.39.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.2...v0.39.0) (2025-09-09)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * add new `query_commitments` ([#123](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/123)) ([dd6e585](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/dd6e585545ea8e7262265de93e2b7f9a726b72a0))
-
-
-
-## [0.37.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.2...v0.37.3) (2025-09-08)
 
 
 
