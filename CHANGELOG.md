@@ -1,3 +1,12 @@
+# [0.41.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.40.0...v0.41.0) (2025-09-17)
+
+
+### Features
+
+* add zk query API for getting proof plans ([#140](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/140)) ([e36daee](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e36daeee8388f3a4b78e9f085789db4d0279ab8f))
+
+
+
 # [0.40.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.39.0...v0.40.0) (2025-09-17)
 
 
@@ -26,15 +35,6 @@
 
 
 ## [0.38.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.0...v0.38.1) (2025-09-08)
-
-
-
-# [0.38.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.37.3...v0.38.0) (2025-09-08)
-
-
-### Features
-
-* add new `query_commitments` ([#123](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/123)) ([dd6e585](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/dd6e585545ea8e7262265de93e2b7f9a726b72a0))
 
 
 
