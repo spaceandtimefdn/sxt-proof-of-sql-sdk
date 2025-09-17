@@ -1,4 +1,4 @@
-.env
+**/*.env
 **/*.log
 **/*.json
 **/node_modules

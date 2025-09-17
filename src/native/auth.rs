@@ -3,7 +3,6 @@ use reqwest::Client;
 ///
 /// To obtain an API key please visit [Space and Time Studio](https://app.spaceandtime.ai/) and create an account.
 /// See [Get API Key Using Space and Time Studio](https://docs.spaceandtime.io/docs/using-studioapi-key) for more information.
-#[allow(dead_code)]
 pub async fn get_access_token(
     apikey: &str,
     url: &str,
