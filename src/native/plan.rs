@@ -11,7 +11,7 @@ use subxt::Config;
 ///
 /// We use dynamic dory here because proof plans are not dependent on the commitment scheme
 pub async fn produce_plan(
-    substrate_node_url: String,
+    substrate_node_url: &str,
     query: &str,
     block_ref: Option<<SxtConfig as Config>::Hash>,
 ) -> Result<DynProofPlan, Box<dyn core::error::Error>> {
@@ -23,7 +23,7 @@ pub async fn produce_plan(
         .collect::<Vec<_>>();
     let accessor = query_commitments::<<SxtConfig as Config>::Hash, DynamicDoryEvaluationProof>(
         &table_refs,
-        &substrate_node_url,
+        substrate_node_url,
         block_ref,
     )
     .await?;

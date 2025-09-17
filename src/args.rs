@@ -19,6 +19,6 @@ pub struct ProofOfSqlSdkArgs {
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum ProofOfSqlSdkSubcommands {
-    QueryAndVerify(QueryAndVerifySdkArgs),
-    ProducePlan(ProducePlanArgs),
+    QueryAndVerify(Box<QueryAndVerifySdkArgs>),
+    ProducePlan(Box<ProducePlanArgs>),
 }

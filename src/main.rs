@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn core::error::Error>> {
     // Parse command-line arguments
     let sdk_args = ProofOfSqlSdkArgs::parse();
     match sdk_args.command {
-        ProofOfSqlSdkSubcommands::QueryAndVerify(args) => query_and_verify(args).await,
-        ProofOfSqlSdkSubcommands::ProducePlan(args) => produce_plan_command(args).await,
+        ProofOfSqlSdkSubcommands::QueryAndVerify(args) => query_and_verify(*args).await,
+        ProofOfSqlSdkSubcommands::ProducePlan(args) => produce_plan_command(*args).await,
     }
 }
