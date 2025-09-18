@@ -13,6 +13,18 @@ use url::Url;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct QueryAndVerifySdkArgs {
+    /// Root URL for SXT services
+    ///
+    /// This URL is used as the base for other service URLs.
+    /// Can be set via ROOT_URL environment variable.
+    #[arg(
+        long,
+        value_name = "ROOT_URL",
+        default_value = "https://api.makeinfinite.dev",
+        env = "ROOT_URL"
+    )]
+    pub root_url: Url,
+
     /// URL for the Prover service
     ///
     /// This URL is used for interacting with the prover service.
@@ -92,6 +104,7 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
     fn from(args: &QueryAndVerifySdkArgs) -> Self {
         (
             SxTClient::new(
+                args.root_url.clone(),
                 args.prover_url.clone(),
                 args.auth_root_url.clone(),
                 args.substrate_node_url.clone(),

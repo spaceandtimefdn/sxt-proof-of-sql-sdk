@@ -112,6 +112,8 @@ async fn main() {
         _ => panic!("Unsupported commitment scheme"),
     };
     let client = Arc::new(SxTClient::new(
+        Url::parse(&env::var("ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()))
+            .unwrap(),
         Url::parse(
             &env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
         )
