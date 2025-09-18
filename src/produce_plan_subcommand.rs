@@ -2,6 +2,7 @@ use crate::native::produce_plan;
 use clap::Parser;
 use proof_of_sql::{base::try_standard_binary_serialization, sql::evm_proof_plan::EVMProofPlan};
 use subxt::utils::H256;
+use url::Url;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(
@@ -16,7 +17,7 @@ pub struct ProducePlanArgs {
         default_value = "wss://rpc.testnet.sxt.network",
         env = "SUBSTRATE_NODE_URL"
     )]
-    pub substrate_node_url: String,
+    pub substrate_node_url: Url,
     /// SQL query to retrieve a plan for
     #[arg(short, long)]
     pub query: String,
@@ -35,7 +36,12 @@ pub async fn produce_plan_command(
     args: ProducePlanArgs,
 ) -> Result<(), Box<dyn core::error::Error>> {
     // Retrieve the proof plan
-    let plan = produce_plan(args.substrate_node_url, &args.query, args.block_hash).await?;
+    let plan = produce_plan(
+        args.substrate_node_url.as_str(),
+        &args.query,
+        args.block_hash,
+    )
+    .await?;
 
     if args.debug_plan {
         println!("{:?}", plan);

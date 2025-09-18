@@ -17,18 +17,19 @@ use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
 use sqlparser::{dialect::GenericDialect, parser::Parser};
 use subxt::Config;
+use url::Url;
 
 /// Space and Time (SxT) client
 #[derive(Debug, Clone)]
 pub struct SxTClient {
     /// Root URL for the Prover service
-    pub prover_root_url: String,
+    pub prover_root_url: Url,
 
     /// Root URL for the Auth service
-    pub auth_root_url: String,
+    pub auth_root_url: Url,
 
     /// URL for the Substrate node service
-    pub substrate_node_url: String,
+    pub substrate_node_url: Url,
 
     /// API Key for Space and Time (SxT) services
     ///
@@ -43,9 +44,9 @@ pub struct SxTClient {
 impl SxTClient {
     /// Create a new SxT client
     pub fn new(
-        prover_root_url: String,
-        auth_root_url: String,
-        substrate_node_url: String,
+        prover_root_url: Url,
+        auth_root_url: Url,
+        substrate_node_url: Url,
         sxt_api_key: String,
         verifier_setup: Option<String>,
     ) -> Self {
@@ -89,7 +90,7 @@ impl SxTClient {
         // Accessor setup
         let accessor = query_commitments::<<SxtConfig as Config>::Hash, CPI>(
             &table_refs,
-            &self.substrate_node_url,
+            self.substrate_node_url.as_str(),
             block_ref,
         )
         .await?;
@@ -97,9 +98,9 @@ impl SxTClient {
         let (prover_query, proof_plan) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
 
         let client = Client::new();
-        let access_token = get_access_token(&self.sxt_api_key, &self.auth_root_url).await?;
+        let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
         let response = client
-            .post(format!("{}/v1/prove", &self.prover_root_url))
+            .post(self.prover_root_url.join("v1/prove")?)
             .bearer_auth(&access_token)
             .json(&prover_query)
             .send()
@@ -166,6 +167,6 @@ impl SxTClient {
     /// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
     /// `AttestationError` describing the failure.
     pub async fn verify_attestations(&self, block_number: u32) -> Result<(), AttestationError> {
-        verify_attestations_for_block(&self.substrate_node_url, block_number).await
+        verify_attestations_for_block(self.substrate_node_url.as_str(), block_number).await
     }
 }

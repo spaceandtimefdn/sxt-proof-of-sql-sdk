@@ -9,6 +9,7 @@ use datafusion::arrow::{
 };
 use std::{path::PathBuf, sync::Arc};
 use subxt::utils::H256;
+use url::Url;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct QueryAndVerifySdkArgs {
@@ -22,7 +23,7 @@ pub struct QueryAndVerifySdkArgs {
         default_value = "https://api.makeinfinite.dev",
         env = "PROVER_ROOT_URL"
     )]
-    pub prover_root_url: String,
+    pub prover_root_url: Url,
 
     /// Root URL for the Auth service
     ///
@@ -34,7 +35,7 @@ pub struct QueryAndVerifySdkArgs {
         default_value = "https://proxy.api.makeinfinite.dev",
         env = "AUTH_ROOT_URL"
     )]
-    pub auth_root_url: String,
+    pub auth_root_url: Url,
 
     /// URL for the Substrate node service
     ///
@@ -46,7 +47,7 @@ pub struct QueryAndVerifySdkArgs {
         default_value = "wss://rpc.testnet.sxt.network",
         env = "SUBSTRATE_NODE_URL"
     )]
-    pub substrate_node_url: String,
+    pub substrate_node_url: Url,
 
     /// API Key for Space and Time (SxT) services
     ///

@@ -9,6 +9,7 @@ use sxt_proof_of_sql_sdk::{
     base::{CommitmentScheme, DynOwnedTable},
     native::SxTClient,
 };
+use url::Url;
 
 const ETHEREUM_CORE_COUNTS_FILE: &str = "ethereum-core-counts.json";
 
@@ -111,9 +112,18 @@ async fn main() {
         _ => panic!("Unsupported commitment scheme"),
     };
     let client = Arc::new(SxTClient::new(
-        env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
-        env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
-        env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
+        Url::parse(
+            &env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
+        )
+        .unwrap(),
+        Url::parse(
+            &env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
+        )
+        .unwrap(),
+        Url::parse(
+            &env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
+        )
+        .unwrap(),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
         env::var("VERIFIER_SETUP").ok(),
     ));
