@@ -22,6 +22,9 @@ use url::Url;
 /// Space and Time (SxT) client
 #[derive(Debug, Clone)]
 pub struct SxTClient {
+    /// Root URL for SXT services
+    pub root_url: Url,
+
     /// Root URL for the Prover service
     pub prover_url: Url,
 
@@ -44,6 +47,7 @@ pub struct SxTClient {
 impl SxTClient {
     /// Create a new SxT client
     pub fn new(
+        root_url: Url,
         prover_url: Url,
         auth_root_url: Url,
         substrate_node_url: Url,
@@ -51,6 +55,7 @@ impl SxTClient {
         verifier_setup: Option<String>,
     ) -> Self {
         Self {
+            root_url,
             prover_url,
             auth_root_url,
             substrate_node_url,
