@@ -1,3 +1,12 @@
+# [0.42.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.2...v0.42.0) (2025-09-19)
+
+
+### Features
+
+* add `root_url` ([#144](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/144)) ([0dc1a7c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0dc1a7c7a9b04647b98a19d49a3ece1254f2ca8c))
+
+
+
 ## [0.41.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.1...v0.41.2) (2025-09-19)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * ignore all **/*.env files and remove allow ([#141](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/141)) ([f6e6c8b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/f6e6c8b46cd70f5925eae358eccff75cd14c0f76))
-
-
-
-# [0.39.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.2...v0.39.0) (2025-09-09)
-
-
-### Features
-
-* csv ([#124](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/124)) ([b23d5b2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/b23d5b2438295a0df07ce308974fcb05f6435de6))
 
 
 
