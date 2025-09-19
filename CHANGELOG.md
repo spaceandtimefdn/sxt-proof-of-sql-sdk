@@ -1,3 +1,12 @@
+## [0.41.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.1...v0.41.2) (2025-09-19)
+
+
+### Bug Fixes
+
+* remove /v1/prove ([#139](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/139)) ([0ab0002](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0ab0002b7296aa26325e56eb4a31807ca7594d48))
+
+
+
 ## [0.41.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.0...v0.41.1) (2025-09-18)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * csv ([#124](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/124)) ([b23d5b2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/b23d5b2438295a0df07ce308974fcb05f6435de6))
-
-
-
-## [0.38.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.38.1...v0.38.2) (2025-09-08)
-
-
-### Bug Fixes
-
-* rename `native::commitment::query_commitments` to `query_verified_commitments` ([#138](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/138)) ([e010470](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e0104706f0cfd955abd97d4aa1180e5764b7f9f1))
 
 
 
