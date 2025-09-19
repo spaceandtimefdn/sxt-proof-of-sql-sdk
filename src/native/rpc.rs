@@ -16,7 +16,7 @@ async fn fetch_attestation_for_block(
 ) -> Result<Vec<Attestation>, ClientError> {
     let response = client
         .request::<AttestationsResponse, ArrayParams>(
-            "attestation_v1_getByBlockHash",
+            "attestation_v1_attestationsForBlock",
             rpc_params![format!("{block_hash:#x}")],
         )
         .await?;
