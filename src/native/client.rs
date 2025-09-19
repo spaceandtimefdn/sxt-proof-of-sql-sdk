@@ -1,9 +1,13 @@
 use super::{
-    get_access_token, query_commitments,
+    get_access_token, query_verified_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
+    ZkQueryClient,
 };
 use crate::base::{
-    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
+    plan_prover_query,
+    prover::{ProverContextRange, ProverQuery, ProverResponse},
+    uppercase_table_ref, verify_prover_response,
+    zk_query_models::QueryPlanRequest,
     CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
 };
 use bumpalo::Bump;
@@ -92,18 +96,33 @@ impl SxTClient {
             None => CPI::DEFAULT_VERIFIER_SETUP_BYTES,
         };
         let verifier_setup = CPI::deserialize_verifier_setup(verifier_setup_bytes, bump)?;
-        // Accessor setup
-        let accessor = query_commitments::<<SxtConfig as Config>::Hash, CPI>(
-            &table_refs,
-            self.substrate_node_url.as_str(),
-            block_ref,
-        )
-        .await?;
-
-        let (prover_query, proof_plan) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
-
         let client = Client::new();
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
+        let serialized_proof_plan = ZkQueryClient {
+            base_url: self.root_url.clone(),
+            client,
+            access_token,
+        }
+        .get_zk_query_plan(proof_plan_request)
+        .await?
+        .plan;
+        let query_context = commitments
+            .iter()
+            .map(|(table_ref, commitment)| {
+                (
+                    table_ref.to_string().to_uppercase(),
+                    ProverContextRange {
+                        start: commitment.range().start as u64,
+                        ends: vec![commitment.range().end as u64],
+                    },
+                )
+            })
+            .collect();
+        let prover_query = ProverQuery {
+            proof_plan: serialized_proof_plan,
+            query_context,
+            commitment_scheme: prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME).into(),
+        };
         let response = client
             .post(self.prover_url.clone())
             .bearer_auth(&access_token)
@@ -119,6 +138,13 @@ impl SxTClient {
                 &serialized_prover_response
             )
         })?;
+        let accessor = query_verified_commitments::<CPI>(
+            self.substrate_node_url.as_str(),
+            serialized_proof_plan,
+            CPI::COMMITMENT_SCHEME,
+            block_ref,
+        )
+        .await?;
 
         let verified_table_result = verify_prover_response::<CPI>(
             &prover_response,

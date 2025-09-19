@@ -11,7 +11,6 @@ use sp_core::H256;
 /// Get the verified commitments for the given tables at the given SxT block.
 ///
 /// If `block_ref` is `None`, the latest block is used.
-#[cfg_attr(not(test), expect(dead_code))]
 pub async fn query_verified_commitments<CPI: CommitmentEvaluationProofId>(
     url: &str,
     serialized_proof_plan: String,
