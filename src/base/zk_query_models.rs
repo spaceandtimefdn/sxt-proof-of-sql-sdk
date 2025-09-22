@@ -28,7 +28,7 @@ pub struct QueryPlanResponse {
 }
 
 /// The source of the underlying data
-#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Eq, ValueEnum)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Copy, Eq, ValueEnum)]
 #[serde(rename_all = "camelCase")]
 pub enum SxtNetwork {
     /// For now at least, this is the only value that is used

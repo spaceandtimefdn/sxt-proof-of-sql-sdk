@@ -6,7 +6,7 @@ use proof_of_sql::base::{
 };
 use std::{cmp::Ordering, env, fs::File, io::BufReader, path::Path, sync::Arc};
 use sxt_proof_of_sql_sdk::{
-    base::{CommitmentScheme, DynOwnedTable},
+    base::{zk_query_models::SxtNetwork, CommitmentScheme, DynOwnedTable},
     native::SxTClient,
 };
 use url::Url;
@@ -111,7 +111,16 @@ async fn main() {
         "hyper-kzg" => CommitmentScheme::HyperKzg,
         _ => panic!("Unsupported commitment scheme"),
     };
+    let network = match env::var("SXT_NETWORK")
+        .unwrap_or("mainnet".to_string())
+        .as_str()
+    {
+        "mainnet" => SxtNetwork::Mainnet,
+        "testnet" => SxtNetwork::Testnet,
+        _ => panic!("Unsupported network"),
+    };
     let client = Arc::new(SxTClient::new(
+        network,
         Url::parse(&env::var("ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()))
             .unwrap(),
         Url::parse(
