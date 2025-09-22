@@ -1,3 +1,12 @@
+# [0.43.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.42.0...v0.43.0) (2025-09-22)
+
+
+### Features
+
+* add `network` to `SxTClient` ([#145](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/145)) ([ab34ece](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ab34ece458e6e7e2695158f2de41f2e596149116))
+
+
+
 # [0.42.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.2...v0.42.0) (2025-09-19)
 
 
@@ -31,15 +40,6 @@
 ### Features
 
 * add zk query API for getting proof plans ([#140](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/140)) ([e36daee](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e36daeee8388f3a4b78e9f085789db4d0279ab8f))
-
-
-
-# [0.40.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.39.0...v0.40.0) (2025-09-17)
-
-
-### Features
-
-* ignore all **/*.env files and remove allow ([#141](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/141)) ([f6e6c8b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/f6e6c8b46cd70f5925eae358eccff75cd14c0f76))
 
 
 
