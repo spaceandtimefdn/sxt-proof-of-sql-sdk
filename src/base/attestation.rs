@@ -246,7 +246,8 @@ pub fn create_attestation_message<BN: Into<u64>>(
     state_root: impl AsRef<[u8]>,
     block_number: BN,
 ) -> Vec<u8> {
-    let mut msg = Vec::with_capacity(state_root.as_ref().len() + core::mem::size_of::<u64>());
+    let mut msg = Vec::with_capacity(1 + state_root.as_ref().len() + core::mem::size_of::<u64>());
+    msg.push(0); // For attestations to the commitments merkle tree we use a 0x00 byte as AttestationDomain
     msg.extend_from_slice(state_root.as_ref());
     msg.extend_from_slice(&block_number.into().to_be_bytes());
     msg
@@ -511,9 +512,10 @@ mod tests {
 
         let message = create_attestation_message(state_root, block_number);
 
-        assert_eq!(message.len(), 40); // 32 bytes state_root + 8 bytes block_number
-        assert_eq!(&message[..32], &state_root[..]);
-        assert_eq!(&message[32..], &block_number.to_be_bytes()[..]);
+        assert_eq!(message.len(), 41); // 1 byte + 32 bytes state_root + 8 bytes block_number
+        assert_eq!(message[0], 0); // AttestationDomain byte
+        assert_eq!(&message[1..33], &state_root[..]);
+        assert_eq!(&message[33..], &block_number.to_be_bytes()[..]);
     }
 
     #[test]
@@ -523,9 +525,10 @@ mod tests {
 
         let message = create_attestation_message(&state_root, block_number);
 
-        assert_eq!(message.len(), 40);
-        assert_eq!(&message[..32], &state_root[..]);
-        assert_eq!(&message[32..], &(block_number as u64).to_be_bytes()[..]);
+        assert_eq!(message.len(), 41);
+        assert_eq!(message[0], 0); // AttestationDomain byte
+        assert_eq!(&message[1..33], &state_root[..]);
+        assert_eq!(&message[33..], &(block_number as u64).to_be_bytes()[..]);
     }
 
     #[test]
