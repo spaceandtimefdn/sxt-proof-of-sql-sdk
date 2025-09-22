@@ -4,7 +4,7 @@ use super::{
 };
 use crate::base::{
     plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+    zk_query_models::SxtNetwork, CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
 };
 use bumpalo::Bump;
 #[cfg(feature = "hyperkzg")]
@@ -22,6 +22,9 @@ use url::Url;
 /// Space and Time (SxT) client
 #[derive(Debug, Clone)]
 pub struct SxTClient {
+    /// SXT Network
+    pub network: SxtNetwork,
+
     /// Root URL for SXT services
     pub root_url: Url,
 
@@ -47,6 +50,7 @@ pub struct SxTClient {
 impl SxTClient {
     /// Create a new SxT client
     pub fn new(
+        network: SxtNetwork,
         root_url: Url,
         prover_url: Url,
         auth_root_url: Url,
@@ -55,6 +59,7 @@ impl SxTClient {
         verifier_setup: Option<String>,
     ) -> Self {
         Self {
+            network,
             root_url,
             prover_url,
             auth_root_url,

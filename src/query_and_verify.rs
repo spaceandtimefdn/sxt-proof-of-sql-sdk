@@ -1,4 +1,7 @@
-use crate::{base::CommitmentScheme, native::SxTClient};
+use crate::{
+    base::{zk_query_models::SxtNetwork, CommitmentScheme},
+    native::SxTClient,
+};
 use arrow_csv::WriterBuilder;
 use clap::Args;
 use datafusion::arrow::{
@@ -13,6 +16,18 @@ use url::Url;
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]
 pub struct QueryAndVerifySdkArgs {
+    /// SXT Network
+    ///
+    /// The SXT network to use.
+    /// Can be set via SXT_NETWORK environment variable.
+    #[arg(
+        long,
+        value_enum,
+        default_value_t = SxtNetwork::Mainnet,
+        env = "SXT_NETWORK"
+    )]
+    pub network: SxtNetwork,
+
     /// Root URL for SXT services
     ///
     /// This URL is used as the base for other service URLs.
@@ -104,6 +119,7 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
     fn from(args: &QueryAndVerifySdkArgs) -> Self {
         (
             SxTClient::new(
+                args.network,
                 args.root_url.clone(),
                 args.prover_url.clone(),
                 args.auth_root_url.clone(),
