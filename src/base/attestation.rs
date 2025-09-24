@@ -98,6 +98,12 @@ pub enum AttestationVerificationError {
     /// Failure to verify Merkle proof for commitments.
     #[snafu(display("Failed to verify Merkle proof"))]
     FailureToVerifyMerkleProof,
+    /// Invalid attestation domain - state_root must start with 0x00.
+    #[snafu(display("Invalid attestation domain - state_root must start with 0x00"))]
+    InvalidAttestationDomain,
+    /// Invalid state_root length - must be exactly 33 bytes.
+    #[snafu(display("Invalid state_root length - must be exactly 33 bytes"))]
+    InvalidStateRoot,
 }
 
 impl From<BytesError> for AttestationError {
@@ -413,9 +419,26 @@ pub fn verify_attestations(
                         proposed_pub_key,
                         ..
                     } = attestation;
+
+                    // Validate state_root length: 1 byte for AttestationDomain + 32 bytes for actual state_root
+                    if state_root.len() != 33 {
+                        return Err(AttestationError::VerificationError {
+                            source: AttestationVerificationError::InvalidStateRoot,
+                        });
+                    }
+
+                    // Validate first byte / AttestationDomain (must be 0x00)
+                    if state_root[0] != 0x00 {
+                        return Err(AttestationError::VerificationError {
+                            source: AttestationVerificationError::InvalidAttestationDomain,
+                        });
+                    }
+
                     let attestation_message = create_attestation_message(state_root, *block_number);
                     verify_eth_signature(&attestation_message, signature, proposed_pub_key)?;
-                    let encoded_root = hex::encode(state_root);
+                    // Remove the first byte for it is the AttestationDomain
+                    let actual_state_root = &state_root[1..];
+                    let encoded_root = hex::encode(actual_state_root);
                     let keccak_encoded_leaf = keccak256(&hex::encode(generate_commitment_leaf(
                         table_id,
                         commitment_scheme,
@@ -931,7 +954,7 @@ mod tests {
                 .unwrap(),
                 address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
                 state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
+                    "00224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
                 )
                 .unwrap(),
                 block_number: 3842926,
@@ -963,7 +986,7 @@ mod tests {
                 .unwrap(),
                 address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
                 state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
+                    "00224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
                 )
                 .unwrap(),
                 block_number: 3842926,
@@ -995,7 +1018,7 @@ mod tests {
                 .unwrap(),
                 address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
                 state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
+                    "00224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
                 )
                 .unwrap(),
                 block_number: 3842926,
@@ -1033,5 +1056,69 @@ mod tests {
             CommitmentScheme::HyperKzg,
         );
         assert!(result.is_ok(), "Verification failed: {:?}", result);
+    }
+
+    #[test]
+    fn test_verify_attestations_invalid_state_root_length() {
+        let attestations = vec![Attestation::EthereumAttestation {
+            signature: EthereumSignature {
+                r: [0; 32],
+                s: [1; 32],
+                v: 0,
+            },
+            proposed_pub_key: vec![0; 33],
+            address20: vec![0; 20],
+            state_root: vec![0; 32], // Invalid length: should be 33 bytes
+            block_number: 1,
+            block_hash: H256::zero(),
+        }];
+
+        let verified_commitments = IndexMap::new();
+        let result = verify_attestations(
+            &attestations,
+            &verified_commitments,
+            CommitmentScheme::HyperKzg,
+        );
+
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidStateRoot
+            })
+        ));
+    }
+
+    #[test]
+    fn test_verify_attestations_invalid_attestation_domain() {
+        let attestations = vec![Attestation::EthereumAttestation {
+            signature: EthereumSignature {
+                r: [0; 32],
+                s: [1; 32],
+                v: 0,
+            },
+            proposed_pub_key: vec![0; 33],
+            address20: vec![0; 20],
+            state_root: {
+                let mut root = vec![0x01]; // Invalid domain: should be 0x00
+                root.extend_from_slice(&[0; 32]);
+                root
+            },
+            block_number: 1,
+            block_hash: H256::zero(),
+        }];
+
+        let verified_commitments = IndexMap::new();
+        let result = verify_attestations(
+            &attestations,
+            &verified_commitments,
+            CommitmentScheme::HyperKzg,
+        );
+
+        assert!(matches!(
+            result,
+            Err(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidAttestationDomain
+            })
+        ));
     }
 }
