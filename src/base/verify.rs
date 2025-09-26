@@ -8,8 +8,8 @@ use proof_of_sql::{
         try_standard_binary_deserialization,
     },
     sql::{
+        evm_proof_plan::EVMProofPlan,
         proof::{QueryError, QueryProof},
-        proof_plans::DynProofPlan,
     },
 };
 use snafu::Snafu;
@@ -37,7 +37,7 @@ impl From<bincode::error::DecodeError> for VerifyProverResponseError {
 /// Verify a response from the prover service against the provided commitment accessor.
 pub fn verify_prover_response<CPI: CommitmentEvaluationProofId>(
     prover_response: &ProverResponse,
-    proof_plan: &DynProofPlan,
+    proof_plan: &EVMProofPlan,
     params: &[LiteralValue],
     accessor: &impl CommitmentAccessor<<CPI as CommitmentEvaluationProof>::Commitment>,
     verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
@@ -49,7 +49,7 @@ pub fn verify_prover_response<CPI: CommitmentEvaluationProofId>(
 
     // Verify the proof
     proof.verify(
-        &CPI::associated_proof_plan(proof_plan),
+        proof_plan,
         &accessor,
         result.clone(),
         verifier_setup,

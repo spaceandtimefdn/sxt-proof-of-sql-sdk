@@ -14,7 +14,7 @@ use proof_of_sql::{
         try_standard_binary_serialization,
     },
     proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
-    sql::proof_plans::DynProofPlan,
+    sql::{evm_proof_plan::EVMProofPlan, proof_plans::DynProofPlan},
 };
 use proof_of_sql_planner::{
     sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
@@ -55,9 +55,10 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     let query = statement_with_uppercase_identifiers(query.clone());
     let mut config_options = ConfigOptions::default();
     config_options.sql_parser.enable_ident_normalization = false;
-    let proof_plan = sql_to_proof_plans(&[query.clone()], accessor, &config_options)?[0].clone();
-    let serialized_proof_plan =
-        try_standard_binary_serialization(CPI::associated_proof_plan(&proof_plan))?;
+    let proof_plan = EVMProofPlan::new(
+        sql_to_proof_plans(&[query.clone()], accessor, &config_options)?[0].clone(),
+    );
+    let serialized_proof_plan = try_standard_binary_serialization(&proof_plan)?;
 
     let query_context = commitments
         .iter()
@@ -78,7 +79,7 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
             query_context,
             commitment_scheme: prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME).into(),
         },
-        proof_plan,
+        proof_plan.into_inner(),
     ))
 }
 
