@@ -12,6 +12,7 @@ use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
     base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
     proof_primitive::dory::DynamicDoryEvaluationProof,
+    sql::evm_proof_plan::EVMProofPlan,
 };
 use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
@@ -127,7 +128,7 @@ impl SxTClient {
 
         let verified_table_result = verify_prover_response::<CPI>(
             &prover_response,
-            &proof_plan,
+            &EVMProofPlan::new(proof_plan),
             &[],
             &accessor,
             &verifier_setup,
