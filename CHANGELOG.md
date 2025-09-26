@@ -1,3 +1,7 @@
+## [0.43.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.43.0...v0.43.1) (2025-09-26)
+
+
+
 # [0.43.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.42.0...v0.43.0) (2025-09-22)
 
 
@@ -31,15 +35,6 @@
 ### Bug Fixes
 
 * replace String with Url for urls ([#142](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/142)) ([e2a86df](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e2a86dff7922fe50a1cc267282d8bc811e7e5070))
-
-
-
-# [0.41.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.40.0...v0.41.0) (2025-09-17)
-
-
-### Features
-
-* add zk query API for getting proof plans ([#140](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/140)) ([e36daee](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e36daeee8388f3a4b78e9f085789db4d0279ab8f))
 
 
 
