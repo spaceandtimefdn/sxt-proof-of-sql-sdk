@@ -15,7 +15,6 @@ where
 ///
 /// Can be used in `#[serde(serialize_with = "serialize_bytes32_array_as_hex")]`
 /// for any `Vec<[u8; 32]>` field.
-#[cfg_attr(not(test), expect(dead_code))]
 pub fn serialize_bytes32_array_as_hex<S>(
     bytes_array: &[[u8; 32]],
     serializer: S,
@@ -59,7 +58,6 @@ where
 ///
 /// Can be used in `#[serde(deserialize_with = "deserialize_bytes32_array_as_hex")]`
 /// for any `Vec<[u8; 32]>` field.
-#[cfg_attr(not(test), expect(dead_code))]
 pub fn deserialize_bytes32_array_as_hex<'de, D>(deserializer: D) -> Result<Vec<[u8; 32]>, D::Error>
 where
     D: Deserializer<'de>,
