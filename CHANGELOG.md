@@ -1,3 +1,12 @@
+# [0.44.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.43.1...v0.44.0) (2025-09-26)
+
+
+### Features
+
+* add bytes32 array roundtrip serialization functions ([9ef74cd](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/9ef74cd6c7065087544da84e9130ae59d4ea3b31))
+
+
+
 ## [0.43.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.43.0...v0.43.1) (2025-09-26)
 
 
@@ -26,15 +35,6 @@
 ### Bug Fixes
 
 * remove /v1/prove ([#139](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/139)) ([0ab0002](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0ab0002b7296aa26325e56eb4a31807ca7594d48))
-
-
-
-## [0.41.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.0...v0.41.1) (2025-09-18)
-
-
-### Bug Fixes
-
-* replace String with Url for urls ([#142](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/142)) ([e2a86df](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e2a86dff7922fe50a1cc267282d8bc811e7e5070))
 
 
 
