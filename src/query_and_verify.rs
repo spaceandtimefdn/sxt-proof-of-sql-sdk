@@ -113,6 +113,10 @@ pub struct QueryAndVerifySdkArgs {
     /// The results will be put in a csv at the output path. If `None`, no csv will be saved
     #[arg(long)]
     pub csv_file_path: Option<PathBuf>,
+
+    /// The source of the data
+    #[arg(long, value_enum, env, default_value_t=SxtNetwork::Mainnet)]
+    pub source_network: SxtNetwork,
 }
 
 impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
