@@ -1,3 +1,7 @@
+## [0.44.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.44.0...v0.44.1) (2025-10-09)
+
+
+
 # [0.44.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.43.1...v0.44.0) (2025-09-26)
 
 
@@ -26,15 +30,6 @@
 ### Features
 
 * add `root_url` ([#144](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/144)) ([0dc1a7c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0dc1a7c7a9b04647b98a19d49a3ece1254f2ca8c))
-
-
-
-## [0.41.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.1...v0.41.2) (2025-09-19)
-
-
-### Bug Fixes
-
-* remove /v1/prove ([#139](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/139)) ([0ab0002](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0ab0002b7296aa26325e56eb4a31807ca7594d48))
 
 
 
