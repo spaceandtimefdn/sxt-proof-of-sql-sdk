@@ -31,6 +31,10 @@ fn main() {
             "sxt.core.ProofAndResultForCommitments.exec_time",
             "#[serde(default, serialize_with = \"crate::base::serde::duration_serde::serialize\", deserialize_with = \"crate::base::serde::duration_serde::deserialize\")]",
         )
+        .type_attribute(
+            "sxt.core.CommitmentScheme",
+            "#[serde(rename_all=\"SCREAMING_SNAKE_CASE\")]",
+        )
         .type_attribute(".", "#[allow(clippy::all)]")
         .build_client(cfg!(feature = "prover-client"))
         .build_server(false)

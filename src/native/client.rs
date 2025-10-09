@@ -2,17 +2,24 @@ use super::{
     get_access_token, query_commitments,
     substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
 };
-use crate::base::{
-    plan_prover_query, prover::ProverResponse, uppercase_table_ref, verify_prover_response,
-    zk_query_models::SxtNetwork, CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+use crate::{
+    base::{
+        uppercase_table_ref, verify_prover_via_gateway_response,
+        zk_query_models::{QuerySubmitRequest, SxtNetwork},
+        CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+    },
+    native::ZkQueryClient,
 };
 use bumpalo::Bump;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
-    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
+    base::{
+        commitment::CommitmentEvaluationProof, database::OwnedTable,
+        try_standard_binary_deserialization,
+    },
     proof_primitive::dory::DynamicDoryEvaluationProof,
-    sql::evm_proof_plan::EVMProofPlan,
+    sql::{evm_proof_plan::EVMProofPlan, proof::QueryProof},
 };
 use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
@@ -106,35 +113,36 @@ impl SxTClient {
         )
         .await?;
 
-        let (prover_query, proof_plan) = plan_prover_query::<CPI>(&query_parsed, &accessor)?;
-
-        let client = Client::new();
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
-        let response = client
-            .post(self.prover_url.clone())
-            .bearer_auth(&access_token)
-            .json(&prover_query)
-            .send()
-            .await?
-            .error_for_status()?;
-        let serialized_prover_response = response.text().await?;
-        let prover_response = serde_json::from_str::<ProverResponse>(&serialized_prover_response)
-            .map_err(|_e| {
-            format!(
-                "Failed to parse prover response: {}",
-                &serialized_prover_response
-            )
-        })?;
+        let client = ZkQueryClient {
+            base_url: self.prover_url.clone(),
+            client: Client::new(),
+            access_token,
+        };
+        let scheme = crate::base::prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME);
+        let block_hash = block_ref.map(|hash| format!("{hash:#x}"));
+        let query_results = client
+            .run_zk_query(QuerySubmitRequest {
+                sql_text: query.to_string(),
+                source_network: SxtNetwork::Mainnet,
+                timeout: None,
+                commitment_scheme: Some(scheme),
+                block_hash,
+            })
+            .await?;
+        let plan: EVMProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
+        let proof: QueryProof<CPI> = try_standard_binary_deserialization(&query_results.proof)?.0;
+        let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
+            try_standard_binary_deserialization(&query_results.results)?.0;
 
-        let verified_table_result = verify_prover_response::<CPI>(
-            &prover_response,
-            &EVMProofPlan::new(proof_plan),
+        Ok(verify_prover_via_gateway_response::<CPI>(
+            proof,
+            result,
+            &plan,
             &[],
             &accessor,
             &verifier_setup,
-        )?;
-
-        Ok(verified_table_result)
+        )?)
     }
 
     /// Query and verify a SQL query at the given SxT block
