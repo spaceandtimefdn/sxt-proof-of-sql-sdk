@@ -1050,4 +1050,50 @@ mod tests {
         );
         assert!(result.is_ok(), "Verification failed: {:?}", result);
     }
+
+    #[test]
+    fn test_verify_attestations_work_if_all_attestations_have_filtered_out_state_roots() {
+        // Attestations with state_root length != 33 are filtered out (valid but not used)
+        let attestations = vec![
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: [0; 32],
+                    s: [1; 32],
+                    v: 0,
+                },
+                proposed_pub_key: vec![0; 33],
+                address20: vec![0; 20],
+                state_root: vec![0; 32], // Length != 33: will be filtered out
+                block_number: 1,
+                block_hash: H256::zero(),
+            },
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: [0; 32],
+                    s: [1; 32],
+                    v: 0,
+                },
+                proposed_pub_key: vec![0; 33],
+                address20: vec![0; 20],
+                state_root: {
+                    let mut root = vec![0x01]; // Non-0x00 domain: will be filtered out
+                    root.extend_from_slice(&[0; 32]);
+                    root
+                },
+                block_number: 1,
+                block_hash: H256::zero(),
+            },
+        ];
+
+        // Since there are no table commitments attestations after filtering, and we have commitments
+        // to verify, the verification should be verification success due to no table commitments
+        // attestations existing
+        let result = verify_attestations(
+            &attestations,
+            &VERIFIED_COMMITMENTS,
+            CommitmentScheme::HyperKzg,
+        );
+
+        assert!(result.is_ok());
+    }
 }
