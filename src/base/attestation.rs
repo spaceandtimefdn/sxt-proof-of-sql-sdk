@@ -463,17 +463,17 @@ mod tests {
         static ref VERIFIED_COMMITMENTS: IndexMap<String, VerifiableCommitment> = indexmap! {
         "ETHEREUM.BLOCKS".to_string() =>
             VerifiableCommitment {
-                commitment: Bytes(hex::decode("000000000000000000000000000c2011000000000000001003b4e15a7c70fbe504638b8628d717e7afff3f733b5f1cdcc08f6b25cd4ff2f120fc19cf9ad833d764372c7b1b42b032618b82e2c521e43ebb5283593ecaf25c19454abebfa3728183fd7f9d557c51cc852945d46fa9536e7ba92804cd5cacb31a912e328996dfe65b1a1739e81254082af58b0ef8e3bce43ca75ec9ead85d3a0b9035706f0e30cfbafa5586803cc4fc1224571ade595ddff3cc60b5d8c2837f2010cd5c6c28f0ed280ddbee42991029c7d6e583b0b551c9c3a1ed0c05a12e480003055a961719b54c5e6a95a6b217d621b103fbf3026a93f737a0b8f318466c1bf0075ec0629a51fba7df9abcff2c448c632ae533893ecb3dc783b439b2d7c9264ccf84600882fe771e0dbe730586d63450394392f4e80537dbb5080e31becf1b671c159f45426ec2c838343f97b804e1850498f508ffa630d00092ecf12b742090e0f132599f69637a35ab9326f1a777751ec8e78238bbf51be73097238dc620a761b3a3f45704bdedd311357106cb32c5c9700709b04fe5d5fc5d20e94a610e1414ada45bea406ead799f48a07fd3c9c5c7849496d9582e5e0ce165a0c53e283c4faf6ef615dbc9f38bbb2b0763588793697d7469805cc92a2bc1d1d6b84306ea89369bbbdf881562270d6c1e9193af23e57c0e595be3bc416daef80870672f0bd6411d59c0de504b57d188efd14f313e0569ddc5af9d96f372aa6e551ea91ce98fff53eed8699ec7e3bcfb867efd7e45986407245bb3fedb5a7b7f742a1e2ea19193b7a0c7b909f0a35ed49f0f375c81f257b019e0e94c413609c0bb29f80dee06ef302b920892e024ae6be846e97acfbffe9a796e7b394b12979528f89f23cfba9125b94abf66bf4228880636e806dfb07690e80f51ba06dde2306b11ee04be2b243278da34217a4c3fe6ae7007d3ab79b021b1d81e1df02ec8f90d8eca09ed474ed244c356f836be4b4095fd4fdaa3f635055c7ca2307bed4ac87700400227b54ee1bc82e16cbc8eee72791df80fb1fdff7a955ae99428029360df1d141b9ca61cd2c076fbf85f4e42fc8e4b0a1dbe0eff657dbe5ca875e89a7bb36d841f417ae1ff0cb15a7ddf83c6fe53acda90a5a8cfcb9100af084da1321e803f6e290857e352582f11e6f065fed15ea9e69716dfda3b1364444a69e56ecf89d84a10539fbe349a4502942336bc2dafdbab5dcb74130bd4f94fb7293fdf5e2a59eb1e97b25b7fe0e31f513f116baa3fa6f68d197587b165a76a8a62d435c89396620c9895ea759f9fe6679b8e507a22ba13738aa5314914d8132e4e60c768bad96d05ae2f59982f6a201e6cd546e462eb46221b42456f2062971aa797d0a5551cc0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000a54494d455f5354414d5000000000090000000100000000000000070000000200000196a1640d7800000198ddf25518000000000000000c424c4f434b5f4e554d4245520000000005000000050000000200000000015615c50000000001623616000000000000000a424c4f434b5f48415348000000000b0000000000000000000000094741535f4c494d495400000000084b000000000000000000000000084741535f5553454400000000084b000000000000000000000000054d494e4552000000000b00000000000000000000000b504152454e545f48415348000000000b00000000000000000000000652455741524400000000084b0000000000000000000000000453495a45000000000500000005000000020000000000000499000000000017cdbe00000000000000115452414e53414354494f4e5f434f554e540000000004000000040000000200000000000007cb00000000000000054e4f4e4345000000000b00000000000000000000000d52454345495054535f524f4f54000000000b00000000000000000000000b534841335f554e434c4553000000000b00000000000000000000000a53544154455f524f4f54000000000b0000000000000000000000115452414e53414354494f4e535f524f4f54000000000b00000000000000000000000c554e434c45535f434f554e540000000005000000050000000200000000000000000000000000000000").unwrap()),
+                commitment: Bytes(hex::decode("000000000000000000000000000d876b000000000000001001a3100e3a6539254118ca7fe91f313b12d56a08ad725f88b43bc89ad038d8141e4e759964be4bb3e87b8a94db952a96427bafa691b099f4d13771bdad5820be030be4d1262cae48e4760636a7416ad4c1ba6f03a23927911f0f6b2ac4afd76f010cb4ba9e13d6d82b61a34aa7f008da49dfba3929db348e3ae7c10014015a4d101d0ba7ec474ac37ad06e9f6145121681b9ada43b0b56f7714a42d43e9d67bf2579a37687bfa8c581f0a9a8a1f5fba516a75816ecbeead2fcd1c64f7a0198da1c9b8eb13d2d6e9cf0d88e045b99b24242530318ed2d95ca0f00365c26ae3bfb11c98f207570448277e9688c0387c46a2c233b3c9c93f171fd2051e4d22fe63c0548668d4f7a1e81c90383735b2e23df8358b28a42bc40b06ce8cbc84acd84960a52e6aab0caa08298b5db82a484aa60af67a8350f1f82d7858078adbedd465f2f535a19d22d122ad3215fa241f9a07c5ac251c93ce04a87f5e88ac8edb2634e0290141f303e73c814e149e8b66008cc053c20a5cd258a3c232675b866fdd61f2661498250b6f721ac41d09dcfcc0ac74537c3a04f801273a22453c3271171a40c3a351337d119b37131dc4a4f96da0e7e8c15f6454d59955ed6f4f9397cf3262199d9d7ffacd2f366023b6ffa2a9090b506edcf4ffbfa199dbc1a809d85ba1606d4ae5fb2d714ef695179bcb3964692a55c0075ad32b677f2edec81e3a7ea741d9317d9d93ebcce351862a3f36cc005db67d6da816c7c546f06bb7c5228fcd601dc82d4718d683ce6538cf99845739766509609d463df64e8ce7c9d10bca09505784aec8ce4405f01076c69466befb0b833c6a94236705bdbde649d65eb0d1f27dba5b9cb1740281d5316769ad16c21be7f7c4b611645fbce5e9b3af1a8dcb623817350bf716ba4ee44feb78604114b972c09ea8fcb91be5cf6ed3ca22ab2a316b3eebd35fb35ec8b27d85be78e4d5212ddf46d5e48d0e9f41bf1d4b252258601ca68eea8030b6259aa0b15ddd5b83565fc237ac6b02509672f1639671bee4621b950d60334824040dbdefc727b08c0d0631301ba958533513273a454d1f7d9039ecaba0997592f4674a36f27285a275f2518fffe97436198b4fe8ef1752714095138fc64cbcef906c4b7653dccd1365abda677009fab38787259262865a00d2e9f22d3355e5beb899e2017e0a55fef52755801e63742cf3eabbfae8b3c07060d0cf861bb8ff8c701d22335a20c16574ca74e2a077141b0247574f6fb44289f07371a5c031cda65b22855abb85e597695f857d260460a6fb2507a8a18b9bfbc2ef0e4cd091a0eb0b2eb3749651243ada88f944cc7599b0b4554368bc37e0497000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000a54494d455f5354414d5000000000090000000100000000000000070000000200000196a1640d780000019922887fb8000000000000000c424c4f434b5f4e554d4245520000000005000000050000000200000000015615c5000000000163aaa8000000000000000a424c4f434b5f48415348000000000b0000000000000000000000094741535f4c494d495400000000084b000000000000000000000000084741535f5553454400000000084b000000000000000000000000054d494e4552000000000b00000000000000000000000b504152454e545f48415348000000000b00000000000000000000000652455741524400000000084b0000000000000000000000000453495a45000000000500000005000000020000000000000499000000000017cdbe00000000000000115452414e53414354494f4e5f434f554e540000000004000000040000000200000000000007cb00000000000000054e4f4e4345000000000b00000000000000000000000d52454345495054535f524f4f54000000000b00000000000000000000000b534841335f554e434c4553000000000b00000000000000000000000a53544154455f524f4f54000000000b0000000000000000000000115452414e53414354494f4e535f524f4f54000000000b00000000000000000000000c554e434c45535f434f554e540000000005000000050000000200000000000000000000000000000000").unwrap()),
                 merkle_proof: vec![
-                    "0xc591dd7a0f71ddcdbc49bb4601c0a8ef5721c4e1aec7de08dfb95216143310ab".to_string(),
+                    "0xf2afda566071d804a1fb62b99722702513773f4aa698fd2ddcf912ee67edb599".to_string(),
                     "0xa508cf57f9e22e629675fa8e2ef07708e3bed4d3308e4a6ec5166f00134146f6".to_string(),
-                    "0x37fa633f0e1cb41b20c382f58e05f5547ef041a58c197abc6284dfc75706936b".to_string(),
-                    "0x398b7fa36433b070a6c363c24c6b786383881941e760dfaecbf9802a171c34ce".to_string(),
-                    "0xcc543be29599709b8d5f8b52cd6ee58da2060cf5328e52760ae68ac761412139".to_string(),
-                    "0x22491678cfa13dba6c69e8f18e1b1aae340a7c52260134c1bd418fda62ed5504".to_string(),
-                    "0x8f4a7c257a4ee573b2678443ab87d1eb9feeaba5853f245f5322550ad461a052".to_string(),
-                    "0xc2e15ac3b9538584bf798ffc153fbd880695eeb33b9c5eb8c17852c9d8e008e3".to_string(),
-                    "0x99707f09ba08de14bc32b48395d4fa2d0d830b340d26967a2f91a5386e31c9db".to_string()
+                    "0x3da1bf86090d6c257805c8ef6be1b3bf96af7931b91c84af2c1eec23543f22e5".to_string(),
+                    "0x10a732b82f460f2f5c44ad74e612bde0711ee049fb75079650b6022a8b015e0e".to_string(),
+                    "0xe4e84d6e587c3773d668f8490d60e8eaac7ef539383c3a579f657264eb728926".to_string(),
+                    "0x2b677d81aaa06a1b8157e57bdef2b558d8673521471c7110998a78d5044a2c0c".to_string(),
+                    "0x175d8b52175b2a41100f99b443799d02debb8733dd30b02141abb4d2cbc413cd".to_string(),
+                    "0xdb7deafdac53cd4028b5dbcc1e04e5b599028f6e71f078b58fbcf00347adcec3".to_string(),
+                    "0x70cf225b30d5caccab230a8de5de1336d230fce32b5bb24754333dff62fe7dc6".to_string()
                 ],
             },
         };
@@ -945,20 +945,22 @@ mod tests {
     #[test]
     fn test_verify_attestations_with_hyper_kzg() {
         let attestations = vec![
-            // First attestation
+            // Attestation 1 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
                 signature: EthereumSignature {
-                    r: [
-                        0xcf, 0x28, 0x35, 0xf2, 0x84, 0x1c, 0x4b, 0x00, 0x2b, 0xb4, 0xf2, 0xc4,
-                        0x29, 0x6b, 0x7a, 0xb2, 0x2d, 0x48, 0xab, 0x09, 0x04, 0x3e, 0x11, 0xa3,
-                        0x60, 0x8f, 0x6c, 0x36, 0xd0, 0x5d, 0xff, 0xd8,
-                    ],
-                    s: [
-                        0x7e, 0xa6, 0x49, 0x69, 0xc5, 0x97, 0x7c, 0x5b, 0x40, 0xeb, 0x00, 0x26,
-                        0xa5, 0x1e, 0xd6, 0x47, 0x8d, 0x7a, 0x57, 0x64, 0x7d, 0x45, 0xdb, 0x52,
-                        0xf7, 0x4a, 0x06, 0xa4, 0xbb, 0x9f, 0x6a, 0x87,
-                    ],
-                    v: 0,
+                    r: hex::decode(
+                        "0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
                 },
                 proposed_pub_key: hex::decode(
                     "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
@@ -966,62 +968,32 @@ mod tests {
                 .unwrap(),
                 address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
                 state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
                 )
                 .unwrap(),
-                block_number: 3842926,
+                block_number: 4425701,
                 block_hash: H256::from_slice(
                     &hex::decode(
-                        "49faa2a069f6d70d326a9e36856f23dcf74aae49a839f91e4800e0ebd61417be",
+                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
                     )
                     .unwrap(),
                 ),
             },
-            // Second attestation
+            // Attestation 2 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
                 signature: EthereumSignature {
-                    r: [
-                        0x00, 0xf7, 0x24, 0xcb, 0x39, 0xfa, 0x60, 0xd3, 0xdd, 0xee, 0x13, 0xfc,
-                        0xb9, 0xbb, 0x61, 0xef, 0x75, 0x88, 0x9e, 0x1d, 0xd7, 0x9f, 0x24, 0xea,
-                        0x22, 0x36, 0x90, 0x5b, 0xee, 0x5b, 0x07, 0xa4,
-                    ],
-                    s: [
-                        0x33, 0xa2, 0x5a, 0xf2, 0x16, 0x50, 0x28, 0x45, 0xef, 0x1b, 0x1c, 0xd2,
-                        0x02, 0x34, 0x15, 0xdf, 0x7e, 0x91, 0x2c, 0x51, 0xfa, 0x92, 0x8a, 0xdc,
-                        0x16, 0xc0, 0xc5, 0x02, 0x21, 0xac, 0x68, 0x12,
-                    ],
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
-                )
-                .unwrap(),
-                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
-                state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
-                )
-                .unwrap(),
-                block_number: 3842926,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "49faa2a069f6d70d326a9e36856f23dcf74aae49a839f91e4800e0ebd61417be",
+                    r: hex::decode(
+                        "d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527",
                     )
+                    .unwrap()
+                    .try_into()
                     .unwrap(),
-                ),
-            },
-            // Third attestation
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: [
-                        0x47, 0x1a, 0x93, 0x35, 0xe7, 0x1a, 0xe6, 0x13, 0xde, 0x8f, 0xb3, 0xf3,
-                        0xcc, 0x92, 0xda, 0x51, 0x91, 0xcc, 0xf6, 0x67, 0x80, 0x4a, 0x56, 0x69,
-                        0x46, 0x73, 0x4d, 0x67, 0xff, 0xe0, 0xf4, 0xfd,
-                    ],
-                    s: [
-                        0x66, 0x16, 0x14, 0x8f, 0xbd, 0x82, 0x72, 0x81, 0x27, 0x09, 0xe8, 0xf3,
-                        0xdc, 0xff, 0x38, 0x05, 0x28, 0x77, 0x32, 0xe9, 0x56, 0xdd, 0xb2, 0xae,
-                        0x97, 0x1e, 0x85, 0x24, 0x57, 0x79, 0xac, 0x4c,
-                    ],
+                    s: hex::decode(
+                        "06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
                     v: 1,
                 },
                 proposed_pub_key: hex::decode(
@@ -1030,13 +1002,251 @@ mod tests {
                 .unwrap(),
                 address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
                 state_root: hex::decode(
-                    "224e2267c840fb03813152cafb2e614ed98e1cabbbf8b133bf1ae7a6b466733c",
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
                 )
                 .unwrap(),
-                block_number: 3842926,
+                block_number: 4425701,
                 block_hash: H256::from_slice(
                     &hex::decode(
-                        "49faa2a069f6d70d326a9e36856f23dcf74aae49a839f91e4800e0ebd61417be",
+                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 3 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
+                )
+                .unwrap(),
+                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                state_root: hex::decode(
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
+                )
+                .unwrap(),
+                block_number: 4425701,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 4 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
+                )
+                .unwrap(),
+                address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                state_root: hex::decode(
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
+                )
+                .unwrap(),
+                block_number: 4425701,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 5 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
+                )
+                .unwrap(),
+                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                state_root: hex::decode(
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
+                )
+                .unwrap(),
+                block_number: 4425701,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 6 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
+                )
+                .unwrap(),
+                address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                state_root: hex::decode(
+                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
+                )
+                .unwrap(),
+                block_number: 4425701,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 7 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "840689485acafc5df1324d81d0667c40712c3c3a17fd6abba28ef50c3d4f3945",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "14c3fe046eecd3ed14bc4d36bea8a70faa0eafb2ac8794e490166c1414a6c743",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
+                )
+                .unwrap(),
+                address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                state_root: hex::decode(
+                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
+                )
+                .unwrap(),
+                block_number: 4539877,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 8 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "4db877e787216abef007c5fdc4332b44dfba84ef2b05146addba4320d372b24c",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "0cf12eadf29cd4fd8c897ab570303e007e7532234c89e04a49ab79b1b3eb85f8",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 1,
+                },
+                proposed_pub_key: hex::decode(
+                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
+                )
+                .unwrap(),
+                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                state_root: hex::decode(
+                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
+                )
+                .unwrap(),
+                block_number: 4539877,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+                    )
+                    .unwrap(),
+                ),
+            },
+            // Attestation 9 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
+            Attestation::EthereumAttestation {
+                signature: EthereumSignature {
+                    r: hex::decode(
+                        "f2bcd53f539c1c08f3fb9cd226f225c9bb408f185bab5956163e31614412883b",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    s: hex::decode(
+                        "62f898bc36b410756ee5592a5cb4be06015f9b283d7d98b9bf65c288a7921d2b",
+                    )
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                    v: 0,
+                },
+                proposed_pub_key: hex::decode(
+                    "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
+                )
+                .unwrap(),
+                address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                state_root: hex::decode(
+                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
+                )
+                .unwrap(),
+                block_number: 4539877,
+                block_hash: H256::from_slice(
+                    &hex::decode(
+                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
                     )
                     .unwrap(),
                 ),
