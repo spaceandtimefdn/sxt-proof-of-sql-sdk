@@ -85,6 +85,19 @@ jobs:
           rustup component add rustfmt
       - name: Run cargo fmt
         run: cargo f --check
+  
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Install stable toolchain
+        run: curl https://sh.rustup.rs -sSf | bash -s -- -y --profile minimal && source ~/.cargo/env && rustup toolchain install
+      - name: Install Dependencies
+        run: export DEBIAN_FRONTEND=non-interactive && sudo apt-get update && sudo apt-get install -y clang lld protobuf-compiler
+      - name: Run tests
+        run: cargo test --lib
 
   udeps:
     name: Unused Dependencies
