@@ -1,3 +1,7 @@
+## [0.45.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.0...v0.45.1) (2025-10-13)
+
+
+
 # [0.45.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.44.1...v0.45.0) (2025-10-13)
 
 
@@ -21,15 +25,6 @@
 
 
 ## [0.43.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.43.0...v0.43.1) (2025-09-26)
-
-
-
-# [0.43.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.42.0...v0.43.0) (2025-09-22)
-
-
-### Features
-
-* add `network` to `SxTClient` ([#145](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/145)) ([ab34ece](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ab34ece458e6e7e2695158f2de41f2e596149116))
 
 
 
