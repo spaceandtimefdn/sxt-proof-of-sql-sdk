@@ -1,3 +1,12 @@
+# [0.45.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.44.1...v0.45.0) (2025-10-13)
+
+
+### Features
+
+* add testing requirement to CI ([#150](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/150)) ([33c4bc1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/33c4bc1c61be6bf807d5685b5acc4398d37cdd70))
+
+
+
 ## [0.44.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.44.0...v0.44.1) (2025-10-09)
 
 
@@ -21,15 +30,6 @@
 ### Features
 
 * add `network` to `SxTClient` ([#145](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/145)) ([ab34ece](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ab34ece458e6e7e2695158f2de41f2e596149116))
-
-
-
-# [0.42.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.41.2...v0.42.0) (2025-09-19)
-
-
-### Features
-
-* add `root_url` ([#144](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/144)) ([0dc1a7c](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/0dc1a7c7a9b04647b98a19d49a3ece1254f2ca8c))
 
 
 
