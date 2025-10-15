@@ -395,8 +395,19 @@ pub fn verify_attestations(
     verified_commitments: &IndexMap<String, VerifiableCommitment>,
     commitment_scheme: CommitmentScheme,
 ) -> Result<(), AttestationError> {
+    // Early filtering: extract table commitments attestations
+    let table_commitments_attestations: Vec<_> = attestations
+        .iter()
+        .filter(|attestation| {
+            let Attestation::EthereumAttestation { state_root, .. } = attestation;
+
+            // Filter out state_roots with length != 33 or first byte != 0x00
+            state_root.len() == 33 && state_root[0] == 0x00
+        })
+        .collect::<Vec<_>>();
+
     let is_valid = process_results(
-        attestations
+        table_commitments_attestations
             .iter()
             .cartesian_product(verified_commitments.clone().into_iter())
             .map(
@@ -415,7 +426,9 @@ pub fn verify_attestations(
                     } = attestation;
                     let attestation_message = create_attestation_message(state_root, *block_number);
                     verify_eth_signature(&attestation_message, signature, proposed_pub_key)?;
-                    let encoded_root = hex::encode(state_root);
+                    // Remove the first byte for it is the AttestationDomain
+                    let actual_state_root = &state_root[1..];
+                    let encoded_root = hex::encode(actual_state_root);
                     let keccak_encoded_leaf = keccak256(&hex::encode(generate_commitment_leaf(
                         table_id,
                         commitment_scheme,
