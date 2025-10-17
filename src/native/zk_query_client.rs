@@ -11,6 +11,7 @@ const INITIAL_MILLISECONDS_TO_RETRY: u64 = 10;
 const MAX_MILLISECONDS_TO_RETRY: u64 = 1_800_000;
 
 /// Struct for interacting with the ZK Query APIs
+#[derive(Debug, Clone)]
 pub struct ZkQueryClient {
     /// Base URL for the ZK Query API
     pub base_url: Url,
