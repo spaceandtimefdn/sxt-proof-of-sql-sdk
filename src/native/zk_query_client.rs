@@ -217,9 +217,10 @@ mod tests {
             access_token,
         };
 
-        let query = "SELECT BLOCK_NUMBER FROM ETHEREUM.BLOCKS WHERE BLOCK_NUMBER=22419300";
+        let query = "SELECT BLOCK_NUMBER FROM ETHEREUM.BLOCKS WHERE BLOCK_NUMBER=23100000";
         let request = QuerySubmitRequest {
             sql_text: query.to_string(),
+            parameters: None,
             source_network: SxtNetwork::Mainnet,
             timeout: None,
             commitment_scheme: Some(crate::base::prover::CommitmentScheme::HyperKzg),
