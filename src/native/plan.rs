@@ -1,31 +1,44 @@
-use super::{query_commitments, substrate::SxtConfig};
-use crate::base::{get_plan_from_accessor_and_query, uppercase_table_ref};
-use proof_of_sql::{
-    proof_primitive::dory::DynamicDoryEvaluationProof, sql::proof_plans::DynProofPlan,
-};
-use proof_of_sql_planner::get_table_refs_from_statement;
-use sqlparser::{dialect::GenericDialect, parser::Parser};
-use subxt::Config;
+use super::{get_access_token, ZkQueryClient};
+use crate::base::zk_query_models::{QueryPlanRequest, SxtNetwork};
+use proof_of_sql::{base::try_standard_binary_deserialization, sql::evm_proof_plan::EVMProofPlan};
+use reqwest::Client;
+use url::Url;
 
-/// Produces a plan given the substrate url and the query
+/// Produces a plan given the API parameters and the query
 ///
-/// We use dynamic dory here because proof plans are not dependent on the commitment scheme
+/// This function uses the ZK Query API to build a proof plan
 pub async fn produce_plan(
-    substrate_node_url: &str,
+    root_url: Url,
+    auth_root_url: Url,
+    api_key: &str,
     query: &str,
-    block_ref: Option<<SxtConfig as Config>::Hash>,
-) -> Result<DynProofPlan, Box<dyn core::error::Error>> {
-    let dialect = GenericDialect {};
-    let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
-    let table_refs = get_table_refs_from_statement(&query_parsed)?
-        .into_iter()
-        .map(uppercase_table_ref)
-        .collect::<Vec<_>>();
-    let accessor = query_commitments::<<SxtConfig as Config>::Hash, DynamicDoryEvaluationProof>(
-        &table_refs,
-        substrate_node_url,
-        block_ref,
-    )
-    .await?;
-    Ok(get_plan_from_accessor_and_query(&query_parsed, accessor)?)
+    source_network: SxtNetwork,
+) -> Result<EVMProofPlan, Box<dyn core::error::Error>> {
+    // Get access token
+    let access_token = get_access_token(api_key, auth_root_url.as_str()).await?;
+
+    // Create ZkQueryClient
+    let client = ZkQueryClient {
+        base_url: root_url.clone(),
+        client: Client::new(),
+        access_token,
+    };
+
+    // Create request
+    let request = QueryPlanRequest {
+        sql_text: query.to_string(),
+        source_network,
+        evm_compatible: true,
+    };
+
+    // Get plan from API
+    let response = client.get_zk_query_plan(request).await?;
+
+    // Deserialize the plan
+
+    let plan_bytes = hex::decode(response.plan.trim_start_matches("0x"))?;
+
+    let plan: EVMProofPlan = try_standard_binary_deserialization(&plan_bytes)?.0;
+
+    Ok(plan)
 }
