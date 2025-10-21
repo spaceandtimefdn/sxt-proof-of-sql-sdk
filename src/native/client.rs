@@ -36,9 +36,6 @@ pub struct SxTClient {
     /// Root URL for SXT services
     pub root_url: Url,
 
-    /// Root URL for the Prover service
-    pub prover_url: Url,
-
     /// Root URL for the Auth service
     pub auth_root_url: Url,
 
@@ -60,7 +57,6 @@ impl SxTClient {
     pub fn new(
         network: SxtNetwork,
         root_url: Url,
-        prover_url: Url,
         auth_root_url: Url,
         substrate_node_url: Url,
         sxt_api_key: String,
@@ -69,7 +65,6 @@ impl SxTClient {
         Self {
             network,
             root_url,
-            prover_url,
             auth_root_url,
             substrate_node_url,
             sxt_api_key,
@@ -115,7 +110,7 @@ impl SxTClient {
 
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
         let client = ZkQueryClient {
-            base_url: self.prover_url.clone(),
+            base_url: self.root_url.clone(),
             client: Client::new(),
             access_token,
         };

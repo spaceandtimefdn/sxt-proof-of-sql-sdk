@@ -124,10 +124,6 @@ async fn main() {
         Url::parse(&env::var("ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()))
             .unwrap(),
         Url::parse(
-            &env::var("PROVER_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
-        )
-        .unwrap(),
-        Url::parse(
             &env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         )
         .unwrap(),

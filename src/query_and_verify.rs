@@ -40,18 +40,6 @@ pub struct QueryAndVerifySdkArgs {
     )]
     pub root_url: Url,
 
-    /// URL for the Prover service
-    ///
-    /// This URL is used for interacting with the prover service.
-    /// Can be set via PROVER_URL environment variable.
-    #[arg(
-        long,
-        value_name = "PROVER_URL",
-        default_value = "https://api.makeinfinite.dev",
-        env = "PROVER_URL"
-    )]
-    pub prover_url: Url,
-
     /// Root URL for the Auth service
     ///
     /// Used for authentication requests.
@@ -125,7 +113,6 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
             SxTClient::new(
                 args.network,
                 args.root_url.clone(),
-                args.prover_url.clone(),
                 args.auth_root_url.clone(),
                 args.substrate_node_url.clone(),
                 args.sxt_api_key.clone(),
