@@ -130,6 +130,17 @@ impl SxTClient {
                 block_hash,
             })
             .await?;
+        if !query_results.success {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!(
+                    "ZK query failed: {}",
+                    query_results
+                        .error
+                        .unwrap_or("Query failed without error".to_string())
+                ),
+            )));
+        }
         let plan: EVMProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
         let proof: QueryProof<CPI> = try_standard_binary_deserialization(&query_results.proof)?.0;
         let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
