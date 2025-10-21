@@ -1,30 +1,26 @@
-use super::{
-    get_access_token, query_commitments,
-    substrate::{verify_attestations_for_block, AttestationError, SxtConfig},
-};
-use crate::{
-    base::{
-        uppercase_table_ref, verify_prover_via_gateway_response,
-        zk_query_models::{QuerySubmitRequest, SxtNetwork},
-        CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
-    },
-    native::ZkQueryClient,
+use super::{fetch_attestation, get_access_token, ZkQueryClient};
+use crate::base::{
+    attestation::verify_attestations,
+    verify_prover_via_gateway_response,
+    zk_query_models::{QuerySubmitRequest, SxtNetwork},
+    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
 };
 use bumpalo::Bump;
+use hex::ToHex;
+use jsonrpsee::ws_client::WsClientBuilder;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
     base::{
-        commitment::CommitmentEvaluationProof, database::OwnedTable,
+        commitment::{CommitmentEvaluationProof, QueryCommitments, TableCommitment},
+        database::{OwnedTable, TableRef},
         try_standard_binary_deserialization,
     },
     proof_primitive::dory::DynamicDoryEvaluationProof,
     sql::{evm_proof_plan::EVMProofPlan, proof::QueryProof},
 };
-use proof_of_sql_planner::get_table_refs_from_statement;
 use reqwest::Client;
-use sqlparser::{dialect::GenericDialect, parser::Parser};
-use subxt::Config;
+use sp_core::H256;
 use url::Url;
 
 /// Space and Time (SxT) client
@@ -82,65 +78,102 @@ impl SxTClient {
     /// Run a SQL query and verify the result.
     ///
     /// If `block_ref` is `None`, the latest block is used.
+    #[expect(clippy::type_complexity)]
     pub async fn query_and_verify_by_cpi<CPI>(
         &self,
         query: &str,
-        block_ref: Option<<SxtConfig as Config>::Hash>,
+        block_ref: Option<H256>,
         bump: &Bump,
     ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>>
     where
         CPI: CommitmentEvaluationProofId,
         <CPI as CommitmentEvaluationProofId>::DeserializationError: 'static,
     {
-        let dialect = GenericDialect {};
-        let query_parsed = Parser::parse_sql(&dialect, query)?[0].clone();
-        let table_refs = get_table_refs_from_statement(&query_parsed)?
-            .into_iter()
-            .map(uppercase_table_ref)
-            .collect::<Vec<_>>();
-
         // Load verifier setup
         let verifier_setup_bytes = match &self.verifier_setup {
             Some(path) => &std::fs::read(path)?,
             None => CPI::DEFAULT_VERIFIER_SETUP_BYTES,
         };
         let verifier_setup = CPI::deserialize_verifier_setup(verifier_setup_bytes, bump)?;
-        // Accessor setup
-        let accessor = query_commitments::<<SxtConfig as Config>::Hash, CPI>(
-            &table_refs,
-            self.substrate_node_url.as_str(),
-            block_ref,
-        )
-        .await?;
-
-        let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
-        let client = ZkQueryClient {
-            base_url: self.prover_url.clone(),
-            client: Client::new(),
-            access_token,
-        };
-        let scheme = crate::base::prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME);
-        let block_hash = block_ref.map(|hash| format!("{hash:#x}"));
-        let query_results = client
-            .run_zk_query(QuerySubmitRequest {
-                sql_text: query.to_string(),
-                source_network: SxtNetwork::Mainnet,
-                timeout: None,
-                commitment_scheme: Some(scheme),
-                block_hash,
-            })
+        let ws_client = WsClientBuilder::new()
+            .build(self.substrate_node_url.clone())
             .await?;
-        let plan: EVMProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
-        let proof: QueryProof<CPI> = try_standard_binary_deserialization(&query_results.proof)?.0;
+
+        // Get the appropriate block hash and attestations
+        let (best_block_hash, attestations) = fetch_attestation(&ws_client, block_ref).await?;
+
+        // Run the query to get the proof plan and query results and Merkle tree
+        let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
+        let request = QuerySubmitRequest {
+            sql_text: query.to_string(),
+            source_network: self.network,
+            commitment_scheme: Some(CPI::COMMITMENT_SCHEME.into()),
+            block_hash: Some(best_block_hash.encode_hex()),
+            timeout: None,
+        };
+        let query_results_response = ZkQueryClient {
+            base_url: self.root_url.clone(),
+            client: Client::new(),
+            access_token: access_token.clone(),
+        }
+        .run_zk_query(request)
+        .await?;
+        if !query_results_response.success {
+            return Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!(
+                    "ZK query failed: {}",
+                    query_results_response
+                        .error
+                        .unwrap_or("Query failed without error".to_string())
+                ),
+            )));
+        }
+
+        // Verify the attestations
+        let table_commitment_with_proof = query_results_response.commitments.commitments;
+        verify_attestations(
+            &attestations,
+            &table_commitment_with_proof,
+            CPI::COMMITMENT_SCHEME,
+        )?;
+
+        let query_commitments: QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment> =
+            table_commitment_with_proof
+                .into_iter()
+                .map(
+                    |(table_id, table_commitment_with_proof)| -> Result<
+                        (
+                            TableRef,
+                            TableCommitment<<CPI as CommitmentEvaluationProof>::Commitment>,
+                        ),
+                        Box<dyn core::error::Error>,
+                    > {
+                        let table_ref = TableRef::try_from(table_id.as_str())?;
+                        let table_commitment: TableCommitment<
+                            <CPI as CommitmentEvaluationProof>::Commitment,
+                        > = try_standard_binary_deserialization(
+                            &table_commitment_with_proof.commitment, // or the correct bytes field
+                        )?
+                        .0;
+                        Ok((table_ref, table_commitment))
+                    },
+                )
+                .collect::<Result<_, _>>()?;
+
+        let plan: EVMProofPlan =
+            try_standard_binary_deserialization(&query_results_response.plan)?.0;
+        let proof: QueryProof<CPI> =
+            try_standard_binary_deserialization(&query_results_response.proof)?.0;
         let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
-            try_standard_binary_deserialization(&query_results.results)?.0;
+            try_standard_binary_deserialization(&query_results_response.results)?.0;
 
         Ok(verify_prover_via_gateway_response::<CPI>(
             proof,
             result,
             &plan,
             &[],
-            &accessor,
+            &query_commitments,
             &verifier_setup,
         )?)
     }
@@ -153,7 +186,7 @@ impl SxTClient {
     pub async fn query_and_verify(
         &self,
         query: &str,
-        block_ref: Option<<SxtConfig as Config>::Hash>,
+        block_ref: Option<H256>,
         commitment_scheme: CommitmentScheme,
     ) -> Result<DynOwnedTable, Box<dyn core::error::Error>> {
         let bump = Bump::new();
@@ -170,22 +203,5 @@ impl SxTClient {
                 .await
                 .map(DynOwnedTable::BN),
         }
-    }
-
-    /// Verify attestations for a specific block number
-    ///
-    /// This method uses the `verify_attestations_for_block` function to validate
-    /// attestations for a given block number.
-    ///
-    /// # Arguments
-    ///
-    /// * `block_number` - The block number for which attestations need to be verified.
-    ///
-    /// # Returns
-    ///
-    /// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
-    /// `AttestationError` describing the failure.
-    pub async fn verify_attestations(&self, block_number: u32) -> Result<(), AttestationError> {
-        verify_attestations_for_block(self.substrate_node_url.as_str(), block_number).await
     }
 }
