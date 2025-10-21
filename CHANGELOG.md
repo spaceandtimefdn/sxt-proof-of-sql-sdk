@@ -1,3 +1,12 @@
+## [0.45.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.3...v0.45.4) (2025-10-21)
+
+
+### Bug Fixes
+
+* switch `produce-plan` subcommand to ZK Query API ([#154](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/154)) ([ca3ee99](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ca3ee99192a5b3d49493986c868720101ca7f0fd))
+
+
+
 ## [0.45.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.2...v0.45.3) (2025-10-20)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * add testing requirement to CI ([#150](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/150)) ([33c4bc1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/33c4bc1c61be6bf807d5685b5acc4398d37cdd70))
-
-
-
-## [0.44.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.44.0...v0.44.1) (2025-10-09)
 
 
 
