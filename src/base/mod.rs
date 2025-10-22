@@ -14,7 +14,7 @@ mod proof_plan;
 pub use proof_plan::get_plan_from_accessor_and_query;
 
 mod uppercase_accessor;
-pub use uppercase_accessor::uppercase_table_ref;
+pub use uppercase_accessor::{uppercase_table_ref, UppercaseAccessor};
 
 mod prover_query;
 #[cfg(feature = "hyperkzg")]
