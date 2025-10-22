@@ -165,7 +165,8 @@ mod tests {
         // Load environment variables from .env file, if available
         dotenv().ok();
 
-        let root_url = Url::parse("https://api.makeinfinite.dev").expect("Invalid base URL");
+        let zk_query_root_url =
+            Url::parse("https://api.makeinfinite.dev").expect("Invalid base URL");
         let auth_root_url = "https://proxy.api.makeinfinite.dev";
         let api_key =
             std::env::var("SXT_API_KEY").expect("SXT_API_KEY environment variable must be set");
@@ -175,7 +176,7 @@ mod tests {
             .expect("Failed to get access token");
 
         let client = ZkQueryClient {
-            base_url: root_url,
+            base_url: zk_query_root_url.clone(),
             client: Client::new(),
             access_token,
         };
@@ -203,7 +204,8 @@ mod tests {
         // Load environment variables from .env file, if available
         dotenv().ok();
 
-        let root_url = Url::parse("https://api.makeinfinite.dev").expect("Invalid base URL");
+        let zk_query_root_url =
+            Url::parse("https://api.makeinfinite.dev").expect("Invalid base URL");
         let auth_root_url = "https://proxy.api.makeinfinite.dev";
         let api_key =
             std::env::var("SXT_API_KEY").expect("SXT_API_KEY environment variable must be set");
@@ -213,7 +215,7 @@ mod tests {
             .expect("Failed to get access token");
 
         let client = ZkQueryClient {
-            base_url: root_url,
+            base_url: zk_query_root_url,
             client: Client::new(),
             access_token,
         };

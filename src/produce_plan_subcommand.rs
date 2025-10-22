@@ -22,17 +22,16 @@ pub struct ProducePlanArgs {
     )]
     pub network: SxtNetwork,
 
-    /// Root URL for SXT services
+    /// Root URL for SXT ZK Query API service
     ///
-    /// This URL is used as the base for other service URLs.
-    /// Can be set via ROOT_URL environment variable.
+    /// Can be set via ZK_QUERY_ROOT_URL environment variable.
     #[arg(
         long,
-        value_name = "ROOT_URL",
+        value_name = "ZK_QUERY_ROOT_URL",
         default_value = "https://api.makeinfinite.dev",
-        env = "ROOT_URL"
+        env = "ZK_QUERY_ROOT_URL"
     )]
-    pub root_url: Url,
+    pub zk_query_root_url: Url,
 
     /// Root URL for the Auth service
     ///
@@ -67,7 +66,7 @@ pub async fn produce_plan_command(
 ) -> Result<(), Box<dyn core::error::Error>> {
     // Retrieve the proof plan
     let plan = produce_plan(
-        args.root_url,
+        args.zk_query_root_url,
         args.auth_root_url,
         &args.sxt_api_key,
         &args.query,

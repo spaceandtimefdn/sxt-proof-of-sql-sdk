@@ -121,8 +121,10 @@ async fn main() {
     };
     let client = Arc::new(SxTClient::new(
         network,
-        Url::parse(&env::var("ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()))
-            .unwrap(),
+        Url::parse(
+            &env::var("ZK_QUERY_ROOT_URL").unwrap_or("https://api.makeinfinite.dev".to_string()),
+        )
+        .unwrap(),
         Url::parse(
             &env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         )
