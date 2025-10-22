@@ -8,7 +8,7 @@ use url::Url;
 ///
 /// This function uses the ZK Query API to build a proof plan
 pub async fn produce_plan(
-    root_url: Url,
+    zk_query_root_url: Url,
     auth_root_url: Url,
     api_key: &str,
     query: &str,
@@ -19,7 +19,7 @@ pub async fn produce_plan(
 
     // Create ZkQueryClient
     let client = ZkQueryClient {
-        base_url: root_url.clone(),
+        base_url: zk_query_root_url.clone(),
         client: Client::new(),
         access_token,
     };

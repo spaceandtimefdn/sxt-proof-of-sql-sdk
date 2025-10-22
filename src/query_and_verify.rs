@@ -28,29 +28,16 @@ pub struct QueryAndVerifySdkArgs {
     )]
     pub network: SxtNetwork,
 
-    /// Root URL for SXT services
+    /// Root URL for SXT ZK Query API service
     ///
-    /// This URL is used as the base for other service URLs.
-    /// Can be set via ROOT_URL environment variable.
+    /// Can be set via ZK_QUERY_ROOT_URL environment variable.
     #[arg(
         long,
-        value_name = "ROOT_URL",
+        value_name = "ZK_QUERY_ROOT_URL",
         default_value = "https://api.makeinfinite.dev",
-        env = "ROOT_URL"
+        env = "ZK_QUERY_ROOT_URL"
     )]
-    pub root_url: Url,
-
-    /// URL for the Prover service
-    ///
-    /// This URL is used for interacting with the prover service.
-    /// Can be set via PROVER_URL environment variable.
-    #[arg(
-        long,
-        value_name = "PROVER_URL",
-        default_value = "https://api.makeinfinite.dev",
-        env = "PROVER_URL"
-    )]
-    pub prover_url: Url,
+    pub zk_query_root_url: Url,
 
     /// Root URL for the Auth service
     ///
@@ -124,8 +111,7 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
         (
             SxTClient::new(
                 args.network,
-                args.root_url.clone(),
-                args.prover_url.clone(),
+                args.zk_query_root_url.clone(),
                 args.auth_root_url.clone(),
                 args.substrate_node_url.clone(),
                 args.sxt_api_key.clone(),
