@@ -1,3 +1,7 @@
+## [0.46.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.0...v0.46.1) (2025-10-22)
+
+
+
 # [0.46.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.4...v0.46.0) (2025-10-22)
 
 
@@ -31,10 +35,6 @@
 ### Bug Fixes
 
 * only verify commitment tree attestations ([#146](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/146)) ([ab12851](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ab1285191789c8ddce2bb7c4a0ba30ee430b4058))
-
-
-
-## [0.45.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.0...v0.45.1) (2025-10-13)
 
 
 
