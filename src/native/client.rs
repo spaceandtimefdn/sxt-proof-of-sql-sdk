@@ -124,6 +124,7 @@ impl SxTClient {
         let query_results = client
             .run_zk_query(QuerySubmitRequest {
                 sql_text: query.to_string(),
+                params: None,
                 source_network: SxtNetwork::Mainnet,
                 timeout: None,
                 commitment_scheme: Some(scheme),
