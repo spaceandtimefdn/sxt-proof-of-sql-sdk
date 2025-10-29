@@ -1,3 +1,7 @@
+## [0.46.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.1...v0.46.2) (2025-10-29)
+
+
+
 ## [0.46.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.0...v0.46.1) (2025-10-22)
 
 
@@ -26,15 +30,6 @@
 ### Bug Fixes
 
 * use updated json rpc method name, `attestation_v1_attestationsForBlock` ([#153](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/153)) ([957d426](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/957d42650bb9d10d17464afa79f5b7f7cfa70eab))
-
-
-
-## [0.45.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.1...v0.45.2) (2025-10-17)
-
-
-### Bug Fixes
-
-* only verify commitment tree attestations ([#146](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/146)) ([ab12851](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ab1285191789c8ddce2bb7c4a0ba30ee430b4058))
 
 
 
