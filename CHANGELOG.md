@@ -1,3 +1,7 @@
+## [0.46.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.2...v0.46.3) (2025-10-29)
+
+
+
 ## [0.46.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.1...v0.46.2) (2025-10-29)
 
 
@@ -21,15 +25,6 @@
 ### Bug Fixes
 
 * switch `produce-plan` subcommand to ZK Query API ([#154](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/154)) ([ca3ee99](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ca3ee99192a5b3d49493986c868720101ca7f0fd))
-
-
-
-## [0.45.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.45.2...v0.45.3) (2025-10-20)
-
-
-### Bug Fixes
-
-* use updated json rpc method name, `attestation_v1_attestationsForBlock` ([#153](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/153)) ([957d426](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/957d42650bb9d10d17464afa79f5b7f7cfa70eab))
 
 
 
