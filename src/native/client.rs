@@ -1,8 +1,4 @@
-use super::{
-    fetch_attestation, get_access_token,
-    substrate::{verify_attestations_for_block, AttestationError},
-    ZkQueryClient,
-};
+use super::{fetch_attestation, get_access_token, ZkQueryClient};
 use crate::base::{
     attestation::verify_attestations,
     verifiable_commitment::extract_query_commitments_from_table_commitments_with_proof,
@@ -180,22 +176,5 @@ impl SxTClient {
                 .await
                 .map(DynOwnedTable::BN),
         }
-    }
-
-    /// Verify attestations for a specific block number
-    ///
-    /// This method uses the `verify_attestations_for_block` function to validate
-    /// attestations for a given block number.
-    ///
-    /// # Arguments
-    ///
-    /// * `block_number` - The block number for which attestations need to be verified.
-    ///
-    /// # Returns
-    ///
-    /// Returns `Ok(())` if all attestations are valid and consistent. Otherwise, it returns an
-    /// `AttestationError` describing the failure.
-    pub async fn verify_attestations(&self, block_number: u32) -> Result<(), AttestationError> {
-        verify_attestations_for_block(self.substrate_node_url.as_str(), block_number).await
     }
 }
