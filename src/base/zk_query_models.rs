@@ -40,7 +40,11 @@ pub struct QuerySubmitResponse {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableCommitmentWithProof {
-    pub commitment: String,
+    #[serde(
+        serialize_with = "serialize_bytes_hex",
+        deserialize_with = "deserialize_bytes_hex"
+    )]
+    pub commitment: Vec<u8>,
     pub merkle_proof: Vec<String>,
 }
 
