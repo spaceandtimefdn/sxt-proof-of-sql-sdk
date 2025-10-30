@@ -16,6 +16,8 @@ use serde::{Deserialize, Serialize};
 pub struct QuerySubmitRequest {
     /// The query to run
     pub sql_text: String,
+    /// Hex-coded parameters for the query
+    pub params: Option<String>,
     /// The source of the underlying data
     pub source_network: SxtNetwork,
     pub timeout: Option<i64>,

@@ -74,6 +74,15 @@ pub struct QueryAndVerifySdkArgs {
     #[arg(short, long, value_name = "QUERY", help = "SQL query to run")]
     pub query: String,
 
+    /// Query parameters for the SQL query
+    #[arg(
+        short,
+        long,
+        value_name = "PARAMS",
+        help = "Parameters for the SQL query"
+    )]
+    pub params: Vec<String>,
+
     /// SxT chain block hash to perform the query at.
     #[arg(long)]
     pub block_hash: Option<H256>,
@@ -172,7 +181,7 @@ pub async fn query_and_verify(
 
     // Execute the query and verify the result
     let result: RecordBatch = client
-        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
+        .query_and_verify(&args.query, args.block_hash, args.params, commitment_scheme)
         .await?
         .try_into()?;
 
