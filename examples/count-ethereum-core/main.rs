@@ -47,7 +47,7 @@ async fn count_table(
     let uppercased_table_ref = table_ref.to_uppercase();
     let query = format!("SELECT COUNT(*) FROM {uppercased_table_ref}");
     let table = client
-        .query_and_verify(&query, None, commitment_scheme)
+        .query_and_verify(&query, None, vec![], commitment_scheme)
         .await?;
     match table {
         DynOwnedTable::Dory(table) => Ok(extract_count(table)),

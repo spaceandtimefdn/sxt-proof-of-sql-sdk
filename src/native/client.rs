@@ -12,8 +12,9 @@ use jsonrpsee::ws_client::WsClientBuilder;
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
     base::{
-        commitment::CommitmentEvaluationProof, database::OwnedTable,
-        try_standard_binary_deserialization,
+        commitment::CommitmentEvaluationProof,
+        database::{LiteralValue, OwnedTable},
+        try_standard_binary_deserialization, try_standard_binary_serialization,
     },
     proof_primitive::dory::DynamicDoryEvaluationProof,
     sql::{evm_proof_plan::EVMProofPlan, proof::QueryProof},
@@ -76,6 +77,7 @@ impl SxTClient {
         &self,
         query: &str,
         block_ref: Option<H256>,
+        params: Vec<LiteralValue>,
         bump: &Bump,
     ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>>
     where
@@ -103,9 +105,12 @@ impl SxTClient {
             access_token,
         };
         let scheme = crate::base::prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME);
+        let serialized_params = try_standard_binary_serialization(params.clone())?;
+        let hex_params = format!("0x{}", hex::encode(&serialized_params));
         let query_results = client
             .run_zk_query(QuerySubmitRequest {
                 sql_text: query.to_string(),
+                params: Some(hex_params),
                 source_network: SxtNetwork::Mainnet,
                 timeout: None,
                 commitment_scheme: Some(scheme),
@@ -145,7 +150,7 @@ impl SxTClient {
             proof,
             result,
             &plan,
-            &[],
+            &params,
             &uppercased_query_commitments,
             &verifier_setup,
         )?)
@@ -160,18 +165,21 @@ impl SxTClient {
         &self,
         query: &str,
         block_ref: Option<H256>,
+        params: Vec<LiteralValue>,
         commitment_scheme: CommitmentScheme,
     ) -> Result<DynOwnedTable, Box<dyn core::error::Error>> {
         let bump = Bump::new();
         match commitment_scheme {
             CommitmentScheme::DynamicDory => self
-                .query_and_verify_by_cpi::<DynamicDoryEvaluationProof>(query, block_ref, &bump)
+                .query_and_verify_by_cpi::<DynamicDoryEvaluationProof>(
+                    query, block_ref, params, &bump,
+                )
                 .await
                 .map(DynOwnedTable::Dory),
             #[cfg(feature = "hyperkzg")]
             CommitmentScheme::HyperKzg => self
                 .query_and_verify_by_cpi::<HyperKZGCommitmentEvaluationProof>(
-                    query, block_ref, &bump,
+                    query, block_ref, params, &bump,
                 )
                 .await
                 .map(DynOwnedTable::BN),
