@@ -1,5 +1,5 @@
 use crate::{
-    base::{zk_query_models::SxtNetwork, CommitmentScheme},
+    base::{serde::param::parse_literal_value, zk_query_models::SxtNetwork, CommitmentScheme},
     native::SxTClient,
 };
 use arrow_csv::WriterBuilder;
@@ -73,6 +73,18 @@ pub struct QueryAndVerifySdkArgs {
     /// SQL query to execute and verify
     #[arg(short, long, value_name = "QUERY", help = "SQL query to run")]
     pub query: String,
+
+    /// Query parameters for the SQL query
+    #[arg(
+        short,
+        long,
+        value_name = "PARAMS",
+        value_delimiter = ',',
+        num_args = 0.., // allow 0 or more args
+        default_value = "", // ensures Vec<String> defaults to empty
+        help = "Parameters for the SQL query"
+    )]
+    pub params: Vec<String>,
 
     /// SxT chain block hash to perform the query at.
     #[arg(long)]
@@ -169,10 +181,21 @@ pub async fn query_and_verify(
     args: QueryAndVerifySdkArgs,
 ) -> Result<(), Box<dyn core::error::Error>> {
     let (client, commitment_scheme) = (&args).into();
+    // Parse parameters
+    let parsed_params = args
+        .params
+        .iter()
+        .map(|p| parse_literal_value(p.as_str()))
+        .collect::<Result<Vec<_>, _>>()?;
 
     // Execute the query and verify the result
     let result: RecordBatch = client
-        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
+        .query_and_verify(
+            &args.query,
+            args.block_hash,
+            parsed_params,
+            commitment_scheme,
+        )
         .await?
         .try_into()?;
 
