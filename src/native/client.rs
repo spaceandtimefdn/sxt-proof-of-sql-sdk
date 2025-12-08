@@ -113,15 +113,12 @@ impl SxTClient {
             })
             .await?;
         if !query_results.success {
-            return Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!(
-                    "ZK query failed: {}",
-                    query_results
-                        .error
-                        .unwrap_or("Query failed without error".to_string())
-                ),
-            )));
+            return Err(Box::new(std::io::Error::other(format!(
+                "ZK query failed: {}",
+                query_results
+                    .error
+                    .unwrap_or("Query failed without error".to_string())
+            ))));
         }
 
         // Verify the attestations

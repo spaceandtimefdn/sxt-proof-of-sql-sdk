@@ -56,7 +56,7 @@ pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
     let mut config_options = ConfigOptions::default();
     config_options.sql_parser.enable_ident_normalization = false;
     let proof_plan = EVMProofPlan::new(
-        sql_to_proof_plans(&[query.clone()], accessor, &config_options)?[0].clone(),
+        sql_to_proof_plans(core::slice::from_ref(&query), accessor, &config_options)?[0].clone(),
     );
     let serialized_proof_plan = try_standard_binary_serialization(&proof_plan)?;
 
