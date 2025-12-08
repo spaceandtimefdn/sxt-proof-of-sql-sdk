@@ -11,12 +11,12 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 ark-serialize = { version = "0.5.0", default-features = false }
-arrow-csv = "51.0.0"
+arrow-csv = "53"
 bincode = { version = "2.0.1", default-features = false, features = ["serde", "alloc"] }
 bumpalo = { version = "3.19.0" }
 chrono="0.4.39"
 clap = { version = "4.5.20", features = ["derive", "env"] }
-datafusion = { version = "38.0.0", default-features = false }
+datafusion = { version = "43", default-features = false }
 dotenv = "0.15"
 env_logger = "0.11.5"
 eth_merkle_tree = "0.1.3"
@@ -29,8 +29,8 @@ log = "0.4.22"
 indexmap = "2.8.0"
 nova-snark = { version = "0.41.0", default-features = false, optional = true }
 parity-scale-codec = { version = "3.7.0", default-features = false, features = ["derive"] }
-proof-of-sql = { version = "=0.124.2", default-features = false, features = ["arrow"] }
-proof-of-sql-planner = { version = "=0.124.2", default-features = false }
+proof-of-sql = { git = "https://github.com/spaceandtimelabs/sxt-proof-of-sql.git", rev = "7f5b83187af14b661f546b853a7219feeb986013", default-features = false, features = ["arrow"] }
+proof-of-sql-planner = { git = "https://github.com/spaceandtimelabs/sxt-proof-of-sql.git", rev = "7f5b83187af14b661f546b853a7219feeb986013", default-features = false }
 prost = "0.12"
 prost-build = "0.12"
 prost-types = "0.12"
@@ -40,7 +40,7 @@ serde_json = "1.0"
 snafu = { version = "0.8.5", default-features = false }
 subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee"]  }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
-sqlparser = { version = "0.45.0", default-features = false, features = ["visitor"] }
+sqlparser = { version = "0.51.0", default-features = false, features = ["visitor"] }
 tokio = { version = "1.0", features = ["macros"] }
 tonic = { version = "0.11", default-features = false, features = ["codegen", "prost"] }
 url = "2.5"
