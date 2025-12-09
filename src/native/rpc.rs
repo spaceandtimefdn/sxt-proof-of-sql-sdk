@@ -1,4 +1,4 @@
-use crate::base::attestation::{Attestation, AttestationsResponse};
+use crate::base::attestation::AttestationsResponse;
 use jsonrpsee::{
     core::{client::ClientT, params::ArrayParams, rpc_params, ClientError},
     ws_client::WsClient,
@@ -9,28 +9,22 @@ use subxt::utils::H256;
 async fn fetch_attestation_for_block(
     client: &WsClient,
     block_hash: H256,
-) -> Result<Vec<Attestation>, ClientError> {
-    let response = client
+) -> Result<AttestationsResponse, ClientError> {
+    client
         .request::<AttestationsResponse, ArrayParams>(
             "attestation_v1_attestationsForBlock",
             rpc_params![format!("{block_hash:#x}")],
         )
-        .await?;
-
-    Ok(response.attestations)
+        .await
 }
 
 /// Fetch the recent block with the most attestations
 async fn fetch_best_recent_attestation(
     client: &WsClient,
-) -> Result<(H256, Vec<Attestation>), ClientError> {
-    let attestation_response: AttestationsResponse = client
+) -> Result<AttestationsResponse, ClientError> {
+    client
         .request("attestation_v1_bestRecentAttestations", rpc_params![])
-        .await?;
-    Ok((
-        attestation_response.attestations_for,
-        attestation_response.attestations,
-    ))
+        .await
 }
 
 /// Fetch attestation
@@ -40,10 +34,12 @@ async fn fetch_best_recent_attestation(
 pub async fn fetch_attestation(
     client: &WsClient,
     block_hash: Option<H256>,
-) -> Result<(H256, Vec<Attestation>), ClientError> {
+) -> Result<(H256, AttestationsResponse), ClientError> {
     match block_hash {
         Some(hash) => Ok((hash, fetch_attestation_for_block(client, hash).await?)),
-        None => fetch_best_recent_attestation(client).await,
+        None => fetch_best_recent_attestation(client)
+            .await
+            .map(|response| (response.attestations_for, response)),
     }
 }
 

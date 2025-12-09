@@ -1,22 +1,16 @@
 use super::{fetch_attestation, get_access_token, ZkQueryClient};
 use crate::base::{
-    attestation::verify_attestations,
-    verifiable_commitment::extract_query_commitments_from_table_commitments_with_proof,
-    verify_prover_via_gateway_response,
+    verify_from_zk_query_and_substrate_responses,
     zk_query_models::{QuerySubmitRequest, SxtNetwork},
-    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable, UppercaseAccessor,
+    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
 };
 use bumpalo::Bump;
 use jsonrpsee::ws_client::WsClientBuilder;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
-    base::{
-        commitment::CommitmentEvaluationProof, database::OwnedTable,
-        try_standard_binary_deserialization,
-    },
+    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
     proof_primitive::dory::DynamicDoryEvaluationProof,
-    sql::{evm_proof_plan::EVMProofPlan, proof::QueryProof},
 };
 use reqwest::Client;
 use sp_core::H256;
@@ -93,7 +87,8 @@ impl SxTClient {
             .await?;
 
         // Get the appropriate block hash and attestations
-        let (best_block_hash, attestations) = fetch_attestation(&ws_client, block_ref).await?;
+        let (best_block_hash, attestations_response) =
+            fetch_attestation(&ws_client, block_ref).await?;
 
         // Run the query to get the proof plan and query results and Merkle tree
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
@@ -121,31 +116,11 @@ impl SxTClient {
             ))));
         }
 
-        // Verify the attestations
-        let table_commitment_with_proof = query_results.commitments.commitments;
-        verify_attestations(
-            &attestations,
-            &table_commitment_with_proof,
-            CPI::COMMITMENT_SCHEME,
-        )?;
-
-        let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
-            table_commitment_with_proof,
-        )?;
-        let uppercased_query_commitments = UppercaseAccessor(&query_commitments);
-        let plan: EVMProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
-        let proof: QueryProof<CPI> = try_standard_binary_deserialization(&query_results.proof)?.0;
-        let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
-            try_standard_binary_deserialization(&query_results.results)?.0;
-
-        Ok(verify_prover_via_gateway_response::<CPI>(
-            proof,
-            result,
-            &plan,
-            &[],
-            &uppercased_query_commitments,
+        verify_from_zk_query_and_substrate_responses::<CPI>(
+            query_results,
+            attestations_response,
             &verifier_setup,
-        )?)
+        )
     }
 
     /// Query and verify a SQL query at the given SxT block
