@@ -93,7 +93,9 @@ impl SxTClient {
             .await?;
 
         // Get the appropriate block hash and attestations
-        let (best_block_hash, attestations) = fetch_attestation(&ws_client, block_ref).await?;
+        let (best_block_hash, attestations_response) =
+            fetch_attestation(&ws_client, block_ref).await?;
+        let attestations = attestations_response.attestations;
 
         // Run the query to get the proof plan and query results and Merkle tree
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
