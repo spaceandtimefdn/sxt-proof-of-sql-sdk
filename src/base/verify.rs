@@ -1,5 +1,10 @@
 use super::{uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId};
-use crate::base::prover::ProverResponse;
+use crate::base::{
+    attestation::{verify_attestations, AttestationsResponse},
+    prover::ProverResponse,
+    verifiable_commitment::extract_query_commitments_from_table_commitments_with_proof,
+    zk_query_models::QueryResultsResponse,
+};
 use proof_of_sql::{
     base::{
         commitment::CommitmentEvaluationProof,
@@ -77,4 +82,36 @@ pub fn verify_prover_via_gateway_response<CPI: CommitmentEvaluationProofId>(
         params,
     )?;
     Ok(result)
+}
+
+pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationProofId>(
+    query_results: QueryResultsResponse,
+    attestations_response: AttestationsResponse,
+    verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
+) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>> {
+    let table_commitment_with_proof = query_results.commitments.commitments;
+    let attestations = attestations_response.attestations;
+    verify_attestations(
+        &attestations,
+        &table_commitment_with_proof,
+        CPI::COMMITMENT_SCHEME,
+    )?;
+
+    let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
+        table_commitment_with_proof,
+    )?;
+    let uppercased_query_commitments = UppercaseAccessor(&query_commitments);
+    let plan: EVMProofPlan = try_standard_binary_deserialization(&query_results.plan)?.0;
+    let proof: QueryProof<CPI> = try_standard_binary_deserialization(&query_results.proof)?.0;
+    let result: OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar> =
+        try_standard_binary_deserialization(&query_results.results)?.0;
+
+    Ok(verify_prover_via_gateway_response::<CPI>(
+        proof,
+        result,
+        &plan,
+        &[],
+        &uppercased_query_commitments,
+        verifier_setup,
+    )?)
 }
