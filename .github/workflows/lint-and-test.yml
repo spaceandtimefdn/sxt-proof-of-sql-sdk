@@ -40,8 +40,8 @@ jobs:
         run: cargo check --all-targets
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: Run cargo check (wasm feature)
-        run: cargo check --target wasm32-unknown-unknown --no-default-features --features wasm
+      - name: Run cargo check (wasm and hyperkzg features)
+        run: cargo check --target wasm32-unknown-unknown --no-default-features --features "wasm hyperkzg"
 
   clippy:
     name: Clippy
@@ -69,8 +69,8 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: Run clippy (wasm feature)
-        run: cargo clippy --target wasm32-unknown-unknown --no-default-features --features wasm -- -D warnings
+      - name: Run clippy (wasm and hyperkzg features)
+        run: cargo clippy --target wasm32-unknown-unknown --no-default-features --features "wasm hyperkzg" -- -D warnings
 
   # Run cargo f --check
   format:
