@@ -16,8 +16,7 @@ const proof = new SxTSDK.SxTClient(
 try {
     // Kick off the proof and await execution
     const result = await proof.queryAndVerify(
-        queryString,
-        table
+        queryString
     );
 
     let t_count = result.t_count.Int[0];
