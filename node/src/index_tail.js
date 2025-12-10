@@ -47,38 +47,6 @@ export class SxTClient {
 
     return response.json()
   }
-  async #getFinalizedHead() {
-    const response = await this.#querySubstrateRpc("chain_getFinalizedHead");
-
-    return response.result
-  }
-  async #getCommitment(commitmentKey, blockHash = null) {
-    if (!blockHash) {
-      blockHash = await this.#getFinalizedHead();
-    }
-
-    const commitmentResponse = await this.#querySubstrateRpc("state_getStorage", [commitmentKey, blockHash]);
-
-    return commitmentResponse;
-  }
-  async #getProof(accessToken, proverQuery) {
-    const proverResponse = await postHttpRequest({
-      url: this.proverRootURL,
-      headers: {
-        Authorization: "Bearer " + accessToken,
-        "content-type": "application/json",
-      },
-      data: proverQuery,
-    });
-
-    if (!proverResponse.ok) {
-      throw new Error(
-        `Error querying prover: ${proverResponse.status}: ${proverResponse.statusText}`,
-      );
-    }
-
-    return proverResponse.json();
-  }
 
   async queryAndVerify(queryString, table, blockHash = null) {
     const commitmentKey = "0x" + commitment_storage_key_dory(table);
