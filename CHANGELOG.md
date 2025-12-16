@@ -1,3 +1,12 @@
+# [0.49.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.48.1...v0.49.0) (2025-12-16)
+
+
+### Features
+
+* bump proof-of-sql to 0.127.25 ([#164](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/164)) ([4aeabb0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/4aeabb01ef01f6b9167b80ff09022dc71f813e8e))
+
+
+
 ## [0.48.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.48.0...v0.48.1) (2025-12-09)
 
 
@@ -21,10 +30,6 @@
 
 
 ## [0.46.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.2...v0.46.3) (2025-10-29)
-
-
-
-## [0.46.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.1...v0.46.2) (2025-10-29)
 
 
 
