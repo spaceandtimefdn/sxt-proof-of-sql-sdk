@@ -20,12 +20,13 @@ use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Serialize, Deserialize)]
+#[repr(u8)]
 pub enum CommitmentScheme {
-    /// Dynamic Dory commitment scheme.
-    DynamicDory,
     /// Hyper KZG commitment scheme.
     #[cfg(feature = "hyperkzg")]
-    HyperKzg,
+    HyperKzg = 0,
+    /// Dynamic Dory commitment scheme.
+    DynamicDory = 1,
 }
 
 impl core::fmt::Display for CommitmentScheme {

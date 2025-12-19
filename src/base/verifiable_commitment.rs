@@ -1,7 +1,6 @@
 use super::{
-    commitment_scheme::CommitmentScheme,
-    sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme,
-    zk_query_models::TableCommitmentWithProof, CommitmentEvaluationProofId,
+    commitment_scheme::CommitmentScheme, zk_query_models::TableCommitmentWithProof,
+    CommitmentEvaluationProofId,
 };
 use indexmap::IndexMap;
 use proof_of_sql::base::{
@@ -9,7 +8,6 @@ use proof_of_sql::base::{
     database::TableRef,
     try_standard_binary_deserialization,
 };
-use subxt::ext::codec::Encode;
 /// Adapted from attestation tree code in `sxt-node`
 /// This replicates the exact encoding logic from [`CommitmentMapPrefixFoliate`]
 ///
@@ -30,7 +28,7 @@ pub fn generate_commitment_leaf(
     // Combine key and value (matching encode_key_value_leaf from sxt-node)
     core::iter::once(table_identifier_length_prefix)
         .chain(table_identifier_utf8)
-        .chain(commitment_scheme::CommitmentScheme::from(commitment_scheme).encode())
+        .chain(core::iter::once(commitment_scheme as u8))
         .chain(table_commitment_bytes)
         .collect()
 }
