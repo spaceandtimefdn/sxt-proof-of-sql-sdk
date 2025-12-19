@@ -1,10 +1,8 @@
 #![doc = include_str!("README.md")]
 
 use crate::base::{
-    attestation::AttestationsResponse,
-    verify_from_zk_query_and_substrate_responses,
-    zk_query_models::QueryResultsResponse,
-    CommitmentEvaluationProofId,
+    attestation::AttestationsResponse, verify_from_zk_query_and_substrate_responses,
+    zk_query_models::QueryResultsResponse, CommitmentEvaluationProofId,
 };
 use bumpalo::Bump;
 use gloo_utils::format::JsValueSerdeExt;
