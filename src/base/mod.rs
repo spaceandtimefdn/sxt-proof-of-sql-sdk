@@ -7,9 +7,6 @@ pub mod sxt_chain_runtime;
 mod commitment_scheme;
 pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable};
 
-mod substrate_query;
-pub use substrate_query::table_ref_to_table_id;
-
 mod proof_plan;
 pub use proof_plan::get_plan_from_accessor_and_query;
 
