@@ -3,17 +3,16 @@ use jsonrpsee::{
     core::{client::ClientT, params::ArrayParams, rpc_params, ClientError},
     ws_client::WsClient,
 };
-use subxt::utils::H256;
 
 /// Fetch attestations for a block hash
 async fn fetch_attestation_for_block(
     client: &WsClient,
-    block_hash: H256,
+    block_hash: [u8; 32],
 ) -> Result<AttestationsResponse, ClientError> {
     client
         .request::<AttestationsResponse, ArrayParams>(
             "attestation_v1_attestationsForBlock",
-            rpc_params![format!("{block_hash:#x}")],
+            rpc_params![format!("0x{}", hex::encode(block_hash))],
         )
         .await
 }
@@ -33,8 +32,8 @@ async fn fetch_best_recent_attestation(
 /// with the block hash.
 pub async fn fetch_attestation(
     client: &WsClient,
-    block_hash: Option<H256>,
-) -> Result<(H256, AttestationsResponse), ClientError> {
+    block_hash: Option<[u8; 32]>,
+) -> Result<([u8; 32], AttestationsResponse), ClientError> {
     match block_hash {
         Some(hash) => Ok((hash, fetch_attestation_for_block(client, hash).await?)),
         None => fetch_best_recent_attestation(client)
@@ -64,6 +63,6 @@ mod tests {
             .await
             .expect("Failed to fetch attestation");
 
-        assert!(!block_hash.is_zero(), "Block hash should not be zero");
+        assert_ne!(block_hash, [0; 32], "Block hash should not be zero");
     }
 }

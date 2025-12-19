@@ -13,7 +13,6 @@ use proof_of_sql::{
     proof_primitive::dory::DynamicDoryEvaluationProof,
 };
 use reqwest::Client;
-use sp_core::H256;
 use url::Url;
 
 /// Space and Time (SxT) client
@@ -69,7 +68,7 @@ impl SxTClient {
     pub async fn query_and_verify_by_cpi<CPI>(
         &self,
         query: &str,
-        block_ref: Option<H256>,
+        block_ref: Option<[u8; 32]>,
         bump: &Bump,
     ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>>
     where
@@ -104,7 +103,7 @@ impl SxTClient {
                 source_network: SxtNetwork::Mainnet,
                 timeout: None,
                 commitment_scheme: Some(scheme),
-                block_hash: Some(format!("{best_block_hash:#x}")),
+                block_hash: Some(format!("0x{}", hex::encode(best_block_hash))),
             })
             .await?;
         if !query_results.success {
@@ -131,7 +130,7 @@ impl SxTClient {
     pub async fn query_and_verify(
         &self,
         query: &str,
-        block_ref: Option<H256>,
+        block_ref: Option<[u8; 32]>,
         commitment_scheme: CommitmentScheme,
     ) -> Result<DynOwnedTable, Box<dyn core::error::Error>> {
         let bump = Bump::new();
