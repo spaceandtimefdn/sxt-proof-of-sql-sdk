@@ -1,6 +1,6 @@
 export class SxTClient {
-  constructor(proverRootURL, authRootURL, substrateNodeURL, sxtApiKey) {
-    this.proverRootURL = proverRootURL;
+  constructor(zkQueryRootURL, authRootURL, substrateNodeURL, sxtApiKey) {
+    this.zkQueryRootURL = zkQueryRootURL;
     this.authRootURL = authRootURL;
     this.substrateNodeURL = substrateNodeURL;
     this.sxtApiKey = sxtApiKey;
@@ -47,28 +47,38 @@ export class SxTClient {
 
     return response.json()
   }
-  async #getFinalizedHead() {
-    const response = await this.#querySubstrateRpc("chain_getFinalizedHead");
-
-    return response.result
-  }
-  async #getCommitment(commitmentKey, blockHash = null) {
-    if (!blockHash) {
-      blockHash = await this.#getFinalizedHead();
+  async #getAttestations(blockHash = null) {
+    if (!!blockHash) {
+      return await this.#querySubstrateRpc("attestation_v1_attestationsForBlock", [`0x${blockHash}`])
+    } else{
+      return await this.#querySubstrateRpc("attestation_v1_bestRecentAttestations", null)
     }
-
-    const commitmentResponse = await this.#querySubstrateRpc("state_getStorage", [commitmentKey, blockHash]);
-
-    return commitmentResponse;
   }
-  async #getProof(accessToken, proverQuery) {
+  async #postZkQueryApi(endpoint, accessToken, data) {
     const proverResponse = await postHttpRequest({
-      url: this.proverRootURL,
+      url: `${this.zkQueryRootURL}${endpoint}`,
       headers: {
         Authorization: "Bearer " + accessToken,
-        "content-type": "application/json",
+        "Content-Type": "application/json",
       },
-      data: proverQuery,
+      data: data,
+    });
+
+    if (!proverResponse.ok) {
+      throw new Error(
+        `Error querying zk query api: ${proverResponse.status}: ${proverResponse.statusText}`,
+      );
+    }
+
+    return proverResponse.json();
+  }
+  async #getZkQueryApi(endpoint, accessToken) {
+    const proverResponse = await getHttpRequest({
+      url: `${this.zkQueryRootURL}${endpoint}`,
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "Content-Type": "application/json",
+      }
     });
 
     if (!proverResponse.ok) {
@@ -79,29 +89,54 @@ export class SxTClient {
 
     return proverResponse.json();
   }
+  async #submitZkQueryRequest(accessToken, querySubmitRequest){
+    return await this.#postZkQueryApi("/v1/zkquery", accessToken, querySubmitRequest)
+  }
+  async #getZkQueryStatus(accessToken, queryId){
+    return await this.#getZkQueryApi(`/v1/zkquery/${queryId}/status`, accessToken)
+  }
+  async #getZkQueryResult(accessToken, queryId){
+    return await this.#getZkQueryApi(`/v1/zkquery/${queryId}/results`, accessToken)
+  }
 
-  async queryAndVerify(queryString, table, blockHash = null) {
-    const commitmentKey = "0x" + commitment_storage_key_dory(table);
+  async queryAndVerify(queryString, blockHash = null) {
     const authResponse = await this.#getAccessToken();
     const accessToken = authResponse.accessToken;
-    const commitmentResponse = await this.#getCommitment(commitmentKey, blockHash);
-    const commitment = commitmentResponse.result.slice(2); // remove the 0x prefix
+    const attestationsResponse = await this.#getAttestations(blockHash)
+    const bestBlockHash = attestationsResponse.result.attestationsFor
 
-    let commitments = [new TableRefAndCommitment(table, commitment)];
-    const plannedProverQuery = plan_prover_query_dory(queryString, commitments);
-    const proverQuery = plannedProverQuery.prover_query_json;
-    const proofPlan = plannedProverQuery.proof_plan_json;
-    commitments = plannedProverQuery.commitments;
+    const submitQueryResponse = await this.#submitZkQueryRequest(accessToken, {
+      sqlText: queryString,
+      sourceNetwork: "mainnet",
+      commitmentScheme: "HYPER_KZG",
+      blockHash: bestBlockHash,
+      timeout: null
+    });
+    let queryId = submitQueryResponse.queryId
 
-    const proverResponseJson = await this.#getProof(accessToken, proverQuery);
+    let count = 0
+    const statusResponse = (await this.#getZkQueryStatus(accessToken, queryId)).status
+    let success = statusResponse === "done" || statusResponse === "failed" || statusResponse === "canceled"
 
-    const result = verify_prover_response_dory(
+    while (!success && count < 60){
+      count++
+      await sleep(1000)
+      const statusResponse = (await this.#getZkQueryStatus(accessToken, queryId)).status
+      success = statusResponse === "done" || statusResponse === "failed" || statusResponse === "canceled"
+    }
+
+    const proverResponseJson = await this.#getZkQueryResult(accessToken, queryId)
+
+    const result = verify_prover_response_hyper_kzg(
       proverResponseJson,
-      proofPlan,
-      commitments,
+      attestationsResponse.result
     );
     return result;
   }
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function postHttpRequest({ url, headers = {}, data = null }) {
@@ -110,6 +145,16 @@ async function postHttpRequest({ url, headers = {}, data = null }) {
     method: "POST",
     headers,
     body: data ? JSON.stringify(data) : undefined,
+    signal: controller.signal,
+  });
+  return response;
+}
+
+async function getHttpRequest({ url, headers = {} }) {
+  const controller = new AbortController();
+  const response = await fetch(url, {
+    method: "GET",
+    headers: headers,
     signal: controller.signal,
   });
   return response;
