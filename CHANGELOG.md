@@ -1,3 +1,13 @@
+# [0.50.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.49.0...v0.50.0) (2025-12-20)
+
+
+### Features
+
+* hyper kzg for wasm ([e1426e8](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e1426e886ced13075f245f0f27fb1ca9693c3712))
+* hyper kzg in wasm ([e4c1831](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/e4c1831403ee98b43fb7cfd50b76c065295451d3))
+
+
+
 # [0.49.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.48.1...v0.49.0) (2025-12-16)
 
 
@@ -26,10 +36,6 @@
 ### Features
 
 * bump `proof-of-sql` to 0.124.2 ([#159](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/159)) ([11d378a](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/11d378a03fae656426002ece802c5f2134af2b21))
-
-
-
-## [0.46.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.46.2...v0.46.3) (2025-10-29)
 
 
 
