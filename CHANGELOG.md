@@ -1,3 +1,7 @@
+## [0.50.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.50.1...v0.50.2) (2025-12-21)
+
+
+
 ## [0.50.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.50.0...v0.50.1) (2025-12-21)
 
 
@@ -22,15 +26,6 @@
 
 
 ## [0.48.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.48.0...v0.48.1) (2025-12-09)
-
-
-
-# [0.48.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.47.0...v0.48.0) (2025-12-08)
-
-
-### Features
-
-* bump Rust to 1.91.1 ([#160](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/160)) ([ddcd632](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/ddcd63224b233f16b2b0f37aae339d40330d73c4))
 
 
 
