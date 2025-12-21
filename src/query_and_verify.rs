@@ -172,7 +172,11 @@ pub async fn query_and_verify(
 
     // Execute the query and verify the result
     let result: RecordBatch = client
-        .query_and_verify(&args.query, args.block_hash, commitment_scheme)
+        .query_and_verify(
+            &args.query,
+            args.block_hash.map(|bh| bh.0),
+            commitment_scheme,
+        )
         .await?
         .try_into()?;
 

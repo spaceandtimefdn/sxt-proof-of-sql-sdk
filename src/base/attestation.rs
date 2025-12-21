@@ -12,7 +12,6 @@ use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
 use serde::{Deserialize, Serialize};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};
-use subxt::utils::H256;
 
 /// Represents an Ethereum-style ECDSA signature, broken into its components.
 ///
@@ -336,7 +335,11 @@ pub enum Attestation {
         /// The block number that was attested
         block_number: u64,
         /// The hash of the block that was attested
-        block_hash: H256,
+        #[serde(
+            serialize_with = "serialize_bytes_hex",
+            deserialize_with = "deserialize_bytes_hex32"
+        )]
+        block_hash: [u8; 32],
     },
 }
 
@@ -383,11 +386,19 @@ pub struct AttestationsResponse {
     /// The attestations for the `attestations_for` block.
     pub attestations: Vec<Attestation>,
     /// The block hash that was attested.
-    pub attestations_for: H256,
+    #[serde(
+        serialize_with = "serialize_bytes_hex",
+        deserialize_with = "deserialize_bytes_hex32"
+    )]
+    pub attestations_for: [u8; 32],
     /// The block number that was attested.
     pub attestations_for_block_number: u32,
     /// The block that was used to query storage.
-    pub at: H256,
+    #[serde(
+        serialize_with = "serialize_bytes_hex",
+        deserialize_with = "deserialize_bytes_hex32"
+    )]
+    pub at: [u8; 32],
 }
 
 /// Now verify for each attestation and every commitment
@@ -801,7 +812,7 @@ mod tests {
             address20: vec![4u8; 20],
             state_root: vec![5u8; 32],
             block_number: 12345,
-            block_hash: H256::from([6u8; 32]),
+            block_hash: [6u8; 32],
         };
 
         // Serialize to JSON
@@ -822,11 +833,11 @@ mod tests {
                 address20: vec![4u8; 20],
                 state_root: vec![5u8; 32],
                 block_number: 12345,
-                block_hash: H256::from([6u8; 32]),
+                block_hash: [6u8; 32],
             }],
-            attestations_for: H256::from([7u8; 32]),
+            attestations_for: [7u8; 32],
             attestations_for_block_number: 67890,
-            at: H256::from([8u8; 32]),
+            at: [8u8; 32],
         };
 
         // Serialize to JSON
@@ -972,12 +983,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 2 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
@@ -1006,12 +1017,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 3 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
@@ -1040,12 +1051,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 4 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
@@ -1074,12 +1085,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 5 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
@@ -1108,12 +1119,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 6 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
             Attestation::EthereumAttestation {
@@ -1142,12 +1153,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4425701,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 7 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
             Attestation::EthereumAttestation {
@@ -1176,12 +1187,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4539877,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 8 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
             Attestation::EthereumAttestation {
@@ -1210,12 +1221,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4539877,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
             // Attestation 9 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
             Attestation::EthereumAttestation {
@@ -1244,12 +1255,12 @@ mod tests {
                 )
                 .unwrap(),
                 block_number: 4539877,
-                block_hash: H256::from_slice(
-                    &hex::decode(
-                        "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                    )
-                    .unwrap(),
-                ),
+                block_hash: hex::decode(
+                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+                )
+                .unwrap()
+                .try_into()
+                .unwrap(),
             },
         ];
 
@@ -1275,7 +1286,7 @@ mod tests {
                 address20: vec![0; 20],
                 state_root: vec![0; 32], // Length != 33: will be filtered out
                 block_number: 1,
-                block_hash: H256::zero(),
+                block_hash: [0; 32],
             },
             Attestation::EthereumAttestation {
                 signature: EthereumSignature {
@@ -1291,7 +1302,7 @@ mod tests {
                     root
                 },
                 block_number: 1,
-                block_hash: H256::zero(),
+                block_hash: [0; 32],
             },
         ];
 
