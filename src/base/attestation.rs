@@ -1,6 +1,5 @@
 use super::{
     serde::hex::{deserialize_bytes_hex, deserialize_bytes_hex32, serialize_bytes_hex},
-    sxt_chain_runtime as runtime,
     verifiable_commitment::generate_commitment_leaf,
     zk_query_models::TableCommitmentWithProof,
     CommitmentScheme,
@@ -8,7 +7,7 @@ use super::{
 use eth_merkle_tree::utils::{errors::BytesError, keccak::keccak256, verify::verify_proof};
 use indexmap::IndexMap;
 use itertools::{process_results, Itertools};
-use k256::ecdsa::{RecoveryId, Signature, SigningKey, VerifyingKey};
+use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
 use serde::{Deserialize, Serialize};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
 use snafu::{ResultExt, Snafu};
@@ -202,37 +201,6 @@ fn hash_eth_msg(message: &[u8]) -> CoreWrapper<Keccak256Core> {
     hasher
 }
 
-/// Signs a message with a private Ethereum key.
-///
-/// # Arguments
-/// * `private_key` - The private key as a byte slice.
-/// * `message` - The message to sign.
-///
-/// Returns the signature if successful.
-pub fn sign_eth_message(private_key: &[u8], message: &[u8]) -> Result<EthereumSignature> {
-    let signing_key = SigningKey::from_bytes(private_key.into())
-        .map_err(|_| SignatureError::CreateSigningKeyError)
-        .context(SignatureSnafu)?;
-
-    let digest = hash_eth_msg(message);
-
-    // Gross coercion of types below
-    let (signature, recovery_id) = signing_key.sign_digest_recoverable(digest).unwrap();
-    let r = slice_to_scalar(&signature.r().to_bytes())
-        .expect("r should work from sign_digest_recoverable");
-    let s = slice_to_scalar(&signature.s().to_bytes())
-        .expect("s should work from sign_digest_recoverable");
-
-    Ok(EthereumSignature::new(r, s, Some(recovery_id.into())))
-}
-
-/// Converts a slice into a fixed-size array.
-///
-/// Returns `None` if the slice is not of the expected length.
-fn slice_to_scalar(slice: &[u8]) -> Option<[u8; 32]> {
-    slice.try_into().ok()
-}
-
 /// Creates an attestation message by concatenating the state root and block number.
 ///
 /// # Arguments
@@ -250,59 +218,6 @@ pub fn create_attestation_message<BN: Into<u64>>(
     msg.extend_from_slice(state_root.as_ref());
     msg.extend_from_slice(&block_number.into().to_be_bytes());
     msg
-}
-
-/// Verifies the signature of an attestation.
-///
-/// This function checks whether an Ethereum-style signature is valid for the provided message
-/// and public key. It is typically used to validate attestations in a blockchain context.
-///
-/// # Arguments
-///
-/// * `msg` - The message that was signed, as a byte slice.
-/// * `signature` - The Ethereum signature to verify, containing `r`, `s`, and `v` components.
-/// * `proposed_pub_key` - The public key proposed for validation, as a 33-byte array.
-/// * `block_number` - The block number associated with the attestation, used for error context.
-///
-/// # Returns
-///
-/// Returns `Ok(())` if the signature is valid. Otherwise, returns an error indicating why the
-/// validation failed.
-///
-/// # Errors
-///
-/// * `AttestationError::InvalidSignature` - If the signature validation fails.
-/// * `AttestationError::VerificationError` - If a lower-level signature verification error occurs.
-///
-/// # Examples
-///
-/// ```rust
-/// let msg = b"Example attestation message";
-/// let signature = EthereumSignature { r: ..., s: ..., v: ... };
-/// let proposed_pub_key = [0x02, ...]; // Compressed public key bytes.
-/// let block_number = 42;
-///
-/// match verify_signature(msg, &signature, &proposed_pub_key, block_number) {
-///     Ok(_) => println!("Attestation signature is valid."),
-///     Err(e) => println!("Attestation signature verification failed: {:?}", e),
-/// }
-/// ```
-pub fn verify_signature(
-    msg: &[u8],
-    signature: &runtime::api::runtime_types::sxt_core::attestation::EthereumSignature,
-    proposed_pub_key: &[u8; 33],
-) -> Result<(), AttestationError> {
-    let runtime::api::runtime_types::sxt_core::attestation::EthereumSignature { r, s, v } =
-        signature;
-    let signature = EthereumSignature {
-        r: *r,
-        s: *s,
-        v: *v,
-    };
-
-    verify_eth_signature(msg, &signature, proposed_pub_key)?;
-
-    Ok(())
 }
 
 /// Represents attestations stored on-chain.
@@ -467,6 +382,7 @@ pub fn verify_attestations(
 mod tests {
     use super::*;
     use indexmap::indexmap;
+    use k256::ecdsa::SigningKey;
     use lazy_static::lazy_static;
     use serde_json;
 
@@ -488,6 +404,37 @@ mod tests {
                 ],
             },
         };
+    }
+
+    /// Converts a slice into a fixed-size array.
+    ///
+    /// Returns `None` if the slice is not of the expected length.
+    fn slice_to_scalar(slice: &[u8]) -> Option<[u8; 32]> {
+        slice.try_into().ok()
+    }
+
+    /// Signs a message with a private Ethereum key.
+    ///
+    /// # Arguments
+    /// * `private_key` - The private key as a byte slice.
+    /// * `message` - The message to sign.
+    ///
+    /// Returns the signature if successful.
+    fn sign_eth_message(private_key: &[u8], message: &[u8]) -> Result<EthereumSignature> {
+        let signing_key = SigningKey::from_bytes(private_key.into())
+            .map_err(|_| SignatureError::CreateSigningKeyError)
+            .context(SignatureSnafu)?;
+
+        let digest = hash_eth_msg(message);
+
+        // Gross coercion of types below
+        let (signature, recovery_id) = signing_key.sign_digest_recoverable(digest).unwrap();
+        let r = slice_to_scalar(&signature.r().to_bytes())
+            .expect("r should work from sign_digest_recoverable");
+        let s = slice_to_scalar(&signature.s().to_bytes())
+            .expect("s should work from sign_digest_recoverable");
+
+        Ok(EthereumSignature::new(r, s, Some(recovery_id.into())))
     }
 
     #[test]
@@ -771,37 +718,6 @@ mod tests {
                 source: AttestationVerificationError::PublicKeyParsingError
             })
         ));
-    }
-
-    #[test]
-    fn test_verify_signature_wrapper() {
-        let private_key = [
-            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
-            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
-            0x89, 0xab, 0xcd, 0xef,
-        ];
-        let message = b"test message";
-
-        // Sign the message
-        let eth_signature = sign_eth_message(&private_key, message).unwrap();
-
-        // Convert to runtime signature type
-        let runtime_sig = runtime::api::runtime_types::sxt_core::attestation::EthereumSignature {
-            r: eth_signature.r,
-            s: eth_signature.s,
-            v: eth_signature.v,
-        };
-
-        // Get the public key (compressed format)
-        let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
-        let verifying_key = signing_key.verifying_key();
-        let pub_key_compressed = verifying_key.to_encoded_point(true).as_bytes().to_vec();
-        let mut pub_key_array = [0u8; 33];
-        pub_key_array.copy_from_slice(&pub_key_compressed);
-
-        // Verify the signature
-        let result = verify_signature(message, &runtime_sig, &pub_key_array);
-        assert!(result.is_ok());
     }
 
     #[test]
