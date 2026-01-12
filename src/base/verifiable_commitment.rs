@@ -71,10 +71,12 @@ pub fn extract_query_commitments_from_table_commitments_with_proof<
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "hyperkzg")]
     use super::*;
     #[cfg(feature = "hyperkzg")]
     use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 
+    #[cfg(feature = "hyperkzg")]
     #[test]
     fn test_generate_commitment_leaf() {
         let table_identifier = "ETHEREUM.BLOCKS".to_string();
