@@ -68,6 +68,7 @@ hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
 # Do not use the `wasm` feature unless you are building for the web.
 # It can not be used with the `native` feature.
 wasm = ["subxt/web", "hyperkzg"]
+trustless-planning = []
 examples = ["native", "hyperkzg"]
 
 [[bin]]

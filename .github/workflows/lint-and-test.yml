@@ -40,6 +40,8 @@ jobs:
         run: cargo check --all-targets
       - name: Run cargo check (featureless)
         run: cargo check --all-targets --no-default-features
+      - name: Run cargo check (trustless-planning)
+        run: cargo check --all-targets --no-default-features --features "trustless-planning"
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
       - name: Run cargo check (wasm and hyperkzg features)
@@ -71,6 +73,8 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
       - name: Run clippy (featureless)
         run: cargo clippy --all-targets --no-default-features -- -D warnings
+      - name: Run clippy (trustless-planning)
+        run: cargo clippy --all-targets --no-default-features --features "trustless-planning" -- -D warnings
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
       - name: Run clippy (wasm and hyperkzg features)
@@ -104,6 +108,8 @@ jobs:
         run: cargo test --lib
       - name: Run tests (featureless)
         run: cargo test --lib --no-default-features
+      - name: Run tests (trustless-planning)
+        run: cargo test --lib --no-default-features --features "trustless-planning"
 
   udeps:
     name: Unused Dependencies
