@@ -67,7 +67,7 @@ hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
 
 # Do not use the `wasm` feature unless you are building for the web.
 # It can not be used with the `native` feature.
-wasm = ["subxt/web"]
+wasm = ["subxt/web", "hyperkzg"]
 
 [[bin]]
 name = "proof-of-sql-cli"
