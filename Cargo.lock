@@ -6354,8 +6354,6 @@ dependencies = [
  "proof-of-sql",
  "proof-of-sql-planner",
  "prost",
- "prost-build",
- "prost-types",
  "rand",
  "reqwest",
  "serde",

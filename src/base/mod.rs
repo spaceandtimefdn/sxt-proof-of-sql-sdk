@@ -13,15 +13,15 @@ pub use uppercase_accessor::{uppercase_table_ref, UppercaseAccessor};
 
 mod prover_query;
 #[cfg(feature = "hyperkzg")]
-pub use prover_query::plan_prover_query_hyperkzg;
+pub use prover_query::produce_hyperkzg_plan_trustlessly;
 pub use prover_query::{
-    plan_prover_query, plan_prover_query_dory, PlanProverQueryError, DEFAULT_SCHEMA,
+    produce_dory_plan_trustlessly, produce_plan_trustlessly, PlanProverQueryError, DEFAULT_SCHEMA,
 };
 
 mod verify;
 pub use verify::{
-    verify_from_zk_query_and_substrate_responses, verify_prover_response,
-    verify_prover_via_gateway_response, VerifyProverResponseError,
+    verify_from_zk_query_and_substrate_responses, verify_prover_via_gateway_response,
+    VerifyProverResponseError,
 };
 
 /// tonic-generated code for interacting with the prover service
