@@ -1,6 +1,4 @@
-use super::{
-    prover, sxt_chain_runtime::api::runtime_types::proof_of_sql_commitment_map::commitment_scheme,
-};
+use super::prover;
 use ark_serialize::{CanonicalDeserialize, Compress, Validate};
 use bumpalo::Bump;
 use clap::ValueEnum;
@@ -52,17 +50,6 @@ const HYPER_KZG_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
 
 /// Convert a `CommitmentScheme` to a `prover::CommitmentScheme`.
 impl From<CommitmentScheme> for prover::CommitmentScheme {
-    fn from(scheme: CommitmentScheme) -> Self {
-        match scheme {
-            CommitmentScheme::DynamicDory => Self::DynamicDory,
-            #[cfg(feature = "hyperkzg")]
-            CommitmentScheme::HyperKzg => Self::HyperKzg,
-        }
-    }
-}
-
-/// Convert a `CommitmentScheme` to a `commitment_scheme::CommitmentScheme`.
-impl From<CommitmentScheme> for commitment_scheme::CommitmentScheme {
     fn from(scheme: CommitmentScheme) -> Self {
         match scheme {
             CommitmentScheme::DynamicDory => Self::DynamicDory,

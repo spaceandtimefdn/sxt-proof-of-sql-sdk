@@ -1,8 +1,6 @@
 #![doc = include_str!("README.md")]
 
 pub(crate) mod serde;
-/// subxt-generated code for interacting with the sxt-chain runtime
-pub mod sxt_chain_runtime;
 
 mod commitment_scheme;
 pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable};
