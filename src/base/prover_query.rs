@@ -1,20 +1,13 @@
-use super::{
-    prover::{self, ProverContextRange, ProverQuery},
-    uppercase_accessor::UppercaseAccessor,
-    CommitmentEvaluationProofId,
-};
+use super::{uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId};
 use datafusion::config::ConfigOptions;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::{
     HyperKZGCommitment, HyperKZGCommitmentEvaluationProof,
 };
 use proof_of_sql::{
-    base::{
-        commitment::{CommitmentEvaluationProof, QueryCommitments},
-        try_standard_binary_serialization,
-    },
+    base::commitment::{CommitmentEvaluationProof, QueryCommitments},
     proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
-    sql::{evm_proof_plan::EVMProofPlan, proof_plans::DynProofPlan},
+    sql::proof_plans::DynProofPlan,
 };
 use proof_of_sql_planner::{
     sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
@@ -47,55 +40,32 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 }
 
 /// Create a query for the prover service from sql query text and commitments.
-pub fn plan_prover_query<CPI: CommitmentEvaluationProofId>(
+pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
     query: &Statement,
     commitments: &QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>,
-) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
+) -> Result<DynProofPlan, PlanProverQueryError> {
     let accessor = &UppercaseAccessor(commitments);
     let query = statement_with_uppercase_identifiers(query.clone());
     let mut config_options = ConfigOptions::default();
     config_options.sql_parser.enable_ident_normalization = false;
-    let proof_plan = EVMProofPlan::new(
-        sql_to_proof_plans(core::slice::from_ref(&query), accessor, &config_options)?[0].clone(),
-    );
-    let serialized_proof_plan = try_standard_binary_serialization(&proof_plan)?;
-
-    let query_context = commitments
-        .iter()
-        .map(|(table_ref, commitment)| {
-            (
-                table_ref.to_string().to_uppercase(),
-                ProverContextRange {
-                    start: commitment.range().start as u64,
-                    ends: vec![commitment.range().end as u64],
-                },
-            )
-        })
-        .collect();
-
-    Ok((
-        ProverQuery {
-            proof_plan: serialized_proof_plan,
-            query_context,
-            commitment_scheme: prover::CommitmentScheme::from(CPI::COMMITMENT_SCHEME).into(),
-        },
-        proof_plan.into_inner(),
-    ))
+    let proof_plan =
+        sql_to_proof_plans(core::slice::from_ref(&query), accessor, &config_options)?[0].clone();
+    Ok(proof_plan)
 }
 
 /// Create a query for the prover service from sql query text and Dynamic Dory commitments.
-pub fn plan_prover_query_dory(
+pub fn produce_dory_plan_trustlessly(
     query: &Statement,
     commitments: &QueryCommitments<DynamicDoryCommitment>,
-) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
-    plan_prover_query::<DynamicDoryEvaluationProof>(query, commitments)
+) -> Result<DynProofPlan, PlanProverQueryError> {
+    produce_plan_trustlessly::<DynamicDoryEvaluationProof>(query, commitments)
 }
 
 /// Create a query for the prover service from sql query text and HyperKZG commitments.
 #[cfg(feature = "hyperkzg")]
-pub fn plan_prover_query_hyperkzg(
+pub fn produce_hyperkzg_plan_trustlessly(
     query: &Statement,
     commitments: &QueryCommitments<HyperKZGCommitment>,
-) -> Result<(ProverQuery, DynProofPlan), PlanProverQueryError> {
-    plan_prover_query::<HyperKZGCommitmentEvaluationProof>(query, commitments)
+) -> Result<DynProofPlan, PlanProverQueryError> {
+    produce_plan_trustlessly::<HyperKZGCommitmentEvaluationProof>(query, commitments)
 }

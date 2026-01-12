@@ -2,56 +2,10 @@ syntax = "proto3";
 
 package sxt.core;
 
-import "ingest.proto";
-import "google/protobuf/empty.proto";
-import "google/protobuf/duration.proto";
-
-// Interface exported by the server
-service Prover {
-    rpc queryWithProof(ProverQuery) returns (ProverResponse) {}
-    rpc queryWithProofForCommitments(ProverQueryForCommitments) returns (ProofAndResultForCommitments) {}
-    rpc ingest(TableIngest) returns (google.protobuf.Empty) {}
-}
-
 // First value of enum is default value, so if no commitment
 // scheme is specified in ProverQuery, IPA is chosen by default
 enum CommitmentScheme {
     IPA = 0;
     DYNAMIC_DORY = 1;
     HYPER_KZG = 2;
-}
-
-message ProverContextRange {
-    uint64 start = 1;
-    repeated uint64 ends = 2;
-}
-
-message ChosenContextRange {
-    uint64 start = 1;
-    uint64 end = 2;
-}
-
-message ProverQuery {
-    bytes proof_plan = 1;
-    map<string, ProverContextRange> query_context = 3;
-    CommitmentScheme commitment_scheme = 4;
-}
-
-message ProverResponse {
-    bytes proof = 1;
-    map<string, ChosenContextRange> chosen_context = 2;
-    google.protobuf.Duration exec_time = 3;
-    bytes result = 4;
-}
-
-message ProverQueryForCommitments {
-    bytes proof_plan = 1;
-    map<string, bytes> query_commitments = 2;
-    CommitmentScheme commitment_scheme = 3;
-}
-
-message ProofAndResultForCommitments {
-    bytes proof = 1;
-    google.protobuf.Duration exec_time = 2;
-    bytes result = 3;
 }

@@ -19,14 +19,6 @@ fn main() {
 
     tonic_build::configure()
         .type_attribute(".", "#[derive(serde::Serialize,serde::Deserialize)]")
-        .field_attribute(
-            "sxt.core.ProverResponse.exec_time",
-            "#[serde(default, serialize_with = \"crate::base::serde::duration_serde::serialize\", deserialize_with = \"crate::base::serde::duration_serde::deserialize\")]",
-        )
-        .field_attribute(
-            "sxt.core.ProofAndResultForCommitments.exec_time",
-            "#[serde(default, serialize_with = \"crate::base::serde::duration_serde::serialize\", deserialize_with = \"crate::base::serde::duration_serde::deserialize\")]",
-        )
         .type_attribute(
             "sxt.core.CommitmentScheme",
             "#[serde(rename_all=\"SCREAMING_SNAKE_CASE\")]",

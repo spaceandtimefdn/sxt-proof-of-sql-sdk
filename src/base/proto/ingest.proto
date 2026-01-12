@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package sxt.core;
-
-message TableIngest {
-    string table_name = 1;
-    bytes record_batch = 2;
-}
