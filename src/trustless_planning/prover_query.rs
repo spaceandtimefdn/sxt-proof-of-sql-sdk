@@ -50,7 +50,7 @@ pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
 }
 
 /// Create a query for the prover service from sql query text and Dynamic Dory commitments.
-#[expect(dead_code)]
+#[cfg_attr(not(test), expect(dead_code))]
 pub fn produce_dory_plan_trustlessly(
     query: &Statement,
     commitments: &QueryCommitments<DynamicDoryCommitment>,
@@ -66,4 +66,62 @@ pub fn produce_hyperkzg_plan_trustlessly(
     commitments: &QueryCommitments<HyperKZGCommitment>,
 ) -> Result<DynProofPlan, PlanProverQueryError> {
     produce_plan_trustlessly::<HyperKZGCommitmentEvaluationProof>(query, commitments)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::trustless_planning::prover_query::produce_dory_plan_trustlessly;
+    use ark_std::test_rng;
+    use bumpalo::Bump;
+    use proof_of_sql::{
+        base::{
+            commitment::{QueryCommitments, QueryCommitmentsExt},
+            database::{
+                table_utility::{borrowed_decimal75, table},
+                ColumnRef, ColumnType, TableRef, TableTestAccessor,
+            },
+            math::decimal::Precision,
+        },
+        proof_primitive::dory::{
+            DoryScalar, DynamicDoryEvaluationProof, ProverSetup, PublicParameters,
+        },
+    };
+    use sqlparser::{dialect::GenericDialect, parser::Parser};
+
+    #[test]
+    fn we_can_get_plan_from_accessor_and_query_even_when_query_uses_lowercase_idents() {
+        let sql = r"SELECT a + b as res FROM tab;";
+        let dialect = GenericDialect {};
+        let query_parsed = Parser::parse_sql(&dialect, sql).unwrap()[0].clone();
+        let table_ref = TableRef::from_names(None, "TAB");
+        let alloc = Bump::new();
+        let table = table::<DoryScalar>(vec![
+            borrowed_decimal75("A", 5, 1, [1, 2, 3, 4], &alloc),
+            borrowed_decimal75("B", 3, 2, [5, 6, 7, 8], &alloc),
+        ]);
+        let public_parameters = PublicParameters::test_rand(5, &mut test_rng());
+        let prover_setup = ProverSetup::from(&public_parameters);
+        let accessor = TableTestAccessor::<DynamicDoryEvaluationProof>::new_from_table(
+            table_ref.clone(),
+            table,
+            0,
+            &prover_setup,
+        );
+        let query_commitments = QueryCommitments::from_accessor_with_max_bounds(
+            vec![
+                ColumnRef::new(
+                    table_ref.clone(),
+                    "A".into(),
+                    ColumnType::Decimal75(Precision::new(5).unwrap(), 1),
+                ),
+                ColumnRef::new(
+                    table_ref.clone(),
+                    "B".into(),
+                    ColumnType::Decimal75(Precision::new(3).unwrap(), 2),
+                ),
+            ],
+            &accessor,
+        );
+        produce_dory_plan_trustlessly(&query_parsed, &query_commitments).unwrap();
+    }
 }
