@@ -869,6 +869,7 @@ mod tests {
         assert_eq!(attestation.signature().unwrap().v, 1);
     }
 
+    #[cfg(feature = "hyperkzg")]
     #[test]
     fn test_verify_attestations_with_hyper_kzg() {
         let attestations = vec![
@@ -1188,6 +1189,7 @@ mod tests {
         assert!(result.is_ok(), "Verification failed: {:?}", result);
     }
 
+    #[cfg(feature = "hyperkzg")]
     #[test]
     fn test_verify_attestations_work_if_all_attestations_have_filtered_out_state_roots() {
         // Attestations with state_root length != 33 are filtered out (valid but not used)
