@@ -24,7 +24,6 @@ fn main() {
             "#[serde(rename_all=\"SCREAMING_SNAKE_CASE\")]",
         )
         .type_attribute(".", "#[allow(clippy::all)]")
-        .build_client(cfg!(feature = "prover-client"))
         .build_server(false)
         .compile(&proto_defs, &[&proto_path])
         .unwrap();

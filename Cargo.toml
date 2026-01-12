@@ -58,8 +58,7 @@ rand = "0.8.5"
 env_logger = "0.11.5"
 
 [features]
-default = ["native", "prover-client", "hyperkzg"]
-prover-client = ["tonic/transport"]
+default = ["native", "hyperkzg"]
 # Do not use the `native` feature unless you are building for the native environment.
 # It can not be used with the `wasm` feature.
 native = ["subxt/native", "proof-of-sql/std", "sqlparser/std", "tokio/rt-multi-thread", "jsonrpsee"]
