@@ -1,4 +1,4 @@
-use super::uppercase_accessor::UppercaseAccessor;
+use crate::base::UppercaseAccessor;
 use datafusion::config::ConfigOptions;
 use proof_of_sql::{base::database::SchemaAccessor, sql::proof_plans::DynProofPlan};
 use proof_of_sql_planner::{
@@ -7,6 +7,7 @@ use proof_of_sql_planner::{
 use sqlparser::ast::Statement;
 
 /// Retrieves a `DynProofPlan` given a query and the commitments for the relevant tables
+#[cfg_attr(not(test), expect(dead_code))]
 pub fn get_plan_from_accessor_and_query(
     query: &Statement,
     accessor: impl SchemaAccessor + Clone,

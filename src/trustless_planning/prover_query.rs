@@ -1,4 +1,4 @@
-use super::{uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId};
+use crate::base::{CommitmentEvaluationProofId, UppercaseAccessor};
 use datafusion::config::ConfigOptions;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::{
@@ -14,10 +14,6 @@ use proof_of_sql_planner::{
 };
 use snafu::Snafu;
 use sqlparser::{ast::Statement, parser::ParserError};
-
-/// Proof-of-sql requires a default schema to be provided when creating a QueryExpr.
-/// This is used as the schema when tables referenced in the query don't have one.
-pub const DEFAULT_SCHEMA: &str = "PUBLIC";
 
 /// Errors that can occur when planning a query to the prover.
 #[derive(Snafu, Debug)]
@@ -54,6 +50,7 @@ pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
 }
 
 /// Create a query for the prover service from sql query text and Dynamic Dory commitments.
+#[expect(dead_code)]
 pub fn produce_dory_plan_trustlessly(
     query: &Statement,
     commitments: &QueryCommitments<DynamicDoryCommitment>,
@@ -62,6 +59,7 @@ pub fn produce_dory_plan_trustlessly(
 }
 
 /// Create a query for the prover service from sql query text and HyperKZG commitments.
+#[expect(dead_code)]
 #[cfg(feature = "hyperkzg")]
 pub fn produce_hyperkzg_plan_trustlessly(
     query: &Statement,

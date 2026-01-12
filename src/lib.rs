@@ -7,5 +7,6 @@ pub mod native;
 pub mod produce_plan_subcommand;
 #[cfg(feature = "native")]
 pub mod query_and_verify;
+mod trustless_planning;
 #[cfg(feature = "wasm")]
 pub mod wasm;
