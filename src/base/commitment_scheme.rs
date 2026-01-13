@@ -1,13 +1,11 @@
 use super::prover;
+#[cfg(feature = "native")]
 use bumpalo::Bump;
-#[cfg(feature = "hyperkzg")]
+#[cfg(all(feature = "hyperkzg", feature = "native"))]
 use nova_snark::provider::hyperkzg::VerifierKey;
 use proof_of_sql::base::commitment::CommitmentEvaluationProof;
-#[cfg(feature = "hyperkzg")]
-use proof_of_sql::{
-    base::try_standard_binary_deserialization,
-    proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
-};
+#[cfg(all(feature = "hyperkzg", feature = "native"))]
+use proof_of_sql::proof_primitive::hyperkzg::HyperKZGEngine;
 use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
@@ -63,6 +61,7 @@ pub trait CommitmentEvaluationProofId:
     type DeserializationError: core::error::Error;
 
     /// Deserialize the verifier public setup from bytes.
+    #[cfg(feature = "native")]
     fn deserialize_verifier_setup<'a>(
         bytes: &[u8],
         alloc: &'a Bump,
@@ -73,17 +72,21 @@ pub trait CommitmentEvaluationProofId:
 }
 
 #[cfg(feature = "hyperkzg")]
-impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
+impl CommitmentEvaluationProofId
+    for proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof
+{
     const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::HyperKzg;
     const DEFAULT_VERIFIER_SETUP_BYTES: &'static [u8] = HYPER_KZG_VERIFIER_SETUP_BYTES;
     type DeserializationError = bincode::error::DecodeError;
 
+    #[cfg(feature = "native")]
     fn deserialize_verifier_setup<'a>(
         bytes: &[u8],
         alloc: &'a Bump,
     ) -> Result<&'a VerifierKey<HyperKZGEngine>, Self::DeserializationError> {
         let setup: VerifierKey<HyperKZGEngine> =
-            try_standard_binary_deserialization(bytes).map(|(setup, _)| setup)?;
+            proof_of_sql::base::try_standard_binary_deserialization(bytes)
+                .map(|(setup, _)| setup)?;
         Ok(alloc.alloc(setup) as &'a VerifierKey<HyperKZGEngine>)
     }
 }
