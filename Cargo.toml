@@ -26,7 +26,7 @@ lazy_static = { version = "1.5.0" }
 indexmap = "2.8.0"
 nova-snark = { version = "0.41.0", default-features = false, optional = true }
 parity-scale-codec = { version = "3.7.0", default-features = false, features = ["derive"] }
-proof-of-sql = { version = "=0.127.25", default-features = false, features = ["arrow"] }
+proof-of-sql = { version = "=0.127.25", default-features = false }
 proof-of-sql-planner = { version = "=0.127.25", default-features = false, optional = true }
 prost = "0.12"
 reqwest = { version = "0.12", features = ["json"] }
@@ -61,7 +61,7 @@ sp-crypto-hashing = { version = "0.1.0", default-features = false }
 default = ["native", "hyperkzg"]
 # Do not use the `native` feature unless you are building for the native environment.
 # It can not be used with the `wasm` feature.
-native = ["subxt/native", "proof-of-sql/std", "sqlparser/std", "tokio/rt-multi-thread", "jsonrpsee", "clap", "ark-serialize", "arrow-csv", "url"]
+native = ["subxt/native", "proof-of-sql/std", "proof-of-sql/arrow", "sqlparser/std", "tokio/rt-multi-thread", "jsonrpsee", "clap", "ark-serialize", "arrow-csv", "url"]
 # Currently the `hyperkzg` and `wasm` features are incompatible.
 hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
 

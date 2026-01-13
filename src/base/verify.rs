@@ -70,7 +70,8 @@ pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationPro
         &attestations,
         &table_commitment_with_proof,
         CPI::COMMITMENT_SCHEME,
-    )?;
+    )
+    .map_err(|err| err.to_string())?;
 
     let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
         table_commitment_with_proof,
@@ -88,5 +89,6 @@ pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationPro
         &[],
         &uppercased_query_commitments,
         verifier_setup,
-    )?)
+    )
+    .map_err(|err| err.to_string())?)
 }
