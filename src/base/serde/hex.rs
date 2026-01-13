@@ -1,5 +1,16 @@
+use hex::FromHexError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use sp_core::Bytes;
+
+/// Function for decoding a hex string with optional "0x" prefix into bytes.
+fn from_hex(hex: &str) -> Result<Vec<u8>, FromHexError> {
+    hex::decode(hex.strip_prefix("0x").unwrap_or(hex))
+}
+
+/// Function for encoding bytes into a hex string with "0x" prefix.
+fn to_hex(bytes: &Vec<u8>) -> String {
+    let hex = hex::encode(bytes);
+    format!("0x{}", hex)
+}
 
 /// Hex serialization function.
 ///
@@ -8,7 +19,7 @@ pub fn serialize_bytes_hex<S>(bytes: &[u8], serializer: S) -> Result<S::Ok, S::E
 where
     S: Serializer,
 {
-    Bytes(bytes.to_vec()).serialize(serializer)
+    serializer.serialize_str(&to_hex(&bytes.to_vec()))
 }
 
 /// Serialization function for encoding `Vec<[u8; 32]>` objects as hex strings with a leading `0x`.
@@ -24,7 +35,7 @@ where
 {
     bytes_array
         .iter()
-        .map(|bytes| Bytes(bytes.to_vec()))
+        .map(|bytes| to_hex(&bytes.to_vec()))
         .collect::<Vec<_>>()
         .serialize(serializer)
 }
@@ -37,8 +48,8 @@ pub fn deserialize_bytes_hex<'de, D>(deserializer: D) -> Result<Vec<u8>, D::Erro
 where
     D: Deserializer<'de>,
 {
-    let b = Bytes::deserialize(deserializer)?;
-    Ok(b.0)
+    let b = String::deserialize(deserializer)?;
+    from_hex(&b).map_err(serde::de::Error::custom)
 }
 
 /// Hex deserialization function.
@@ -49,8 +60,10 @@ pub fn deserialize_bytes_hex32<'de, D>(deserializer: D) -> Result<[u8; 32], D::E
 where
     D: Deserializer<'de>,
 {
-    let b = Bytes::deserialize(deserializer)?;
-    b.0.try_into()
+    let b = String::deserialize(deserializer)?;
+    from_hex(&b)
+        .map_err(serde::de::Error::custom)?
+        .try_into()
         .map_err(|_| serde::de::Error::custom("Invalid length"))
 }
 
@@ -62,11 +75,13 @@ pub fn deserialize_bytes32_array_as_hex<'de, D>(deserializer: D) -> Result<Vec<[
 where
     D: Deserializer<'de>,
 {
-    let bytes32_array = Vec::<Bytes>::deserialize(deserializer)?;
+    let bytes32_array = Vec::<String>::deserialize(deserializer)?;
     bytes32_array
         .into_iter()
         .map(|b| {
-            b.0.try_into()
+            from_hex(&b)
+                .map_err(serde::de::Error::custom)?
+                .try_into()
                 .map_err(|_| serde::de::Error::custom("Invalid length"))
         })
         .collect()
@@ -75,10 +90,10 @@ where
 #[cfg(test)]
 mod tests {
     use crate::base::serde::hex::{
-        deserialize_bytes32_array_as_hex, serialize_bytes32_array_as_hex,
+        deserialize_bytes32_array_as_hex, deserialize_bytes_hex, serialize_bytes32_array_as_hex,
+        serialize_bytes_hex,
     };
     use serde::{Deserialize, Serialize};
-    use sp_core::Bytes;
 
     #[derive(Serialize, Deserialize, PartialEq, Debug)]
     struct Bytes32ArrayWrapper {
@@ -90,18 +105,14 @@ mod tests {
         pub value: Vec<[u8; 32]>,
     }
 
-    #[test]
-    fn test_serialize_bytes_hex() {
-        let bytes = vec![0xde, 0xad, 0xbe, 0xef];
-        let serialized = serde_json::to_string(&Bytes(bytes.clone())).unwrap();
-        assert_eq!(serialized, "\"0xdeadbeef\"");
-    }
-
-    #[test]
-    fn test_deserialize_bytes_hex() {
-        let json = "\"0xdeadbeef\"";
-        let bytes: Bytes = serde_json::from_str(json).unwrap();
-        assert_eq!(bytes.0, vec![0xde, 0xad, 0xbe, 0xef]);
+    #[derive(Serialize, Deserialize, PartialEq, Debug)]
+    struct BytesWrapper {
+        /// The bytes32 array.
+        #[serde(
+            serialize_with = "serialize_bytes_hex",
+            deserialize_with = "deserialize_bytes_hex"
+        )]
+        pub value: Vec<u8>,
     }
 
     #[test]
@@ -112,6 +123,26 @@ mod tests {
         let serialized = serde_json::to_string(&bytes_array).unwrap();
         assert_eq!(serialized, "{\"value\":[\"0x0101010101010101010101010101010101010101010101010101010101010101\",\"0x0202020202020202020202020202020202020202020202020202020202020202\"]}");
         let deserialized: Bytes32ArrayWrapper = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(bytes_array, deserialized);
+    }
+
+    #[test]
+    fn we_can_roundtrip_empty_bytes() {
+        let bytes_array = BytesWrapper { value: vec![] };
+        let serialized = serde_json::to_string(&bytes_array).unwrap();
+        assert_eq!(serialized, "{\"value\":\"0x\"}");
+        let deserialized: BytesWrapper = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(bytes_array, deserialized);
+    }
+
+    #[test]
+    fn we_can_roundtrip_nonempty_bytes() {
+        let bytes_array = BytesWrapper {
+            value: vec![1u8, 40],
+        };
+        let serialized = serde_json::to_string(&bytes_array).unwrap();
+        assert_eq!(serialized, "{\"value\":\"0x0128\"}");
+        let deserialized: BytesWrapper = serde_json::from_str(&serialized).unwrap();
         assert_eq!(bytes_array, deserialized);
     }
 }
