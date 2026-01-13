@@ -6,7 +6,6 @@ use crate::base::{
         serialize_bytes32_array_as_hex, serialize_bytes_hex,
     },
 };
-use clap::ValueEnum;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
@@ -153,7 +152,7 @@ pub struct QueryPlanResponse {
 
 /// The source of the underlying data
 #[cfg(feature = "native")]
-#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Copy, Eq, ValueEnum)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Copy, Eq, clap::ValueEnum)]
 #[serde(rename_all = "camelCase")]
 pub enum SxtNetwork {
     /// For now at least, this is the only value that is used

@@ -1,6 +1,5 @@
 use super::prover;
 use bumpalo::Bump;
-use clap::ValueEnum;
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
 #[cfg(feature = "hyperkzg")]
@@ -12,7 +11,8 @@ use proof_of_sql::base::commitment::CommitmentEvaluationProof;
 use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[cfg_attr(feature = "native", derive(clap::ValueEnum))]
 #[repr(u8)]
 pub enum CommitmentScheme {
     /// Hyper KZG commitment scheme.
