@@ -14,10 +14,8 @@ pub use verify::{
     VerifyProverResponseError,
 };
 
-/// tonic-generated code for interacting with the prover service
-pub mod prover {
-    tonic::include_proto!("sxt.core");
-}
+/// code for interacting with the prover service
+pub mod prover;
 
 /// types for verifying attestations
 pub mod attestation;
