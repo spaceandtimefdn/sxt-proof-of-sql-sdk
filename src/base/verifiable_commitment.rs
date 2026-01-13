@@ -55,7 +55,8 @@ pub fn extract_query_commitments_from_table_commitments_with_proof<
                     ),
                     Box<dyn core::error::Error>,
                 > {
-                    let table_ref = TableRef::try_from(table_id.as_str())?;
+                    let table_ref =
+                        TableRef::try_from(table_id.as_str()).map_err(|err| err.to_string())?;
                     let table_commitment: TableCommitment<
                         <CPI as CommitmentEvaluationProof>::Commitment,
                     > = try_standard_binary_deserialization(

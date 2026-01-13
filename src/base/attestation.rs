@@ -92,8 +92,8 @@ pub enum AttestationVerificationError {
     #[snafu(display("The signature recovery resulted in an incorrect public key"))]
     InvalidPublicKeyRecovered,
     /// Error related to internals of Merkle tree-related computations.
-    #[snafu(display("Bytes error: {:?}", source))]
-    BytesError { source: BytesError },
+    #[snafu(display("Bytes error: {:?}", err))]
+    BytesError { err: BytesError },
     /// Failure to verify Merkle proof for commitments.
     #[snafu(display("Failed to verify Merkle proof"))]
     FailureToVerifyMerkleProof,
@@ -102,7 +102,7 @@ pub enum AttestationVerificationError {
 impl From<BytesError> for AttestationError {
     fn from(source: BytesError) -> Self {
         AttestationError::VerificationError {
-            source: AttestationVerificationError::BytesError { source },
+            source: AttestationVerificationError::BytesError { err: source },
         }
     }
 }

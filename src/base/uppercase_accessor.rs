@@ -2,8 +2,12 @@ use proof_of_sql::base::{
     commitment::Commitment,
     database::{ColumnType, CommitmentAccessor, MetadataAccessor, SchemaAccessor, TableRef},
 };
-use proof_of_sql_planner::uppercase_identifier;
 use sqlparser::ast::Ident;
+
+fn uppercase_identifier(ident: Ident) -> Ident {
+    let value = ident.value.to_uppercase();
+    Ident { value, ..ident }
+}
 
 pub fn uppercase_table_ref(table_ref: TableRef) -> TableRef {
     TableRef::from_idents(

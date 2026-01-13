@@ -6,11 +6,11 @@ use crate::base::{
         serialize_bytes32_array_as_hex, serialize_bytes_hex,
     },
 };
-use clap::ValueEnum;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 /// The request model for running a zk query model
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QuerySubmitRequest {
@@ -26,6 +26,7 @@ pub struct QuerySubmitRequest {
 }
 
 /// The response to the initial zk query request
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QuerySubmitResponse {
@@ -109,6 +110,7 @@ pub struct QueryResultsResponse {
 }
 
 /// The status of a query
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QueryStatusResponse {
@@ -121,6 +123,7 @@ pub struct QueryStatusResponse {
 }
 
 /// The request model to get a proof plan
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QueryPlanRequest {
@@ -133,11 +136,13 @@ pub struct QueryPlanRequest {
     pub evm_compatible: bool,
 }
 
+#[cfg(feature = "native")]
 fn default_evm_compatible() -> bool {
     true
 }
 
 /// The return model with the proof plan
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct QueryPlanResponse {
@@ -146,7 +151,8 @@ pub struct QueryPlanResponse {
 }
 
 /// The source of the underlying data
-#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Copy, Eq, ValueEnum)]
+#[cfg(feature = "native")]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Default, Clone, Copy, Eq, clap::ValueEnum)]
 #[serde(rename_all = "camelCase")]
 pub enum SxtNetwork {
     /// For now at least, this is the only value that is used
@@ -156,6 +162,7 @@ pub enum SxtNetwork {
 }
 
 /// The eligible values for status
+#[cfg(feature = "native")]
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum ZkQueryStatus {

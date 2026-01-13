@@ -1,8 +1,11 @@
 use super::{fetch_attestation, get_access_token, ZkQueryClient};
-use crate::base::{
-    verify_from_zk_query_and_substrate_responses,
-    zk_query_models::{QuerySubmitRequest, SxtNetwork},
-    CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable,
+use crate::{
+    base::{
+        verify_from_zk_query_and_substrate_responses,
+        zk_query_models::{QuerySubmitRequest, SxtNetwork},
+        CommitmentEvaluationProofId, CommitmentScheme,
+    },
+    native::dyn_owned_table::DynOwnedTable,
 };
 use bumpalo::Bump;
 use jsonrpsee::ws_client::WsClientBuilder;

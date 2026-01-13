@@ -1,12 +1,13 @@
 use crate::base::{CommitmentEvaluationProofId, UppercaseAccessor};
 use datafusion::config::ConfigOptions;
+#[cfg(feature = "native")]
+use proof_of_sql::proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof};
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::{
     HyperKZGCommitment, HyperKZGCommitmentEvaluationProof,
 };
 use proof_of_sql::{
     base::commitment::{CommitmentEvaluationProof, QueryCommitments},
-    proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof},
     sql::proof_plans::DynProofPlan,
 };
 use proof_of_sql_planner::{
@@ -36,6 +37,7 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 }
 
 /// Create a query for the prover service from sql query text and commitments.
+#[expect(dead_code)]
 pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
     query: &Statement,
     commitments: &QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>,
@@ -51,6 +53,7 @@ pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
 
 /// Create a query for the prover service from sql query text and Dynamic Dory commitments.
 #[cfg_attr(not(test), expect(dead_code))]
+#[cfg(feature = "native")]
 pub fn produce_dory_plan_trustlessly(
     query: &Statement,
     commitments: &QueryCommitments<DynamicDoryCommitment>,
@@ -68,6 +71,7 @@ pub fn produce_hyperkzg_plan_trustlessly(
     produce_plan_trustlessly::<HyperKZGCommitmentEvaluationProof>(query, commitments)
 }
 
+#[cfg(feature = "native")]
 #[cfg(test)]
 mod tests {
     use crate::trustless_planning::prover_query::produce_dory_plan_trustlessly;

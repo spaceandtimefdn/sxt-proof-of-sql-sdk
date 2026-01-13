@@ -3,7 +3,7 @@
 pub(crate) mod serde;
 
 mod commitment_scheme;
-pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme, DynOwnedTable};
+pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme};
 
 mod uppercase_accessor;
 pub use uppercase_accessor::{uppercase_table_ref, UppercaseAccessor};
