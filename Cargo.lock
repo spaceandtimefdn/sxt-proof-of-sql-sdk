@@ -5542,7 +5542,6 @@ dependencies = [
  "lazy_static",
  "log",
  "nova-snark",
- "parity-scale-codec",
  "proof-of-sql",
  "proof-of-sql-planner",
  "prost",
