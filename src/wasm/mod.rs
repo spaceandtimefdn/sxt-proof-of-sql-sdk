@@ -2,11 +2,14 @@
 
 use crate::base::{
     attestation::AttestationsResponse, verify_from_zk_query_and_substrate_responses,
-    zk_query_models::QueryResultsResponse, CommitmentEvaluationProofId,
+    zk_query_models::QueryResultsResponse,
 };
-use bumpalo::Bump;
 use gloo_utils::format::JsValueSerdeExt;
-use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
+use nova_snark::provider::hyperkzg::VerifierKey;
+use proof_of_sql::{
+    base::try_standard_binary_deserialization,
+    proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
+};
 use wasm_bindgen::prelude::*;
 
 /// Proof-of-sql verifier setup serialized as bytes.
@@ -27,14 +30,15 @@ pub fn verify_prover_response_hyper_kzg(
         .into_serde()
         .map_err(|e| format!("failed to deserialize attestations response json: {e}"))?;
 
-    let bump = Bump::new();
-
-    let verifier_setup = <HyperKZGCommitmentEvaluationProof as CommitmentEvaluationProofId>::deserialize_verifier_setup(HYPER_KZG_VERIFIER_SETUP_BYTES, &bump).unwrap();
+    let verifier_setup: VerifierKey<HyperKZGEngine> =
+        try_standard_binary_deserialization(HYPER_KZG_VERIFIER_SETUP_BYTES)
+            .map(|(setup, _)| setup)
+            .map_err(|err| err.to_string())?;
 
     let verified_table_result: Vec<_> = verify_from_zk_query_and_substrate_responses::<
         HyperKZGCommitmentEvaluationProof,
     >(
-        prover_response, attestations_response, &verifier_setup
+        prover_response, attestations_response, &&verifier_setup
     )
     .map_err(|e| format!("verification failure: {e}"))?
     .into_inner()
