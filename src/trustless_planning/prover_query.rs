@@ -1,5 +1,7 @@
 use crate::base::{CommitmentEvaluationProofId, UppercaseAccessor};
 use datafusion::config::ConfigOptions;
+#[cfg(feature = "native")]
+use proof_of_sql::proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof};
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::{
     HyperKZGCommitment, HyperKZGCommitmentEvaluationProof,
@@ -8,8 +10,6 @@ use proof_of_sql::{
     base::commitment::{CommitmentEvaluationProof, QueryCommitments},
     sql::proof_plans::DynProofPlan,
 };
-#[cfg(feature = "native")]
-use proof_of_sql::proof_primitive::dory::{DynamicDoryCommitment, DynamicDoryEvaluationProof};
 use proof_of_sql_planner::{
     sql_to_proof_plans, statement_with_uppercase_identifiers, PlannerError,
 };

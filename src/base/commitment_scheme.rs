@@ -2,12 +2,12 @@ use super::prover;
 use bumpalo::Bump;
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
+use proof_of_sql::base::commitment::CommitmentEvaluationProof;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::{
     base::try_standard_binary_deserialization,
     proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
 };
-use proof_of_sql::base::commitment::CommitmentEvaluationProof;
 use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
