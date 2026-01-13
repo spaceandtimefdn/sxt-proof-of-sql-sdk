@@ -1,19 +1,14 @@
 use super::prover;
-use ark_serialize::{CanonicalDeserialize, Compress, Validate};
 use bumpalo::Bump;
 use clap::ValueEnum;
-use datafusion::arrow::{error::ArrowError, record_batch::RecordBatch};
 #[cfg(feature = "hyperkzg")]
 use nova_snark::provider::hyperkzg::VerifierKey;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::{
     base::try_standard_binary_deserialization,
-    proof_primitive::hyperkzg::{BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
+    proof_primitive::hyperkzg::{HyperKZGCommitmentEvaluationProof, HyperKZGEngine},
 };
-use proof_of_sql::{
-    base::{commitment::CommitmentEvaluationProof, database::OwnedTable},
-    proof_primitive::dory::{DoryScalar, DynamicDoryEvaluationProof, VerifierSetup},
-};
+use proof_of_sql::base::commitment::CommitmentEvaluationProof;
 use serde::{Deserialize, Serialize};
 
 /// Commitment schemes used in the proof-of-sql SDK.
@@ -37,11 +32,6 @@ impl core::fmt::Display for CommitmentScheme {
     }
 }
 
-// Default verifier setups for different commitment schemes.
-const DYNAMIC_DORY_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/verifier_setups/dynamic-dory.bin"
-));
 #[cfg(feature = "hyperkzg")]
 const HYPER_KZG_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -55,28 +45,6 @@ impl From<CommitmentScheme> for prover::CommitmentScheme {
             CommitmentScheme::DynamicDory => Self::DynamicDory,
             #[cfg(feature = "hyperkzg")]
             CommitmentScheme::HyperKzg => Self::HyperKzg,
-        }
-    }
-}
-
-/// Enum of [`OwnedTable`]s with different scalar types.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum DynOwnedTable {
-    /// Owned table with a [`DoryScalar`]. Used for Dynamic Dory.
-    Dory(OwnedTable<DoryScalar>),
-    /// Owned table with a [`BNScalar`]. Used for HyperKZG.
-    #[cfg(feature = "hyperkzg")]
-    BN(OwnedTable<BNScalar>),
-}
-
-impl TryFrom<DynOwnedTable> for RecordBatch {
-    type Error = ArrowError;
-
-    fn try_from(value: DynOwnedTable) -> Result<Self, Self::Error> {
-        match value {
-            DynOwnedTable::Dory(table) => table.try_into(),
-            #[cfg(feature = "hyperkzg")]
-            DynOwnedTable::BN(table) => table.try_into(),
         }
     }
 }
@@ -117,19 +85,5 @@ impl CommitmentEvaluationProofId for HyperKZGCommitmentEvaluationProof {
         let setup: VerifierKey<HyperKZGEngine> =
             try_standard_binary_deserialization(bytes).map(|(setup, _)| setup)?;
         Ok(alloc.alloc(setup) as &'a VerifierKey<HyperKZGEngine>)
-    }
-}
-
-impl CommitmentEvaluationProofId for DynamicDoryEvaluationProof {
-    const COMMITMENT_SCHEME: CommitmentScheme = CommitmentScheme::DynamicDory;
-    const DEFAULT_VERIFIER_SETUP_BYTES: &'static [u8] = DYNAMIC_DORY_VERIFIER_SETUP_BYTES;
-    type DeserializationError = ark_serialize::SerializationError;
-
-    fn deserialize_verifier_setup<'a>(
-        bytes: &[u8],
-        alloc: &'a Bump,
-    ) -> Result<&'a VerifierSetup, Self::DeserializationError> {
-        let setup = VerifierSetup::deserialize_with_mode(bytes, Compress::No, Validate::No)?;
-        Ok(alloc.alloc(setup) as &'a VerifierSetup)
     }
 }
