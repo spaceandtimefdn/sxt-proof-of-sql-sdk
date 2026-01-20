@@ -31,7 +31,7 @@ impl core::fmt::Display for CommitmentScheme {
 }
 
 #[cfg(feature = "hyperkzg")]
-const HYPER_KZG_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
+pub const HYPER_KZG_VERIFIER_SETUP_BYTES: &[u8] = include_bytes!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/verifier_setups/hyper-kzg.bin"
 ));
