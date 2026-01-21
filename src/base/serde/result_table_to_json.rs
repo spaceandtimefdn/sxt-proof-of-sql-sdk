@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use proof_of_sql::{
     base::{
         database::OwnedColumn,
@@ -7,6 +8,7 @@ use proof_of_sql::{
     proof_primitive::hyperkzg::BNScalar,
 };
 use serde::Serialize;
+use sqlparser::ast::Ident;
 use std::ops::Neg;
 
 #[derive(Serialize, Debug)]
@@ -154,6 +156,21 @@ impl TryFrom<&OwnedColumn<BNScalar>> for JSFriendlyColumn {
             _ => Err("Unsupported column type for JS friendly conversion".to_string()),
         }
     }
+}
+
+#[cfg_attr(not(test), expect(dead_code))]
+pub(crate) fn convert_result_to_json(
+    result: IndexMap<Ident, OwnedColumn<BNScalar>>,
+) -> Result<String, String> {
+    let js_friendly_table: Result<IndexMap<_, _>, String> = result
+        .iter()
+        .map(|(key, column)| {
+            let js_friendly_column = JSFriendlyColumn::try_from(column)?;
+            Ok((key.to_string(), js_friendly_column))
+        })
+        .collect();
+    serde_json::to_string(&js_friendly_table?)
+        .map_err(|e| format!("Failed to serialize to JSON: {}", e))
 }
 
 #[cfg(test)]
@@ -309,6 +326,38 @@ mod tests {
         let result = JSFriendlyColumn::try_from(&unsupported_column).unwrap_err();
         assert_eq!(
             result,
+            "Unsupported column type for JS friendly conversion".to_string()
+        );
+    }
+
+    #[test]
+    fn test_convert_result_to_json() {
+        let mut result = IndexMap::new();
+        result.insert(
+            Ident::new("bool_col"),
+            OwnedColumn::Boolean(vec![true, false, true]),
+        );
+        result.insert(Ident::new("int_col"), OwnedColumn::Int(vec![1, -2, 3]));
+        result.insert(
+            Ident::new("bigint_col"),
+            OwnedColumn::BigInt(vec![1234567890123456789, -987654321098765432, 2]),
+        );
+
+        let json_result = convert_result_to_json(result).expect("Conversion to JSON failed");
+        let expected_json = r#"{"bool_col":{"type":"Boolean","column":[true,false,true]},"int_col":{"type":"Int","column":[1,-2,3]},"bigint_col":{"type":"BigInt","column":["1234567890123456789","-987654321098765432","2"]}}"#;
+        assert_eq!(json_result, expected_json);
+    }
+
+    #[test]
+    fn test_convert_result_to_json_with_unsupported_column() {
+        let mut result = IndexMap::new();
+        result.insert(
+            Ident::new("unsupported_col"),
+            OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]),
+        );
+        let json_result = convert_result_to_json(result).unwrap_err();
+        assert_eq!(
+            json_result,
             "Unsupported column type for JS friendly conversion".to_string()
         );
     }
