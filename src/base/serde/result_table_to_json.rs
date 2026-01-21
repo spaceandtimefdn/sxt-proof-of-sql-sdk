@@ -91,13 +91,13 @@ enum JSFriendlyColumn {
     Scalar(ScalarColumn),
 }
 
-fn scalar_to_string(scalar: &Vec<BNScalar>) -> Vec<String> {
+fn scalar_to_string(scalar: &[BNScalar]) -> Vec<String> {
     scalar
         .iter()
         .map(|s| match s.gt(&BNScalar::MAX_SIGNED) {
             true => {
                 let abs_value = s.neg();
-                format!("-{}", abs_value.into_u256_wrapping().to_string())
+                format!("-{}", abs_value.into_u256_wrapping())
             }
             false => s.into_u256_wrapping().to_string(),
         })
