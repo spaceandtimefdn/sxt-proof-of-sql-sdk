@@ -12,36 +12,6 @@ use sqlparser::ast::Ident;
 use std::ops::Neg;
 
 #[derive(Serialize, Debug)]
-struct BooleanColumn {
-    column: Vec<bool>,
-}
-
-#[derive(Serialize, Debug)]
-struct TinyIntColumn {
-    column: Vec<i8>,
-}
-
-#[derive(Serialize, Debug)]
-struct SmallIntColumn {
-    column: Vec<i16>,
-}
-
-#[derive(Serialize, Debug)]
-struct IntColumn {
-    column: Vec<i32>,
-}
-
-#[derive(Serialize, Debug)]
-struct BigIntColumn {
-    column: Vec<String>,
-}
-
-#[derive(Serialize, Debug)]
-struct VarCharColumn {
-    column: Vec<String>,
-}
-
-#[derive(Serialize, Debug)]
 struct Decimal75Column {
     precision: u8,
     scale: i8,
@@ -57,41 +27,38 @@ struct TimestampTZColumn {
 }
 
 #[derive(Serialize, Debug)]
-struct VarBinaryColumn {
-    column: Vec<Vec<u8>>,
+struct Column<T> {
+    column: Vec<T>,
 }
 
-#[derive(Serialize, Debug)]
-struct ScalarColumn {
-    column: Vec<String>,
-}
-
+/// A JavaScript-friendly representation of a proof of sql result column, converting larger integer types to strings.
 #[derive(Serialize, Debug)]
 #[serde(tag = "type")]
 enum JSFriendlyColumn {
     /// Boolean columns
-    Boolean(BooleanColumn),
+    Boolean(Column<bool>),
     /// i8 columns
-    TinyInt(TinyIntColumn),
+    TinyInt(Column<i8>),
     /// i16 columns
-    SmallInt(SmallIntColumn),
+    SmallInt(Column<i16>),
     /// i32 columns
-    Int(IntColumn),
+    Int(Column<i32>),
     /// i64 columns
-    BigInt(BigIntColumn),
+    BigInt(Column<String>),
     /// String columns
-    VarChar(VarCharColumn),
+    VarChar(Column<String>),
     /// Decimal columns
     Decimal75(Decimal75Column),
     /// Timestamp columns
     TimestampTZ(TimestampTZColumn),
     /// Variable length binary columns
-    VarBinary(VarBinaryColumn),
+    VarBinary(Column<Vec<u8>>),
     /// Scalar columns
-    Scalar(ScalarColumn),
+    Scalar(Column<String>),
 }
 
-fn scalar_to_string(scalar: &[BNScalar]) -> Vec<String> {
+// Converts a `BNScalar` slice to a vector of decimal strings, handling negative values appropriately.
+fn scalar_to_string(scalar: Vec<BNScalar>) -> Vec<String> {
     scalar
         .iter()
         .map(|s| match s.gt(&BNScalar::MAX_SIGNED) {
@@ -104,42 +71,34 @@ fn scalar_to_string(scalar: &[BNScalar]) -> Vec<String> {
         .collect()
 }
 
-impl TryFrom<&OwnedColumn<BNScalar>> for JSFriendlyColumn {
+impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
     type Error = String;
 
-    fn try_from(value: &OwnedColumn<BNScalar>) -> Result<Self, Self::Error> {
+    fn try_from(value: OwnedColumn<BNScalar>) -> Result<Self, Self::Error> {
         match value {
-            OwnedColumn::Boolean(items) => Ok(JSFriendlyColumn::Boolean(BooleanColumn {
-                column: items.clone(),
-            })),
-            OwnedColumn::TinyInt(items) => Ok(JSFriendlyColumn::TinyInt(TinyIntColumn {
-                column: items.clone(),
-            })),
-            OwnedColumn::SmallInt(items) => Ok(JSFriendlyColumn::SmallInt(SmallIntColumn {
-                column: items.clone(),
-            })),
-            OwnedColumn::Int(items) => Ok(JSFriendlyColumn::Int(IntColumn {
-                column: items.clone(),
-            })),
-            OwnedColumn::BigInt(items) => Ok(JSFriendlyColumn::BigInt(BigIntColumn {
+            OwnedColumn::Boolean(items) => Ok(JSFriendlyColumn::Boolean(Column { column: items })),
+            OwnedColumn::TinyInt(items) => Ok(JSFriendlyColumn::TinyInt(Column { column: items })),
+            OwnedColumn::SmallInt(items) => {
+                Ok(JSFriendlyColumn::SmallInt(Column { column: items }))
+            }
+            OwnedColumn::Int(items) => Ok(JSFriendlyColumn::Int(Column { column: items })),
+            OwnedColumn::BigInt(items) => Ok(JSFriendlyColumn::BigInt(Column {
                 column: items
                     .iter()
                     .map(|item| item.to_string())
                     .collect::<Vec<_>>(),
             })),
-            OwnedColumn::VarChar(items) => Ok(JSFriendlyColumn::VarChar(VarCharColumn {
-                column: items.clone(),
-            })),
+            OwnedColumn::VarChar(items) => Ok(JSFriendlyColumn::VarChar(Column { column: items })),
             OwnedColumn::Decimal75(precision, scale, items) => {
                 Ok(JSFriendlyColumn::Decimal75(Decimal75Column {
                     precision: precision.value(),
-                    scale: *scale,
+                    scale: scale,
                     column: scalar_to_string(items),
                 }))
             }
             OwnedColumn::TimestampTZ(time_unit, time_zone, items) => {
                 Ok(JSFriendlyColumn::TimestampTZ(TimestampTZColumn {
-                    time_unit: *time_unit,
+                    time_unit: time_unit,
                     offset: time_zone.offset(),
                     column: items
                         .iter()
@@ -147,23 +106,24 @@ impl TryFrom<&OwnedColumn<BNScalar>> for JSFriendlyColumn {
                         .collect::<Vec<_>>(),
                 }))
             }
-            OwnedColumn::VarBinary(items) => Ok(JSFriendlyColumn::VarBinary(VarBinaryColumn {
-                column: items.clone(),
-            })),
-            OwnedColumn::Scalar(items) => Ok(JSFriendlyColumn::Scalar(ScalarColumn {
+            OwnedColumn::VarBinary(items) => {
+                Ok(JSFriendlyColumn::VarBinary(Column { column: items }))
+            }
+            OwnedColumn::Scalar(items) => Ok(JSFriendlyColumn::Scalar(Column {
                 column: scalar_to_string(items),
             })),
-            _ => Err("Unsupported column type for JS friendly conversion".to_string()),
+            _ => Err(format!("Unsupported column type: {}", value.column_type())),
         }
     }
 }
 
+/// Convert a result table to a JSON string. This handles converting bigger integer types to string for easier handling by javascript.
 #[cfg_attr(not(test), expect(dead_code))]
 pub(crate) fn convert_result_to_json(
     result: IndexMap<Ident, OwnedColumn<BNScalar>>,
 ) -> Result<String, String> {
     let js_friendly_table: Result<IndexMap<_, _>, String> = result
-        .iter()
+        .into_iter()
         .map(|(key, column)| {
             let js_friendly_column = JSFriendlyColumn::try_from(column)?;
             Ok((key.to_string(), js_friendly_column))
@@ -184,7 +144,7 @@ mod tests {
     fn test_js_friendly_boolean_column_conversion() {
         let boolean_column = OwnedColumn::Boolean(vec![true, false, true]);
         let js_friendly_column =
-            JSFriendlyColumn::try_from(&boolean_column).expect("Conversion failed");
+            JSFriendlyColumn::try_from(boolean_column).expect("Conversion failed");
         if let JSFriendlyColumn::Boolean(bool_col) = js_friendly_column {
             assert_eq!(bool_col.column, vec![true, false, true]);
         } else {
@@ -196,7 +156,7 @@ mod tests {
     fn test_js_friendly_tinyint_column_conversion() {
         let tinyint_column = OwnedColumn::TinyInt(vec![1, -2, 3]);
         let js_friendly_column =
-            JSFriendlyColumn::try_from(&tinyint_column).expect("Conversion failed");
+            JSFriendlyColumn::try_from(tinyint_column).expect("Conversion failed");
         if let JSFriendlyColumn::TinyInt(tinyint_col) = js_friendly_column {
             assert_eq!(tinyint_col.column, vec![1, -2, 3]);
         } else {
@@ -208,7 +168,7 @@ mod tests {
     fn test_js_friendly_smallint_column_conversion() {
         let smallint_column = OwnedColumn::SmallInt(vec![1, -2, 3]);
         let js_friendly_column =
-            JSFriendlyColumn::try_from(&smallint_column).expect("Conversion failed");
+            JSFriendlyColumn::try_from(smallint_column).expect("Conversion failed");
         if let JSFriendlyColumn::SmallInt(smallint_col) = js_friendly_column {
             assert_eq!(smallint_col.column, vec![1, -2, 3]);
         } else {
@@ -219,8 +179,7 @@ mod tests {
     #[test]
     fn test_js_friendly_int_column_conversion() {
         let int_column = OwnedColumn::Int(vec![1, -2, 3]);
-        let js_friendly_column =
-            JSFriendlyColumn::try_from(&int_column).expect("Conversion failed");
+        let js_friendly_column = JSFriendlyColumn::try_from(int_column).expect("Conversion failed");
         if let JSFriendlyColumn::Int(int_col) = js_friendly_column {
             assert_eq!(int_col.column, vec![1, -2, 3]);
         } else {
@@ -232,7 +191,7 @@ mod tests {
     fn test_js_friendly_bigint_column_conversion() {
         let bigint_column = OwnedColumn::BigInt(vec![1234567890123456789, -987654321098765432]);
         let js_friendly_column =
-            JSFriendlyColumn::try_from(&bigint_column).expect("Conversion failed");
+            JSFriendlyColumn::try_from(bigint_column).expect("Conversion failed");
         if let JSFriendlyColumn::BigInt(bigint_col) = js_friendly_column {
             assert_eq!(
                 bigint_col.column,
@@ -250,7 +209,7 @@ mod tests {
     fn test_js_friendly_varchar_column_conversion() {
         let varchar_column = OwnedColumn::VarChar(vec!["hello".to_string(), "world".to_string()]);
         let js_friendly_column =
-            JSFriendlyColumn::try_from(&varchar_column).expect("Conversion failed");
+            JSFriendlyColumn::try_from(varchar_column).expect("Conversion failed");
         if let JSFriendlyColumn::VarChar(varchar_col) = js_friendly_column {
             assert_eq!(
                 varchar_col.column,
@@ -268,7 +227,7 @@ mod tests {
             -2i8,
             vec![BNScalar::from(12345), BNScalar::from(-67890)],
         );
-        let js_friendly_column = JSFriendlyColumn::try_from(&decimal_column).unwrap();
+        let js_friendly_column = JSFriendlyColumn::try_from(decimal_column).unwrap();
         if let JSFriendlyColumn::Decimal75(decimal_col) = js_friendly_column {
             assert_eq!(
                 decimal_col.column,
@@ -286,7 +245,7 @@ mod tests {
             PoSQLTimeZone::utc(),
             vec![1234567890, -9876543210],
         );
-        let js_friendly_column = JSFriendlyColumn::try_from(&timestamp_column).unwrap();
+        let js_friendly_column = JSFriendlyColumn::try_from(timestamp_column).unwrap();
         if let JSFriendlyColumn::TimestampTZ(timestamp_col) = js_friendly_column {
             assert_eq!(
                 timestamp_col.column,
@@ -300,9 +259,9 @@ mod tests {
     #[test]
     fn test_js_friendly_varbinary_column_conversion() {
         let varbinary_column = OwnedColumn::VarBinary(vec![vec![1, 2, 3], vec![4, 5, 6]]);
-        let js_friendly_columnq =
-            JSFriendlyColumn::try_from(&varbinary_column).expect("Conversion failed");
-        if let JSFriendlyColumn::VarBinary(varbinary_col) = js_friendly_columnq {
+        let js_friendly_column =
+            JSFriendlyColumn::try_from(varbinary_column).expect("Conversion failed");
+        if let JSFriendlyColumn::VarBinary(varbinary_col) = js_friendly_column {
             assert_eq!(varbinary_col.column, vec![vec![1, 2, 3], vec![4, 5, 6]]);
         } else {
             panic!("Expected VarBinary column");
@@ -312,7 +271,7 @@ mod tests {
     #[test]
     fn test_js_friendly_scalar_column_conversion() {
         let scalar_column = OwnedColumn::Scalar(vec![BNScalar::from(42), BNScalar::from(-99)]);
-        let js_friendly_column = JSFriendlyColumn::try_from(&scalar_column).unwrap();
+        let js_friendly_column = JSFriendlyColumn::try_from(scalar_column).unwrap();
         if let JSFriendlyColumn::Scalar(scalar_col) = js_friendly_column {
             assert_eq!(scalar_col.column, vec!["42".to_string(), "-99".to_string()]);
         } else {
@@ -323,11 +282,8 @@ mod tests {
     #[test]
     fn test_js_friendly_unsupported_column_conversion() {
         let unsupported_column = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
-        let result = JSFriendlyColumn::try_from(&unsupported_column).unwrap_err();
-        assert_eq!(
-            result,
-            "Unsupported column type for JS friendly conversion".to_string()
-        );
+        let result = JSFriendlyColumn::try_from(unsupported_column).unwrap_err();
+        assert_eq!(result, "Unsupported column type: UINT8".to_string());
     }
 
     #[test]
@@ -356,9 +312,6 @@ mod tests {
             OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]),
         );
         let json_result = convert_result_to_json(result).unwrap_err();
-        assert_eq!(
-            json_result,
-            "Unsupported column type for JS friendly conversion".to_string()
-        );
+        assert_eq!(json_result, "Unsupported column type: UINT8".to_string());
     }
 }
