@@ -92,13 +92,13 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
             OwnedColumn::Decimal75(precision, scale, items) => {
                 Ok(JSFriendlyColumn::Decimal75(Decimal75Column {
                     precision: precision.value(),
-                    scale: scale,
+                    scale,
                     column: scalar_to_string(items),
                 }))
             }
             OwnedColumn::TimestampTZ(time_unit, time_zone, items) => {
                 Ok(JSFriendlyColumn::TimestampTZ(TimestampTZColumn {
-                    time_unit: time_unit,
+                    time_unit,
                     offset: time_zone.offset(),
                     column: items
                         .iter()
