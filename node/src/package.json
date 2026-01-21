@@ -1,6 +1,6 @@
 {
     "name": "sxt-proof-of-sql-sdk",
-    "version": "0.51.5",
+    "version": "0.52.0",
     "description": "",
     "main": "index.js",
     "type": "module",
