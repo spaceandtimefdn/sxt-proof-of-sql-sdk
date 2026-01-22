@@ -1,3 +1,17 @@
+# [0.53.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.52.1...v0.53.0) (2026-01-22)
+
+
+### Bug Fixes
+
+* clean up js test ([8f27359](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/8f273595480c8d7b0904e2747fc4b9f720e5fbf0))
+
+
+### Features
+
+* add missing fields to `AttestedCommitments` ([a26271b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/a26271b0d1c8e7f1be60c3bef96780e179f63ae1))
+
+
+
 ## [0.52.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.52.0...v0.52.1) (2026-01-22)
 
 
@@ -16,10 +30,6 @@
 
 
 ## [0.51.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.51.3...v0.51.4) (2026-01-13)
-
-
-
-## [0.51.3](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.51.2...v0.51.3) (2026-01-13)
 
 
 
