@@ -39,7 +39,7 @@ pub struct QuerySubmitResponse {
 }
 
 /// The table commitments with the merkle proof of the commitments
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableCommitmentWithProof {
     #[serde(

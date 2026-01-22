@@ -7,7 +7,7 @@ fn from_hex(hex: &str) -> Result<Vec<u8>, FromHexError> {
 }
 
 /// Function for encoding bytes into a hex string with "0x" prefix.
-fn to_hex(bytes: &Vec<u8>) -> String {
+pub(crate) fn to_hex(bytes: &Vec<u8>) -> String {
     let hex = hex::encode(bytes);
     format!("0x{}", hex)
 }
