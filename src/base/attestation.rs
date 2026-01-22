@@ -81,9 +81,6 @@ pub enum AttestationVerificationError {
     /// The public key could not be recovered.
     #[snafu(display("Key recovery error"))]
     KeyRecoveryError,
-    /// The public key could not be parsed.
-    #[snafu(display("Public key parsing error"))]
-    PublicKeyParsingError,
     /// The signature could not be recovered.
     #[snafu(display("Signature recovery error"))]
     SignatureRecoveryError,
@@ -158,7 +155,11 @@ pub enum SignatureError {
 ///     Err(e) => println!("Signature verification failed: {:?}", e),
 /// }
 /// ```
-pub fn verify_eth_signature(msg: &[u8], scalars: &EthereumSignature, pub_key: &[u8]) -> Result<()> {
+pub fn verify_eth_signature(
+    msg: &[u8],
+    scalars: &EthereumSignature,
+    address20: &[u8],
+) -> Result<()> {
     let signature = Signature::from_scalars(scalars.r, scalars.s)
         .map_err(|_| AttestationVerificationError::SignatureRecoveryError)
         .context(VerificationSnafu)?;
@@ -175,11 +176,24 @@ pub fn verify_eth_signature(msg: &[u8], scalars: &EthereumSignature, pub_key: &[
         .map_err(|_| AttestationVerificationError::KeyRecoveryError)
         .context(VerificationSnafu)?;
 
-    let expected_key = VerifyingKey::from_sec1_bytes(pub_key)
-        .map_err(|_| AttestationVerificationError::PublicKeyParsingError)
-        .context(VerificationSnafu)?;
+    let recovered_address = Keccak256::digest(
+        recovered_pub_key
+            .to_encoded_point(false)
+            .as_bytes()
+            .split_first()
+            .ok_or(AttestationError::VerificationError {
+                source: AttestationVerificationError::InvalidPublicKeyRecovered,
+            })?
+            .1,
+    )
+    .split_at_checked(12)
+    .ok_or(AttestationError::VerificationError {
+        source: AttestationVerificationError::InvalidPublicKeyRecovered,
+    })?
+    .1
+    .to_vec();
 
-    match recovered_pub_key == expected_key {
+    match address20 == recovered_address {
         true => Ok(()),
         false => Err(AttestationError::VerificationError {
             source: AttestationVerificationError::InvalidPublicKeyRecovered,
@@ -348,11 +362,11 @@ pub fn verify_attestations(
                         state_root,
                         block_number,
                         signature,
-                        proposed_pub_key,
+                        address20,
                         ..
                     } = attestation;
                     let attestation_message = create_attestation_message(state_root, *block_number);
-                    verify_eth_signature(&attestation_message, signature, proposed_pub_key)?;
+                    verify_eth_signature(&attestation_message, signature, address20)?;
                     // Remove the first byte for it is the AttestationDomain
                     let actual_state_root = &state_root[1..];
                     let encoded_root = hex::encode(actual_state_root);
@@ -569,10 +583,13 @@ mod tests {
         // Get the public key from the private key
         let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
         let verifying_key = signing_key.verifying_key();
-        let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+        let address20 =
+            Keccak256::digest(&verifying_key.to_encoded_point(false).as_bytes().to_vec()[1..])
+                .to_vec()[12..]
+                .to_vec();
 
         // Verify the signature
-        let result = verify_eth_signature(message, &signature, &pub_key_bytes);
+        let result = verify_eth_signature(message, &signature, &address20);
         assert!(result.is_ok());
     }
 
@@ -696,31 +713,6 @@ mod tests {
     }
 
     #[test]
-    fn test_verify_eth_signature_invalid_public_key_format() {
-        let private_key = [
-            0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
-            0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67,
-            0x89, 0xab, 0xcd, 0xef,
-        ];
-        let message = b"test message";
-
-        // Sign the message
-        let signature = sign_eth_message(&private_key, message).unwrap();
-
-        // Invalid public key (wrong length)
-        let invalid_pub_key = vec![0u8; 10];
-
-        // Try to verify with invalid public key format
-        let result = verify_eth_signature(message, &signature, &invalid_pub_key);
-        assert!(matches!(
-            result,
-            Err(AttestationError::VerificationError {
-                source: AttestationVerificationError::PublicKeyParsingError
-            })
-        ));
-    }
-
-    #[test]
     fn test_attestation_serialization() {
         let attestation = Attestation::EthereumAttestation {
             signature: EthereumSignature::new([1u8; 32], [2u8; 32], Some(27)),
@@ -786,10 +778,13 @@ mod tests {
             // Get the public key
             let signing_key = SigningKey::from_bytes(&private_key.into()).unwrap();
             let verifying_key = signing_key.verifying_key();
-            let pub_key_bytes = verifying_key.to_encoded_point(false).as_bytes().to_vec();
+            let address20 =
+                Keccak256::digest(&verifying_key.to_encoded_point(false).as_bytes().to_vec()[1..])
+                    .to_vec()[12..]
+                    .to_vec();
 
             // Verify the signature
-            let result = verify_eth_signature(message, &signature, &pub_key_bytes);
+            let result = verify_eth_signature(message, &signature, &address20);
             assert!(
                 result.is_ok(),
                 "Failed to verify signature for message length {}",
