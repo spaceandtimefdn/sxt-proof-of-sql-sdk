@@ -3117,8 +3117,6 @@ dependencies = [
  "jsonrpsee-core 0.22.5",
  "jsonrpsee-http-client",
  "jsonrpsee-types 0.22.5",
- "jsonrpsee-wasm-client 0.22.5",
- "jsonrpsee-ws-client 0.22.5",
 ]
 
 [[package]]
@@ -3129,8 +3127,8 @@ checksum = "62b089779ad7f80768693755a031cc14a7766aba707cbe886674e3f79e9b7e47"
 dependencies = [
  "jsonrpsee-core 0.23.2",
  "jsonrpsee-types 0.23.2",
- "jsonrpsee-wasm-client 0.23.2",
- "jsonrpsee-ws-client 0.23.2",
+ "jsonrpsee-wasm-client",
+ "jsonrpsee-ws-client",
 ]
 
 [[package]]
@@ -3154,7 +3152,6 @@ dependencies = [
  "tokio-util",
  "tracing",
  "url",
- "webpki-roots 0.26.11",
 ]
 
 [[package]]
@@ -3277,17 +3274,6 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-wasm-client"
-version = "0.22.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f448d8eacd945cc17b6c0b42c361531ca36a962ee186342a97cdb8fca679cd77"
-dependencies = [
- "jsonrpsee-client-transport 0.22.5",
- "jsonrpsee-core 0.22.5",
- "jsonrpsee-types 0.22.5",
-]
-
-[[package]]
-name = "jsonrpsee-wasm-client"
 version = "0.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4727ac037f834c6f04c0912cada7532dbddb54e92fbc64e33d6cb8c24af313c9"
@@ -3295,19 +3281,6 @@ dependencies = [
  "jsonrpsee-client-transport 0.23.2",
  "jsonrpsee-core 0.23.2",
  "jsonrpsee-types 0.23.2",
-]
-
-[[package]]
-name = "jsonrpsee-ws-client"
-version = "0.22.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58b9db2dfd5bb1194b0ce921504df9ceae210a345bc2f6c5a61432089bbab070"
-dependencies = [
- "http 0.2.12",
- "jsonrpsee-client-transport 0.22.5",
- "jsonrpsee-core 0.22.5",
- "jsonrpsee-types 0.22.5",
- "url",
 ]
 
 [[package]]
@@ -5514,7 +5487,6 @@ dependencies = [
  "hex",
  "indexmap",
  "itertools 0.13.0",
- "jsonrpsee 0.22.5",
  "k256",
  "lazy_static",
  "log",

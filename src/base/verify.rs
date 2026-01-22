@@ -1,6 +1,6 @@
 use super::{uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId};
 use crate::base::{
-    attestation::{verify_attestations, AttestationsResponse},
+    attestation::verify_attestations,
     verifiable_commitment::extract_query_commitments_from_table_commitments_with_proof,
     zk_query_models::QueryResultsResponse,
 };
@@ -61,17 +61,11 @@ pub fn verify_prover_via_gateway_response<CPI: CommitmentEvaluationProofId>(
 
 pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationProofId>(
     query_results: QueryResultsResponse,
-    attestations_response: AttestationsResponse,
     verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
 ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>> {
-    let table_commitment_with_proof = query_results.commitments.commitments;
-    let attestations = attestations_response.attestations;
-    verify_attestations(
-        &attestations,
-        &table_commitment_with_proof,
-        CPI::COMMITMENT_SCHEME,
-    )
-    .map_err(|err| err.to_string())?;
+    let table_commitment_with_proof =
+        verify_attestations(&query_results.commitments, CPI::COMMITMENT_SCHEME)
+            .map_err(|err| err.to_string())?;
 
     let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
         table_commitment_with_proof,
