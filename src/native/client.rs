@@ -1,6 +1,7 @@
-use super::{fetch_attestation, get_access_token, ZkQueryClient};
+use super::{get_access_token, ZkQueryClient};
 use crate::{
     base::{
+        serde::hex::to_hex,
         verify_from_zk_query_and_substrate_responses,
         zk_query_models::{QuerySubmitRequest, SxtNetwork},
         CommitmentEvaluationProofId, CommitmentScheme,
@@ -8,7 +9,6 @@ use crate::{
     native::dyn_owned_table::DynOwnedTable,
 };
 use bumpalo::Bump;
-use jsonrpsee::ws_client::WsClientBuilder;
 #[cfg(feature = "hyperkzg")]
 use proof_of_sql::proof_primitive::hyperkzg::HyperKZGCommitmentEvaluationProof;
 use proof_of_sql::{
@@ -84,13 +84,6 @@ impl SxTClient {
             None => CPI::DEFAULT_VERIFIER_SETUP_BYTES,
         };
         let verifier_setup = CPI::deserialize_verifier_setup(verifier_setup_bytes, bump)?;
-        let ws_client = WsClientBuilder::new()
-            .build(self.substrate_node_url.clone())
-            .await?;
-
-        // Get the appropriate block hash and attestations
-        let (best_block_hash, attestations_response) =
-            fetch_attestation(&ws_client, block_ref).await?;
 
         // Run the query to get the proof plan and query results and Merkle tree
         let access_token = get_access_token(&self.sxt_api_key, self.auth_root_url.as_str()).await?;
@@ -106,7 +99,7 @@ impl SxTClient {
                 source_network: SxtNetwork::Mainnet,
                 timeout: None,
                 commitment_scheme: Some(scheme),
-                block_hash: Some(format!("0x{}", hex::encode(best_block_hash))),
+                block_hash: block_ref.map(|bytes| to_hex(&bytes.to_vec())),
             })
             .await?;
         if !query_results.success {
@@ -118,11 +111,7 @@ impl SxTClient {
             ))));
         }
 
-        verify_from_zk_query_and_substrate_responses::<CPI>(
-            query_results,
-            attestations_response,
-            &verifier_setup,
-        )
+        verify_from_zk_query_and_substrate_responses::<CPI>(query_results, &verifier_setup)
     }
 
     /// Query and verify a SQL query at the given SxT block

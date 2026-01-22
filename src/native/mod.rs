@@ -8,9 +8,6 @@ mod dyn_owned_table;
 mod plan;
 pub use plan::produce_plan;
 
-mod rpc;
-pub use rpc::fetch_attestation;
-
 mod client;
 pub use client::SxTClient;
 

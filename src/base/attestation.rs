@@ -1,12 +1,13 @@
 use super::{
-    serde::hex::{deserialize_bytes_hex, deserialize_bytes_hex32, serialize_bytes_hex},
+    serde::hex::{deserialize_bytes_hex32, serialize_bytes_hex},
     verifiable_commitment::generate_commitment_leaf,
     zk_query_models::TableCommitmentWithProof,
     CommitmentScheme,
 };
+use crate::base::zk_query_models::AttestedCommitments;
 use eth_merkle_tree::utils::{errors::BytesError, keccak::keccak256, verify::verify_proof};
 use indexmap::IndexMap;
-use itertools::{process_results, Itertools};
+use itertools::{izip, process_results, Itertools};
 use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
 use serde::{Deserialize, Serialize};
 use sha3::{digest::core_api::CoreWrapper, Digest, Keccak256, Keccak256Core};
@@ -61,9 +62,9 @@ pub enum AttestationError {
         /// Source of the error.
         source: SignatureError,
     },
-    /// Error parsing the public key.
-    #[snafu(display("Public key parsing error"))]
-    PublicKeyError,
+    /// Error retrieving attestations
+    #[snafu(display("Error retrieving attestations"))]
+    MalformedData,
 }
 
 /// Specialized `Result` type for the attestation module.
@@ -235,122 +236,60 @@ pub fn create_attestation_message<BN: Into<u64>>(
 }
 
 /// Represents attestations stored on-chain.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum Attestation {
-    /// An Ethereum-style attestation.
-    #[serde(rename_all = "camelCase")]
-    EthereumAttestation {
-        /// The signature.
-        signature: EthereumSignature,
-        /// The public key used to sign the attestation.
-        #[serde(
-            serialize_with = "serialize_bytes_hex",
-            deserialize_with = "deserialize_bytes_hex"
-        )]
-        proposed_pub_key: Vec<u8>,
-        /// The ethereum address for this public key
-        #[serde(
-            serialize_with = "serialize_bytes_hex",
-            deserialize_with = "deserialize_bytes_hex"
-        )]
-        address20: Vec<u8>,
-        /// The state root included in the attestation.
-        #[serde(
-            serialize_with = "serialize_bytes_hex",
-            deserialize_with = "deserialize_bytes_hex"
-        )]
-        state_root: Vec<u8>,
-        /// The block number that was attested
-        block_number: u64,
-        /// The hash of the block that was attested
-        #[serde(
-            serialize_with = "serialize_bytes_hex",
-            deserialize_with = "deserialize_bytes_hex32"
-        )]
-        block_hash: [u8; 32],
-    },
-}
-
-impl Attestation {
-    /// Get the [`EthereumSignature`] if this variant has one.
-    pub fn signature(&self) -> Option<&EthereumSignature> {
-        match self {
-            Attestation::EthereumAttestation { signature, .. } => Some(signature),
-            // more variants later → return None by default
-        }
-    }
-
-    /// Get the proposed public key if this variant has one.
-    pub fn proposed_pub_key(&self) -> Option<&[u8]> {
-        match self {
-            Attestation::EthereumAttestation {
-                proposed_pub_key, ..
-            } => Some(proposed_pub_key),
-            // more variants later → return None by default
-        }
-    }
-
-    /// Get the state_root if this variant has one.
-    pub fn state_root(&self) -> Option<Vec<u8>> {
-        match self {
-            Attestation::EthereumAttestation { state_root, .. } => Some(state_root.clone()),
-            // more variants later → return None by default
-        }
-    }
-
-    /// Get the block number if this variant has one.
-    pub fn block_number(&self) -> Option<u64> {
-        match self {
-            Attestation::EthereumAttestation { block_number, .. } => Some(*block_number),
-            // more variants later → return None by default
-        }
-    }
-}
-
-/// Response containing attestation info used by the attestation RPCs.
-#[derive(Clone, PartialEq, Eq, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct AttestationsResponse {
-    /// The attestations for the `attestations_for` block.
-    pub attestations: Vec<Attestation>,
-    /// The block hash that was attested.
-    #[serde(
-        serialize_with = "serialize_bytes_hex",
-        deserialize_with = "deserialize_bytes_hex32"
-    )]
-    pub attestations_for: [u8; 32],
-    /// The block number that was attested.
-    pub attestations_for_block_number: u32,
-    /// The block that was used to query storage.
-    #[serde(
-        serialize_with = "serialize_bytes_hex",
-        deserialize_with = "deserialize_bytes_hex32"
-    )]
-    pub at: [u8; 32],
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Attestation {
+    /// The signature.
+    signature: EthereumSignature,
+    /// The ethereum address for this public key
+    address20: Vec<u8>,
+    /// The state root included in the attestation.
+    state_root: Vec<u8>,
 }
 
 /// Now verify for each attestation and every commitment
 pub fn verify_attestations(
-    attestations: &[Attestation],
-    table_commitment_with_proof: &IndexMap<String, TableCommitmentWithProof>,
+    attested_commitments: &AttestedCommitments,
     commitment_scheme: CommitmentScheme,
-) -> Result<(), AttestationError> {
+) -> Result<IndexMap<String, TableCommitmentWithProof>, AttestationError> {
+    let attestations = [
+        attested_commitments.r.len(),
+        attested_commitments.s.len(),
+        attested_commitments.v.len(),
+        attested_commitments.address20s.len(),
+        attested_commitments.state_root.len(),
+    ]
+    .iter()
+    .all_equal()
+    .then(|| {
+        izip!(
+            attested_commitments.r.clone(),
+            attested_commitments.s.clone(),
+            attested_commitments.v.clone(),
+            attested_commitments.address20s.clone(),
+            attested_commitments.state_root.clone(),
+        )
+        .map(|(r, s, v, address20, state_root)| Attestation {
+            signature: EthereumSignature { r, s, v },
+            address20,
+            state_root,
+        })
+        .collect::<Vec<_>>()
+    })
+    .ok_or(AttestationError::MalformedData)?;
     // Early filtering: extract table commitments attestations
     let table_commitments_attestations: Vec<_> = attestations
         .iter()
-        .filter(|attestation| {
-            let Attestation::EthereumAttestation { state_root, .. } = attestation;
-
+        .filter(|Attestation { state_root, .. }| {
             // Filter out state_roots with length != 33 or first byte != 0x00
             state_root.len() == 33 && state_root[0] == 0x00
         })
         .collect::<Vec<_>>();
+    let block_number = attested_commitments.block_number;
 
     let is_valid = process_results(
         table_commitments_attestations
             .iter()
-            .cartesian_product(table_commitment_with_proof.into_iter())
+            .cartesian_product(attested_commitments.commitments.iter())
             .map(
                 |(attestation, (table_id, commitment_with_proof))| -> Result<bool, AttestationError> {
                     // We need to verify
@@ -358,14 +297,13 @@ pub fn verify_attestations(
                     // 2. The [`TableCommitmentBytes`] is in fact a leaf in the attestation tree and that
                     //    the provided Merkle proof in [`TableCommitmentWithProof`] is valid for the leaf
                     //    with respect to the attestation's state root
-                    let Attestation::EthereumAttestation {
+                    let Attestation {
                         state_root,
-                        block_number,
                         signature,
                         address20,
                         ..
                     } = attestation;
-                    let attestation_message = create_attestation_message(state_root, *block_number);
+                    let attestation_message = create_attestation_message(state_root, block_number);
                     verify_eth_signature(&attestation_message, signature, address20)?;
                     // Remove the first byte for it is the AttestationDomain
                     let actual_state_root = &state_root[1..];
@@ -389,7 +327,7 @@ pub fn verify_attestations(
             source: AttestationVerificationError::FailureToVerifyMerkleProof,
         });
     }
-    Ok(())
+    Ok(attested_commitments.commitments.clone())
 }
 
 #[cfg(test)]
@@ -398,7 +336,6 @@ mod tests {
     use indexmap::indexmap;
     use k256::ecdsa::SigningKey;
     use lazy_static::lazy_static;
-    use serde_json;
 
     lazy_static! {
         static ref TABLE_COMMITMENTS_WITH_PROOF: IndexMap<String, TableCommitmentWithProof> = indexmap! {
@@ -713,51 +650,6 @@ mod tests {
     }
 
     #[test]
-    fn test_attestation_serialization() {
-        let attestation = Attestation::EthereumAttestation {
-            signature: EthereumSignature::new([1u8; 32], [2u8; 32], Some(27)),
-            proposed_pub_key: vec![3u8; 33],
-            address20: vec![4u8; 20],
-            state_root: vec![5u8; 32],
-            block_number: 12345,
-            block_hash: [6u8; 32],
-        };
-
-        // Serialize to JSON
-        let json = serde_json::to_string(&attestation).unwrap();
-
-        // Deserialize back
-        let deserialized: Attestation = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(attestation, deserialized);
-    }
-
-    #[test]
-    fn test_attestation_response_serialization() {
-        let response = AttestationsResponse {
-            attestations: vec![Attestation::EthereumAttestation {
-                signature: EthereumSignature::new([1u8; 32], [2u8; 32], Some(27)),
-                proposed_pub_key: vec![3u8; 33],
-                address20: vec![4u8; 20],
-                state_root: vec![5u8; 32],
-                block_number: 12345,
-                block_hash: [6u8; 32],
-            }],
-            attestations_for: [7u8; 32],
-            attestations_for_block_number: 67890,
-            at: [8u8; 32],
-        };
-
-        // Serialize to JSON
-        let json = serde_json::to_string(&response).unwrap();
-
-        // Deserialize back
-        let deserialized: AttestationsResponse = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(response, deserialized);
-    }
-
-    #[test]
     fn test_sign_and_verify_roundtrip() {
         let private_key = [
             0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab,
@@ -793,440 +685,154 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_attestations_response_deserialization() {
-        let json_data = r#"{
-            "attestations": [
-                {
-                    "signature": {
-                        "r": "0x3237b93564178a49a6fa9cc96f0a3df5e27fa53a28cf1a88ac64a17f73d2944a",
-                        "s": "0x09a97f7a405ef418c98dd663fb5fd56f1c0862d1193a3d028c18d368d166347e",
-                        "v": 1
-                    },
-                    "proposedPubKey": "0x0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
-                    "address20": "0x813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace",
-                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
-                    "blockNumber": 3871761,
-                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
-                },
-                {
-                    "signature": {
-                        "r": "0x96a8b2f3b0012e1b07d7fa45ef262089897820e9169c39ee6615369ca7c97a59",
-                        "s": "0x0de1c99c2237d53009081595c6e44377b10d04c426a2e3c61719aeaab9552010",
-                        "v": 0
-                    },
-                    "proposedPubKey": "0x03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
-                    "address20": "0x8c2b9f40a674ca91f8ac5ff30eb17b80d768f209",
-                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
-                    "blockNumber": 3871761,
-                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
-                },
-                {
-                    "signature": {
-                        "r": "0xcf557caac3a7468fbff30bdbcbce6c6f74d047b4f7ca58ba3db013e3c6e28952",
-                        "s": "0x32fb4912195e408ee5e662b1cf93fc9426d157dbcd82963028872fef2d1f8989",
-                        "v": 1
-                    },
-                    "proposedPubKey": "0x02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
-                    "address20": "0xe7c9f4d5b48920f6e561b4889bb9bef9874c57e0",
-                    "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
-                    "blockNumber": 3871761,
-                    "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
-                }
-            ],
-            "attestationsFor": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8",
-            "attestationsForBlockNumber": 3871761,
-            "at": "0xd269eca553be9eb838bd6d8de6bcfab88ec0491de2eb05c2d6f9606696c9f6bc"
-        }"#;
-
-        let response: AttestationsResponse = serde_json::from_str(json_data).unwrap();
-        assert_eq!(response.attestations.len(), 3);
-        assert_eq!(response.attestations_for_block_number, 3871761);
-    }
-
-    #[test]
-    fn test_single_attestation_deserialization() {
-        let json_data = r#"{
-            "signature": {
-                "r": "0x3237b93564178a49a6fa9cc96f0a3df5e27fa53a28cf1a88ac64a17f73d2944a",
-                "s": "0x09a97f7a405ef418c98dd663fb5fd56f1c0862d1193a3d028c18d368d166347e",
-                "v": 1
-            },
-            "proposedPubKey": "0x0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
-            "address20": "0x813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace",
-            "stateRoot": "0xd59fb8badcfe01e423f5bac34ef53ab541c6c644f34ba5ad822d2d9bb12a34ec",
-            "blockNumber": 3871761,
-            "blockHash": "0x714ba2ae2caa5c669e4a348f9000b6225b6803bee989b8caca009f790a1b1ad8"
-        }"#;
-
-        let attestation: Attestation = serde_json::from_str(json_data).unwrap();
-        assert_eq!(attestation.block_number().unwrap(), 3871761);
-        assert_eq!(attestation.signature().unwrap().v, 1);
-    }
-
     #[cfg(feature = "hyperkzg")]
     #[test]
     fn test_verify_attestations_with_hyper_kzg() {
-        let attestations = vec![
-            // Attestation 1 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4",
-                    )
+        let attested_commitments = AttestedCommitments {
+            commitments: TABLE_COMMITMENTS_WITH_PROOF.clone(),
+            r: vec![
+                hex::decode("0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920",
-                    )
+                hex::decode("d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
-                )
-                .unwrap(),
-                address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 2 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527",
-                    )
+                hex::decode("adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda",
-                    )
+                hex::decode("0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
-                )
-                .unwrap(),
-                address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 3 - block 4425701, blockHash 0x697cf...35fef (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8",
-                    )
+                hex::decode("adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94",
-                    )
+                hex::decode("d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
-                )
-                .unwrap(),
-                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "697cf0edc651905f40df340b9bb4273bf829aab988b36df175e1ea6e3bd35fef",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 4 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "0aadcc62871621389df55e32ab2a71bcbb60fbf75994ddccd26f3a4204726ae4",
-                    )
+                hex::decode("840689485acafc5df1324d81d0667c40712c3c3a17fd6abba28ef50c3d4f3945")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920",
-                    )
+                hex::decode("4db877e787216abef007c5fdc4332b44dfba84ef2b05146addba4320d372b24c")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
-                )
-                .unwrap(),
-                address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 5 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "adefc9c8758708aca7cdc11f634f993c3e735d1cd23e6acc51df60aa46ecc8b8",
-                    )
+                hex::decode("f2bcd53f539c1c08f3fb9cd226f225c9bb408f185bab5956163e31614412883b")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94",
-                    )
+            ],
+            s: vec![
+                hex::decode("15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
-                )
-                .unwrap(),
-                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 6 - block 4425701, blockHash 0xc6a40...0dba7 (filtered out - 32 byte state_root)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "d8cc7dbf0881c1fedf2926433c8dc22b24de6030f1d503d133655e72ec970527",
-                    )
+                hex::decode("06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda",
-                    )
+                hex::decode("31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
-                )
-                .unwrap(),
-                address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
-                state_root: hex::decode(
-                    "742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590",
-                )
-                .unwrap(),
-                block_number: 4425701,
-                block_hash: hex::decode(
-                    "c6a40099a6cbf095764597d78c49f6ab2dfd8d3fabda3ce3f064cd6d5840dba7",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 7 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "840689485acafc5df1324d81d0667c40712c3c3a17fd6abba28ef50c3d4f3945",
-                    )
+                hex::decode("15e73ea804162dcb455efcd747f40050e77cc9d585e7de9d640478ded029e920")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "14c3fe046eecd3ed14bc4d36bea8a70faa0eafb2ac8794e490166c1414a6c743",
-                    )
+                hex::decode("31504910641b0877511c8241fac881404a0b1e43e2a07cee03b5156e8151ac94")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "0259fa36fd0d3fc21ba33904a68d6af18edf59bf5a9c1cc31dda371d3f38993bc9",
-                )
-                .unwrap(),
-                address20: hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
-                state_root: hex::decode(
-                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
-                )
-                .unwrap(),
-                block_number: 4539877,
-                block_hash: hex::decode(
-                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 8 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "4db877e787216abef007c5fdc4332b44dfba84ef2b05146addba4320d372b24c",
-                    )
+                hex::decode("06a66d51e3930b56c600d8112ff7f897b5e2292a7eeb120987d0fe26203f5bda")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "0cf12eadf29cd4fd8c897ab570303e007e7532234c89e04a49ab79b1b3eb85f8",
-                    )
+                hex::decode("14c3fe046eecd3ed14bc4d36bea8a70faa0eafb2ac8794e490166c1414a6c743")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 1,
-                },
-                proposed_pub_key: hex::decode(
-                    "03b1f15d1e2a19d0784547de80b271f28cc7aaed0030d8409f9462a94f920062f2",
-                )
-                .unwrap(),
-                address20: hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
-                state_root: hex::decode(
-                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
-                )
-                .unwrap(),
-                block_number: 4539877,
-                block_hash: hex::decode(
-                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-            // Attestation 9 - block 4539877, blockHash 0x631a6...c87fe (valid - 33 byte state_root with 0x00 prefix)
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: hex::decode(
-                        "f2bcd53f539c1c08f3fb9cd226f225c9bb408f185bab5956163e31614412883b",
-                    )
+                hex::decode("0cf12eadf29cd4fd8c897ab570303e007e7532234c89e04a49ab79b1b3eb85f8")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    s: hex::decode(
-                        "62f898bc36b410756ee5592a5cb4be06015f9b283d7d98b9bf65c288a7921d2b",
-                    )
+                hex::decode("62f898bc36b410756ee5592a5cb4be06015f9b283d7d98b9bf65c288a7921d2b")
                     .unwrap()
                     .try_into()
                     .unwrap(),
-                    v: 0,
-                },
-                proposed_pub_key: hex::decode(
-                    "02e6b88162d12753a7f9074ca32854bb9022941f2158f3f179212d1abb030125b3",
-                )
-                .unwrap(),
-                address20: hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
-                state_root: hex::decode(
-                    "001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e",
-                )
-                .unwrap(),
-                block_number: 4539877,
-                block_hash: hex::decode(
-                    "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
-                )
-                .unwrap()
-                .try_into()
-                .unwrap(),
-            },
-        ];
+            ],
+            v: vec![1, 1, 1, 1, 1, 1, 1, 1, 0],
+            state_root: vec![
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("742fdac4036e107068940342dbc4b638388736107aa28f4c91e49b9435c89590")
+                    .unwrap(),
+                hex::decode("001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+                hex::decode("001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+                hex::decode("001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+            ],
+            address20s: vec![
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+            ],
+            block_number: 4539877,
+            block_hash: hex::decode(
+                "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+            )
+            .unwrap()
+            .try_into()
+            .unwrap(),
+        };
 
-        let result = verify_attestations(
-            &attestations,
-            &TABLE_COMMITMENTS_WITH_PROOF,
-            CommitmentScheme::HyperKzg,
-        );
+        let result = verify_attestations(&attested_commitments, CommitmentScheme::HyperKzg);
         assert!(result.is_ok(), "Verification failed: {:?}", result);
     }
 
     #[cfg(feature = "hyperkzg")]
     #[test]
     fn test_verify_attestations_work_if_all_attestations_have_filtered_out_state_roots() {
-        // Attestations with state_root length != 33 are filtered out (valid but not used)
-        let attestations = vec![
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: [0; 32],
-                    s: [1; 32],
-                    v: 0,
-                },
-                proposed_pub_key: vec![0; 33],
-                address20: vec![0; 20],
-                state_root: vec![0; 32], // Length != 33: will be filtered out
-                block_number: 1,
-                block_hash: [0; 32],
-            },
-            Attestation::EthereumAttestation {
-                signature: EthereumSignature {
-                    r: [0; 32],
-                    s: [1; 32],
-                    v: 0,
-                },
-                proposed_pub_key: vec![0; 33],
-                address20: vec![0; 20],
-                state_root: {
-                    let mut root = vec![0x01]; // Non-0x00 domain: will be filtered out
-                    root.extend_from_slice(&[0; 32]);
-                    root
-                },
-                block_number: 1,
-                block_hash: [0; 32],
-            },
-        ];
+        let attested_commitments = AttestedCommitments {
+            commitments: TABLE_COMMITMENTS_WITH_PROOF.clone(),
+            r: vec![[0; 32], [0; 32]],
+            s: vec![[1; 32], [1; 32]],
+            v: vec![0, 0],
+            state_root: vec![vec![0; 32], {
+                let mut root = vec![0x01]; // Non-0x00 domain: will be filtered out
+                root.extend_from_slice(&[0; 32]);
+                root
+            }],
+            address20s: vec![vec![0; 20], vec![0; 20]],
+            block_number: 1,
+            block_hash: [0; 32],
+        };
 
         // Since there are no table commitments attestations after filtering, and we have commitments
         // to verify, the verification should be verification success due to no table commitments
         // attestations existing
-        let result = verify_attestations(
-            &attestations,
-            &TABLE_COMMITMENTS_WITH_PROOF,
-            CommitmentScheme::HyperKzg,
-        );
+        let result = verify_attestations(&attested_commitments, CommitmentScheme::HyperKzg);
 
         assert!(result.is_ok());
     }

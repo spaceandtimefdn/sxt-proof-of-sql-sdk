@@ -7,7 +7,7 @@ fn from_hex(hex: &str) -> Result<Vec<u8>, FromHexError> {
 }
 
 /// Function for encoding bytes into a hex string with "0x" prefix.
-fn to_hex(bytes: &Vec<u8>) -> String {
+pub(crate) fn to_hex(bytes: &Vec<u8>) -> String {
     let hex = hex::encode(bytes);
     format!("0x{}", hex)
 }
@@ -84,6 +84,39 @@ where
                 .try_into()
                 .map_err(|_| serde::de::Error::custom("Invalid length"))
         })
+        .collect()
+}
+
+/// Serialization function for encoding `Vec<Vec<u8>>` objects as hex strings with a leading `0x`.
+///
+/// Can be used in `#[serde(serialize_with = "serialize_bytes_array_as_hex")]`
+/// for any `Vec<Vec<u8>>` field.
+pub fn serialize_bytes_array_as_hex<S>(
+    bytes_array: &[Vec<u8>],
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    bytes_array
+        .iter()
+        .map(|bytes| to_hex(&bytes.to_vec()))
+        .collect::<Vec<_>>()
+        .serialize(serializer)
+}
+
+/// Deserialization function for `Vec<Vec<u8>>` objects that are encoded as hex strings with a leading `0x`.
+///
+/// Can be used in `#[serde(deserialize_with = "deserialize_bytes_array_as_hex")]`
+/// for any `Vec<Vec<u8>>` field.
+pub fn deserialize_bytes_array_as_hex<'de, D>(deserializer: D) -> Result<Vec<Vec<u8>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let bytes_array = Vec::<String>::deserialize(deserializer)?;
+    bytes_array
+        .into_iter()
+        .map(|b| from_hex(&b).map_err(serde::de::Error::custom))
         .collect()
 }
 

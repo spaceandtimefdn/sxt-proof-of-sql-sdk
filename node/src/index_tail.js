@@ -128,8 +128,7 @@ export class SxTClient {
     const proverResponseJson = await this.#getZkQueryResult(accessToken, queryId)
 
     const result = verify_prover_response_hyper_kzg(
-      proverResponseJson,
-      attestationsResponse.result
+      proverResponseJson
     );
     return result;
   }

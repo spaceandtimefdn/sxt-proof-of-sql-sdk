@@ -2,8 +2,9 @@
 use crate::base::{
     prover::CommitmentScheme,
     serde::hex::{
-        deserialize_bytes32_array_as_hex, deserialize_bytes_hex, deserialize_bytes_hex32,
-        serialize_bytes32_array_as_hex, serialize_bytes_hex,
+        deserialize_bytes32_array_as_hex, deserialize_bytes_array_as_hex, deserialize_bytes_hex,
+        deserialize_bytes_hex32, serialize_bytes32_array_as_hex, serialize_bytes_array_as_hex,
+        serialize_bytes_hex,
     },
 };
 use indexmap::IndexMap;
@@ -38,7 +39,7 @@ pub struct QuerySubmitResponse {
 }
 
 /// The table commitments with the merkle proof of the commitments
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableCommitmentWithProof {
     #[serde(
@@ -67,6 +68,16 @@ pub struct AttestedCommitments {
     )]
     pub s: Vec<[u8; 32]>,
     pub v: Vec<u8>,
+    #[serde(
+        serialize_with = "serialize_bytes_array_as_hex",
+        deserialize_with = "deserialize_bytes_array_as_hex"
+    )]
+    pub state_root: Vec<Vec<u8>>,
+    #[serde(
+        serialize_with = "serialize_bytes_array_as_hex",
+        deserialize_with = "deserialize_bytes_array_as_hex"
+    )]
+    pub address20s: Vec<Vec<u8>>,
     pub block_number: u64,
     #[serde(
         serialize_with = "serialize_bytes_hex",
