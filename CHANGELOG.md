@@ -1,3 +1,7 @@
+## [0.53.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.53.0...v0.53.1) (2026-01-23)
+
+
+
 # [0.53.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.52.1...v0.53.0) (2026-01-22)
 
 
@@ -26,10 +30,6 @@
 
 
 ## [0.51.5](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.51.4...v0.51.5) (2026-01-13)
-
-
-
-## [0.51.4](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.51.3...v0.51.4) (2026-01-13)
 
 
 
