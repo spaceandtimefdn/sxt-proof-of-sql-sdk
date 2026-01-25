@@ -51,18 +51,6 @@ pub struct QueryAndVerifySdkArgs {
     )]
     pub auth_root_url: Url,
 
-    /// URL for the Substrate node service
-    ///
-    /// Specifies the Substrate node endpoint used for accessing commitment data.
-    /// Can be set via SUBSTRATE_NODE_URL environment variable.
-    #[arg(
-        long,
-        value_name = "SUBSTRATE_NODE_URL",
-        default_value = "wss://rpc.testnet.sxt.network",
-        env = "SUBSTRATE_NODE_URL"
-    )]
-    pub substrate_node_url: Url,
-
     /// API Key for Space and Time (SxT) services
     ///
     /// The API key required for authorization with Space and Time services.
@@ -113,7 +101,6 @@ impl From<&QueryAndVerifySdkArgs> for (SxTClient, CommitmentScheme) {
                 args.network,
                 args.zk_query_root_url.clone(),
                 args.auth_root_url.clone(),
-                args.substrate_node_url.clone(),
                 args.sxt_api_key.clone(),
                 args.verifier_setup.clone(),
             ),

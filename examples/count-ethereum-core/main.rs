@@ -129,10 +129,6 @@ async fn main() {
             &env::var("AUTH_ROOT_URL").unwrap_or("https://proxy.api.makeinfinite.dev".to_string()),
         )
         .unwrap(),
-        Url::parse(
-            &env::var("SUBSTRATE_NODE_URL").unwrap_or("wss://rpc.testnet.sxt.network".to_string()),
-        )
-        .unwrap(),
         env::var("SXT_API_KEY").expect("SXT_API_KEY is required"),
         env::var("VERIFIER_SETUP").ok(),
     ));
