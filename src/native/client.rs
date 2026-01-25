@@ -30,9 +30,6 @@ pub struct SxTClient {
     /// Root URL for the Auth service
     pub auth_root_url: Url,
 
-    /// URL for the Substrate node service
-    pub substrate_node_url: Url,
-
     /// API Key for Space and Time (SxT) services
     ///
     /// Please visit [Space and Time Studio](https://app.spaceandtime.ai/) to obtain an API key
@@ -49,7 +46,6 @@ impl SxTClient {
         network: SxtNetwork,
         zk_query_root_url: Url,
         auth_root_url: Url,
-        substrate_node_url: Url,
         sxt_api_key: String,
         verifier_setup: Option<String>,
     ) -> Self {
@@ -57,7 +53,6 @@ impl SxTClient {
             network,
             zk_query_root_url,
             auth_root_url,
-            substrate_node_url,
             sxt_api_key,
             verifier_setup,
         }
