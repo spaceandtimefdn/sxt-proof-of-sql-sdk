@@ -1,8 +1,16 @@
 use super::{uppercase_accessor::UppercaseAccessor, CommitmentEvaluationProofId};
+#[cfg(feature = "hyperkzg")]
+use crate::base::commitment_scheme::HYPER_KZG_VERIFIER_SETUP_BYTES;
 use crate::base::{
     attestation::verify_attestations,
     verifiable_commitment::extract_query_commitments_from_table_commitments_with_proof,
     zk_query_models::QueryResultsResponse,
+};
+#[cfg(feature = "hyperkzg")]
+use nova_snark::provider::hyperkzg::VerifierKey;
+#[cfg(feature = "hyperkzg")]
+use proof_of_sql::proof_primitive::hyperkzg::{
+    BNScalar, HyperKZGCommitmentEvaluationProof, HyperKZGEngine,
 };
 use proof_of_sql::{
     base::{
@@ -59,13 +67,54 @@ pub fn verify_prover_via_gateway_response<CPI: CommitmentEvaluationProofId>(
     Ok(result)
 }
 
+#[cfg(feature = "hyperkzg")]
+fn proof_of_sql_verify_from_json_responses_as_result(
+    query_results_json: String,
+    valid_attestors: Vec<String>,
+) -> Result<OwnedTable<BNScalar>, String> {
+    use crate::base::serde::hex::from_hex;
+
+    let query_results: QueryResultsResponse = serde_json::from_str(&query_results_json)
+        .map_err(|err| format!("Error deserializing query results: {}", err.to_string()))?;
+    let valid_attestors = valid_attestors
+        .iter()
+        .map(|attestor| from_hex(attestor).map_err(|err| err.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+    let verifier_setup: VerifierKey<HyperKZGEngine> =
+        try_standard_binary_deserialization(HYPER_KZG_VERIFIER_SETUP_BYTES)
+            .map_err(|err| err.to_string())
+            .unwrap()
+            .0;
+
+    verify_from_zk_query_and_substrate_responses::<HyperKZGCommitmentEvaluationProof>(
+        query_results,
+        valid_attestors,
+        &&verifier_setup,
+    )
+    .map_err(|err| format!("Error verifying result: {}", err.to_string()))
+}
+
+#[cfg(feature = "hyperkzg")]
+pub fn proof_of_sql_verify_from_json_responses(
+    query_results_json: String,
+    valid_attestors: Vec<String>,
+) -> String {
+    let result =
+        proof_of_sql_verify_from_json_responses_as_result(query_results_json, valid_attestors);
+    crate::base::serde::result_table_to_json::convert_result_to_json(result).unwrap()
+}
+
 pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationProofId>(
     query_results: QueryResultsResponse,
+    required_attestors: Vec<Vec<u8>>,
     verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
 ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>> {
-    let table_commitment_with_proof =
-        verify_attestations(&query_results.commitments, vec![], CPI::COMMITMENT_SCHEME)
-            .map_err(|err| err.to_string())?;
+    let table_commitment_with_proof = verify_attestations(
+        &query_results.commitments,
+        required_attestors,
+        CPI::COMMITMENT_SCHEME,
+    )
+    .map_err(|err| err.to_string())?;
 
     let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
         table_commitment_with_proof,

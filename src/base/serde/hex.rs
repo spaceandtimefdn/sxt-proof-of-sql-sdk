@@ -2,7 +2,7 @@ use hex::FromHexError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Function for decoding a hex string with optional "0x" prefix into bytes.
-fn from_hex(hex: &str) -> Result<Vec<u8>, FromHexError> {
+pub(crate) fn from_hex(hex: &String) -> Result<Vec<u8>, FromHexError> {
     hex::decode(hex.strip_prefix("0x").unwrap_or(hex))
 }
 
