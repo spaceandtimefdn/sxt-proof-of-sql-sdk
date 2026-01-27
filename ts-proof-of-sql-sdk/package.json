@@ -1,0 +1,16 @@
+{
+  "name": "@spaceandtime/ts-proof-of-sql-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+	"publishConfig": {
+		"access": "public"
+	}
+}
