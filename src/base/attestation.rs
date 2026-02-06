@@ -65,6 +65,9 @@ pub enum AttestationError {
     /// Error retrieving attestations
     #[snafu(display("Error retrieving attestations"))]
     MalformedData,
+    /// Attestations do not included every required attestor
+    #[snafu(display("At least one required attestor has not signed"))]
+    MissingAttestor,
 }
 
 /// Specialized `Result` type for the attestation module.
@@ -249,6 +252,7 @@ pub struct Attestation {
 /// Now verify for each attestation and every commitment
 pub fn verify_attestations(
     attested_commitments: &AttestedCommitments,
+    required_attestors: Vec<Vec<u8>>,
     commitment_scheme: CommitmentScheme,
 ) -> Result<IndexMap<String, TableCommitmentWithProof>, AttestationError> {
     let attestations = [
@@ -284,6 +288,15 @@ pub fn verify_attestations(
             state_root.len() == 33 && state_root[0] == 0x00
         })
         .collect::<Vec<_>>();
+
+    if !required_attestors.iter().all(|attestor| {
+        table_commitments_attestations
+            .iter()
+            .any(|attestation| attestation.address20 == *attestor)
+    }) {
+        return Err(AttestationError::MissingAttestor);
+    }
+
     let block_number = attested_commitments.block_number;
 
     let is_valid = process_results(
@@ -807,7 +820,15 @@ mod tests {
             .unwrap(),
         };
 
-        let result = verify_attestations(&attested_commitments, CommitmentScheme::HyperKzg);
+        let result = verify_attestations(
+            &attested_commitments,
+            vec![
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+            ],
+            CommitmentScheme::HyperKzg,
+        );
         assert!(result.is_ok(), "Verification failed: {:?}", result);
     }
 
@@ -832,8 +853,79 @@ mod tests {
         // Since there are no table commitments attestations after filtering, and we have commitments
         // to verify, the verification should be verification success due to no table commitments
         // attestations existing
-        let result = verify_attestations(&attested_commitments, CommitmentScheme::HyperKzg);
+        let result = verify_attestations(&attested_commitments, vec![], CommitmentScheme::HyperKzg);
 
         assert!(result.is_ok());
+    }
+
+    #[cfg(feature = "hyperkzg")]
+    #[test]
+    fn test_missing_attestor() {
+        let attested_commitments = AttestedCommitments {
+            commitments: TABLE_COMMITMENTS_WITH_PROOF.clone(),
+            r: vec![
+                hex::decode("840689485acafc5df1324d81d0667c40712c3c3a17fd6abba28ef50c3d4f3945")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                hex::decode("4db877e787216abef007c5fdc4332b44dfba84ef2b05146addba4320d372b24c")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                hex::decode("f2bcd53f539c1c08f3fb9cd226f225c9bb408f185bab5956163e31614412883b")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ],
+            s: vec![
+                hex::decode("14c3fe046eecd3ed14bc4d36bea8a70faa0eafb2ac8794e490166c1414a6c743")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                hex::decode("0cf12eadf29cd4fd8c897ab570303e007e7532234c89e04a49ab79b1b3eb85f8")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+                hex::decode("62f898bc36b410756ee5592a5cb4be06015f9b283d7d98b9bf65c288a7921d2b")
+                    .unwrap()
+                    .try_into()
+                    .unwrap(),
+            ],
+            v: vec![1, 1, 0],
+            state_root: vec![
+                hex::decode("001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+                hex::decode("001c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+                hex::decode("1c9eacb80783f8e6f9bd2645ec40d91dc294512bb4c53d68cb07f9e056d1904e")
+                    .unwrap(),
+            ],
+            address20s: vec![
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+            ],
+            block_number: 4539877,
+            block_hash: hex::decode(
+                "631a6cdd6a156d7e61fe7627ab04b7c748e4d61a29f13aee0b54d458fbcc87fe",
+            )
+            .unwrap()
+            .try_into()
+            .unwrap(),
+        };
+
+        let result = verify_attestations(
+            &attested_commitments,
+            vec![
+                hex::decode("e7c9f4d5b48920f6e561b4889bb9bef9874c57e0").unwrap(),
+                hex::decode("813d6af4222a6b8ea3237f3a9eb7a9d58ade2ace").unwrap(),
+                hex::decode("8c2b9f40a674ca91f8ac5ff30eb17b80d768f209").unwrap(),
+            ],
+            CommitmentScheme::HyperKzg,
+        );
+        assert!(matches!(
+            result.unwrap_err(),
+            AttestationError::MissingAttestor
+        ));
     }
 }

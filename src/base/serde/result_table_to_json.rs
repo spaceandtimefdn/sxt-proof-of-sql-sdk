@@ -135,7 +135,6 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
 
 /// Convert a result table to a JSON string. This handles converting bigger integer types to string for easier handling by javascript.
 /// Additionally, any errors are recorded in a javascript friendly result type.
-#[cfg_attr(not(test), expect(dead_code))]
 pub(crate) fn convert_result_to_json(
     result: Result<OwnedTable<BNScalar>, String>,
 ) -> Result<String, String> {
