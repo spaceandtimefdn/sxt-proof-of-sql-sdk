@@ -64,7 +64,7 @@ pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationPro
     verifier_setup: &<CPI as CommitmentEvaluationProof>::VerifierPublicSetup<'_>,
 ) -> Result<OwnedTable<<CPI as CommitmentEvaluationProof>::Scalar>, Box<dyn core::error::Error>> {
     let table_commitment_with_proof =
-        verify_attestations(&query_results.commitments, CPI::COMMITMENT_SCHEME)
+        verify_attestations(&query_results.commitments, vec![], CPI::COMMITMENT_SCHEME)
             .map_err(|err| err.to_string())?;
 
     let query_commitments = extract_query_commitments_from_table_commitments_with_proof::<CPI>(
