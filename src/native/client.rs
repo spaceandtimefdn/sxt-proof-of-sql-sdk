@@ -106,7 +106,7 @@ impl SxTClient {
             ))));
         }
 
-        verify_from_zk_query_and_substrate_responses::<CPI>(query_results, &verifier_setup)
+        verify_from_zk_query_and_substrate_responses::<CPI>(query_results, vec![], &verifier_setup)
     }
 
     /// Query and verify a SQL query at the given SxT block

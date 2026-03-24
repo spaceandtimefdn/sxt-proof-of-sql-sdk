@@ -29,7 +29,7 @@ pub fn verify_prover_response_hyper_kzg(prover_response_json: JsValue) -> Result
 
     let verified_table_result: Vec<_> = verify_from_zk_query_and_substrate_responses::<
         HyperKZGCommitmentEvaluationProof,
-    >(prover_response, &&verifier_setup)
+    >(prover_response, Vec::new(), &&verifier_setup)
     .map_err(|e| format!("verification failure: {e}"))?
     .into_inner()
     .into_iter()

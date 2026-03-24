@@ -149,20 +149,27 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
 }
 
 /// Convert a result table to a javascript friendly value. This handles converting bigger integer types to string for easier handling by javascript.
-#[cfg_attr(not(test), expect(dead_code))]
 pub(crate) fn try_convert_table_to_javascript_friendly_table(
-    table: Result<OwnedTable<BNScalar>, Failure>,
+    table: OwnedTable<BNScalar>,
 ) -> Result<IndexMap<String, JSFriendlyColumn>, Failure> {
-    table.and_then(|table| {
-        table
-            .into_inner()
-            .into_iter()
-            .map(|(key, column)| {
-                let js_friendly_column = JSFriendlyColumn::try_from(column)?;
-                Ok((key.to_string(), js_friendly_column))
-            })
-            .collect()
-    })
+    table
+        .into_inner()
+        .into_iter()
+        .map(|(key, column)| {
+            let js_friendly_column = JSFriendlyColumn::try_from(column)?;
+            Ok((key.to_string(), js_friendly_column))
+        })
+        .collect()
+}
+
+impl From<Result<IndexMap<String, JSFriendlyColumn>, Failure>>
+    for VerificationStatus<IndexMap<String, JSFriendlyColumn>>
+{
+    fn from(value: Result<IndexMap<String, JSFriendlyColumn>, Failure>) -> Self {
+        value.map_or_else(VerificationStatus::Failure, |success| {
+            VerificationStatus::Success(Success { result: success })
+        })
+    }
 }
 
 #[cfg(test)]
@@ -339,10 +346,9 @@ mod tests {
         let big_int_column = OwnedColumn::BigInt(vec![1234567890123456789, -987654321098765432, 2]);
         result.insert(Ident::new("bigint_col"), big_int_column.clone());
 
-        let result = try_convert_table_to_javascript_friendly_table(Ok(OwnedTable::try_new(
-            result.into_iter().collect(),
+        let result = try_convert_table_to_javascript_friendly_table(
+            OwnedTable::try_new(result.into_iter().collect()).unwrap(),
         )
-        .unwrap()))
         .unwrap();
         let expected_result = indexmap::indexmap! {
             "bool_col".to_string() => JSFriendlyColumn::try_from(bool_column).unwrap(),
@@ -358,7 +364,7 @@ mod tests {
         let col = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
         result.insert(Ident::new("unsupported_col"), col.clone());
         let failure = try_convert_table_to_javascript_friendly_table(
-            Ok(OwnedTable::try_new(result.into_iter().collect()).unwrap()),
+            OwnedTable::try_new(result.into_iter().collect()).unwrap(),
         )
         .unwrap_err();
         assert!(
