@@ -5,6 +5,9 @@ pub(crate) mod serde;
 mod commitment_scheme;
 pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme};
 
+#[cfg(feature = "hyperkzg")]
+mod javascript_friendly_types;
+
 mod uppercase_accessor;
 pub use uppercase_accessor::{uppercase_table_ref, UppercaseAccessor};
 
