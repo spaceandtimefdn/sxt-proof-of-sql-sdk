@@ -10,14 +10,14 @@ use proof_of_sql::{
 use serde::Serialize;
 use std::ops::Neg;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq)]
 pub(crate) struct Decimal75Column {
     precision: u8,
     scale: i8,
     column: Vec<String>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct TimestampTZColumn {
     time_unit: PoSQLTimeUnit,
@@ -25,13 +25,13 @@ pub(crate) struct TimestampTZColumn {
     column: Vec<String>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq)]
 pub(crate) struct Column<T> {
-    column: Vec<T>,
+    pub(crate) column: Vec<T>,
 }
 
 /// A JavaScript-friendly representation of a proof of sql result column, converting larger integer types to strings.
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq)]
 #[serde(tag = "type")]
 pub(crate) enum JSFriendlyColumn {
     /// Boolean columns
@@ -133,35 +133,36 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
     }
 }
 
-/// Convert a result table to a JSON string. This handles converting bigger integer types to string for easier handling by javascript.
-/// Additionally, any errors are recorded in a javascript friendly result type.
+/// Convert a result table to a javascript friendly value. This handles converting bigger integer types to string for easier handling by javascript.
 #[cfg_attr(not(test), expect(dead_code))]
-pub(crate) fn convert_result_to_json(
-    result: Result<OwnedTable<BNScalar>, String>,
-) -> Result<String, String> {
-    let js_friendly_table: Result<IndexMap<String, JSFriendlyColumn>, String> =
-        result.and_then(|table| {
-            table
-                .into_inner()
-                .into_iter()
-                .map(|(key, column)| {
-                    let js_friendly_column = JSFriendlyColumn::try_from(column)?;
-                    Ok((key.to_string(), js_friendly_column))
-                })
-                .collect()
-        });
-    let verification_status = js_friendly_table
-        .map(|columns| VerificationStatus::Success(Success { result: columns }))
-        .unwrap_or_else(|error| VerificationStatus::Failure(Failure { error }));
-    serde_json::to_string(&verification_status)
-        .map_err(|e| format!("Failed to serialize to JSON: {}", e))
+pub(crate) fn try_convert_table_to_javascript_friendly_table(
+    table: Result<OwnedTable<BNScalar>, String>,
+) -> Result<IndexMap<String, JSFriendlyColumn>, String> {
+    table.and_then(|table| {
+        table
+            .into_inner()
+            .into_iter()
+            .map(|(key, column)| {
+                let js_friendly_column = JSFriendlyColumn::try_from(column)?;
+                Ok((key.to_string(), js_friendly_column))
+            })
+            .collect()
+    })
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use proof_of_sql::base::{
-        database::OwnedColumn, math::decimal::Precision, posql_time::PoSQLTimeZone,
+    use crate::base::javascript_friendly_types::{
+        try_convert_table_to_javascript_friendly_table, Failure, JSFriendlyColumn,
+    };
+    use indexmap::IndexMap;
+    use proof_of_sql::{
+        base::{
+            database::{OwnedColumn, OwnedTable},
+            math::decimal::Precision,
+            posql_time::{PoSQLTimeUnit, PoSQLTimeZone},
+        },
+        proof_primitive::hyperkzg::BNScalar,
     };
     use sqlparser::ast::Ident;
 
@@ -308,55 +309,42 @@ mod tests {
     fn test_js_friendly_unsupported_column_conversion() {
         let unsupported_column = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
         let result = JSFriendlyColumn::try_from(unsupported_column).unwrap_err();
-        assert_eq!(result, "Unsupported column type: UINT8".to_string());
+        assert_eq!(result, "Unsupported column type: UINT8");
     }
 
     #[test]
     fn test_convert_result_to_json() {
         let mut result = IndexMap::new();
-        result.insert(
-            Ident::new("bool_col"),
-            OwnedColumn::Boolean(vec![true, false, true]),
-        );
-        result.insert(Ident::new("int_col"), OwnedColumn::Int(vec![1, -2, 3]));
-        result.insert(
-            Ident::new("bigint_col"),
-            OwnedColumn::BigInt(vec![1234567890123456789, -987654321098765432, 2]),
-        );
+        let bool_column = OwnedColumn::Boolean(vec![true, false, true]);
+        result.insert(Ident::new("bool_col"), bool_column.clone());
+        let int_column = OwnedColumn::Int(vec![1, -2, 3]);
+        result.insert(Ident::new("int_col"), int_column.clone());
+        let big_int_column = OwnedColumn::BigInt(vec![1234567890123456789, -987654321098765432, 2]);
+        result.insert(Ident::new("bigint_col"), big_int_column.clone());
 
-        let json_result = convert_result_to_json(Ok(OwnedTable::try_new(
+        let result = try_convert_table_to_javascript_friendly_table(Ok(OwnedTable::try_new(
             result.into_iter().collect(),
         )
         .unwrap()))
-        .expect("Conversion to JSON failed");
-        let expected_json = r#"{"verificationStatus":"Success","result":{"bool_col":{"type":"Boolean","column":[true,false,true]},"int_col":{"type":"Int","column":[1,-2,3]},"bigint_col":{"type":"BigInt","column":["1234567890123456789","-987654321098765432","2"]}}}"#;
-        assert_eq!(json_result, expected_json);
+        .unwrap();
+        let expected_result = indexmap::indexmap! {
+            "bool_col".to_string() => JSFriendlyColumn::try_from(bool_column).unwrap(),
+            "int_col".to_string() => JSFriendlyColumn::try_from(int_column).unwrap(),
+            "bigint_col".to_string() => JSFriendlyColumn::try_from(big_int_column).unwrap()
+        };
+        assert_eq!(result, expected_result);
     }
 
     #[test]
     fn test_convert_result_to_json_with_unsupported_column() {
         let mut result = IndexMap::new();
-        result.insert(
-            Ident::new("unsupported_col"),
-            OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]),
-        );
-        let json_result = convert_result_to_json(Ok(OwnedTable::try_new(
+        let col = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
+        result.insert(Ident::new("unsupported_col"), col.clone());
+        let failure = try_convert_table_to_javascript_friendly_table(Ok(OwnedTable::try_new(
             result.into_iter().collect(),
         )
         .unwrap()))
-        .unwrap();
-        assert_eq!(
-            json_result,
-            r#"{"verificationStatus":"Failure","error":"Unsupported column type: UINT8"}"#
-        );
-    }
-
-    #[test]
-    fn test_input_error() {
-        let err = convert_result_to_json(Err("test_err".to_string())).unwrap();
-        assert_eq!(
-            err,
-            r#"{"verificationStatus":"Failure","error":"test_err"}"#
-        );
+        .unwrap_err();
+        assert_eq!(failure, "Unsupported column type: UINT8");
     }
 }
