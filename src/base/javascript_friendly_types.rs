@@ -62,8 +62,14 @@ pub(crate) struct Success<T> {
 }
 
 #[derive(Serialize, Debug)]
-pub(crate) struct Failure {
-    pub(crate) error: String,
+#[serde(tag = "error", content = "message")]
+pub(crate) enum Failure {
+    QueryResultsDeserialization(String),
+    AttestorDeserialization(String),
+    VerificationError(String),
+    TypeConversion(String),
+    #[cfg_attr(not(test), expect(dead_code))]
+    Serialization(String),
 }
 
 #[derive(Serialize, Debug)]
@@ -71,6 +77,12 @@ pub(crate) struct Failure {
 pub(crate) enum VerificationStatus<T> {
     Success(Success<T>),
     Failure(Failure),
+}
+
+impl<T> From<Failure> for VerificationStatus<T> {
+    fn from(value: Failure) -> Self {
+        VerificationStatus::Failure(value)
+    }
 }
 
 // Converts a `BNScalar` slice to a vector of decimal strings, handling negative values appropriately.
@@ -88,7 +100,7 @@ fn scalar_to_string(scalar: Vec<BNScalar>) -> Vec<String> {
 }
 
 impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
-    type Error = String;
+    type Error = Failure;
 
     fn try_from(value: OwnedColumn<BNScalar>) -> Result<Self, Self::Error> {
         match value {
@@ -128,7 +140,10 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
             OwnedColumn::Scalar(items) => Ok(JSFriendlyColumn::Scalar(Column {
                 column: scalar_to_string(items),
             })),
-            _ => Err(format!("Unsupported column type: {}", value.column_type())),
+            _ => Err(Failure::TypeConversion(format!(
+                "Unsupported column type: {}",
+                value.column_type()
+            ))),
         }
     }
 }
@@ -136,8 +151,8 @@ impl TryFrom<OwnedColumn<BNScalar>> for JSFriendlyColumn {
 /// Convert a result table to a javascript friendly value. This handles converting bigger integer types to string for easier handling by javascript.
 #[cfg_attr(not(test), expect(dead_code))]
 pub(crate) fn try_convert_table_to_javascript_friendly_table(
-    table: Result<OwnedTable<BNScalar>, String>,
-) -> Result<IndexMap<String, JSFriendlyColumn>, String> {
+    table: Result<OwnedTable<BNScalar>, Failure>,
+) -> Result<IndexMap<String, JSFriendlyColumn>, Failure> {
     table.and_then(|table| {
         table
             .into_inner()
@@ -309,7 +324,9 @@ mod tests {
     fn test_js_friendly_unsupported_column_conversion() {
         let unsupported_column = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
         let result = JSFriendlyColumn::try_from(unsupported_column).unwrap_err();
-        assert_eq!(result, "Unsupported column type: UINT8");
+        assert!(
+            matches!(result, Failure::TypeConversion(err) if err == "Unsupported column type: UINT8")
+        );
     }
 
     #[test]
@@ -340,11 +357,12 @@ mod tests {
         let mut result = IndexMap::new();
         let col = OwnedColumn::Uint8(vec![1u8, 2u8, 3u8]);
         result.insert(Ident::new("unsupported_col"), col.clone());
-        let failure = try_convert_table_to_javascript_friendly_table(Ok(OwnedTable::try_new(
-            result.into_iter().collect(),
+        let failure = try_convert_table_to_javascript_friendly_table(
+            Ok(OwnedTable::try_new(result.into_iter().collect()).unwrap()),
         )
-        .unwrap()))
         .unwrap_err();
-        assert_eq!(failure, "Unsupported column type: UINT8");
+        assert!(
+            matches!(failure, Failure::TypeConversion(message) if message == "Unsupported column type: UINT8")
+        );
     }
 }
