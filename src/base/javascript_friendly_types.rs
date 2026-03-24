@@ -11,7 +11,7 @@ use serde::Serialize;
 use std::ops::Neg;
 
 #[derive(Serialize, Debug)]
-struct Decimal75Column {
+pub(crate) struct Decimal75Column {
     precision: u8,
     scale: i8,
     column: Vec<String>,
@@ -19,21 +19,21 @@ struct Decimal75Column {
 
 #[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-struct TimestampTZColumn {
+pub(crate) struct TimestampTZColumn {
     time_unit: PoSQLTimeUnit,
     offset: i32,
     column: Vec<String>,
 }
 
 #[derive(Serialize, Debug)]
-struct Column<T> {
+pub(crate) struct Column<T> {
     column: Vec<T>,
 }
 
 /// A JavaScript-friendly representation of a proof of sql result column, converting larger integer types to strings.
 #[derive(Serialize, Debug)]
 #[serde(tag = "type")]
-enum JSFriendlyColumn {
+pub(crate) enum JSFriendlyColumn {
     /// Boolean columns
     Boolean(Column<bool>),
     /// i8 columns
@@ -57,18 +57,18 @@ enum JSFriendlyColumn {
 }
 
 #[derive(Serialize, Debug)]
-struct Success<T> {
+pub(crate) struct Success<T> {
     result: T,
 }
 
 #[derive(Serialize, Debug)]
-struct Failure {
-    error: String,
+pub(crate) struct Failure {
+    pub(crate) error: String,
 }
 
 #[derive(Serialize, Debug)]
 #[serde(tag = "verificationStatus")]
-enum VerificationStatus<T> {
+pub(crate) enum VerificationStatus<T> {
     Success(Success<T>),
     Failure(Failure),
 }
