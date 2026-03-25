@@ -9,7 +9,10 @@ use crate::base::{
     javascript_friendly_types::{
         try_convert_table_to_javascript_friendly_table, Failure, JSFriendlyColumn,
     },
-    serde::javascript_serializations::deserialize_verify_args_from_javascript,
+    serde::javascript_serializations::{
+        deserialize_attestors_from_javascript, deserialize_query_results_from_javascript,
+        deserialize_verifier_key,
+    },
 };
 #[cfg(feature = "hyperkzg")]
 use indexmap::IndexMap;
@@ -75,8 +78,9 @@ fn proof_of_sql_verify_from_json_responses_as_result(
     query_results_json: String,
     valid_attestors: Vec<String>,
 ) -> Result<IndexMap<String, JSFriendlyColumn>, Failure> {
-    let (query_results, valid_attestors, verifier_setup) =
-        deserialize_verify_args_from_javascript(query_results_json, valid_attestors)?;
+    let query_results = deserialize_query_results_from_javascript(query_results_json)?;
+    let valid_attestors = deserialize_attestors_from_javascript(valid_attestors)?;
+    let verifier_setup = deserialize_verifier_key();
 
     let result = verify_from_zk_query_and_substrate_responses::<HyperKZGCommitmentEvaluationProof>(
         query_results,

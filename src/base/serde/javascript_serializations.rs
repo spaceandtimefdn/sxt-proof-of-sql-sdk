@@ -21,18 +21,9 @@ pub(crate) fn serialize_javascript_friendly_type(
     serde_json::to_string(&result).unwrap_or_else(|_| SERIALIZATION_FAILED_MESSAGE.to_string())
 }
 
-#[expect(clippy::type_complexity)]
-pub(crate) fn deserialize_verify_args_from_javascript(
+pub(crate) fn deserialize_query_results_from_javascript(
     query_results_json: String,
-    valid_attestors: Vec<String>,
-) -> Result<
-    (
-        QueryResultsResponse,
-        Vec<[u8; 20]>,
-        VerifierKey<HyperKZGEngine>,
-    ),
-    Failure,
-> {
+) -> Result<QueryResultsResponse, Failure> {
     let query_results: QueryResultsResponse =
         serde_json::from_str(&query_results_json).map_err(|err| {
             Failure::QueryResultsDeserialization(format!(
@@ -40,7 +31,13 @@ pub(crate) fn deserialize_verify_args_from_javascript(
                 err
             ))
         })?;
-    let valid_attestors = valid_attestors
+    Ok(query_results)
+}
+
+pub(crate) fn deserialize_attestors_from_javascript(
+    valid_attestors: Vec<String>,
+) -> Result<Vec<[u8; 20]>, Failure> {
+    valid_attestors
         .iter()
         .map(|attestor| {
             address_from_hex(attestor).map_err(|err| {
@@ -50,13 +47,16 @@ pub(crate) fn deserialize_verify_args_from_javascript(
                 ))
             })
         })
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()
+}
+
+pub(crate) fn deserialize_verifier_key() -> VerifierKey<HyperKZGEngine> {
     // This should never fail, so no need to add an extra error type for typescript to handle.
     let verifier_setup: VerifierKey<HyperKZGEngine> =
         try_standard_binary_deserialization(HYPER_KZG_VERIFIER_SETUP_BYTES)
             .expect("Verifier setup unexpectedly failed to deserialize")
             .0;
-    Ok((query_results, valid_attestors, verifier_setup))
+    verifier_setup
 }
 
 #[cfg(test)]
