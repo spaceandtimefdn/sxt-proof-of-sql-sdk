@@ -24,14 +24,9 @@ pub(crate) fn serialize_javascript_friendly_type(
 pub(crate) fn deserialize_query_results_from_javascript(
     query_results_json: String,
 ) -> Result<QueryResultsResponse, Failure> {
-    let query_results: QueryResultsResponse =
-        serde_json::from_str(&query_results_json).map_err(|err| {
-            Failure::QueryResultsDeserialization(format!(
-                "Error deserializing query results: {}",
-                err
-            ))
-        })?;
-    Ok(query_results)
+    serde_json::from_str(&query_results_json).map_err(|err| {
+        Failure::QueryResultsDeserialization(format!("Error deserializing query results: {}", err))
+    })
 }
 
 pub(crate) fn deserialize_attestors_from_javascript(
@@ -52,11 +47,9 @@ pub(crate) fn deserialize_attestors_from_javascript(
 
 pub(crate) fn deserialize_verifier_key() -> VerifierKey<HyperKZGEngine> {
     // This should never fail, so no need to add an extra error type for typescript to handle.
-    let verifier_setup: VerifierKey<HyperKZGEngine> =
-        try_standard_binary_deserialization(HYPER_KZG_VERIFIER_SETUP_BYTES)
-            .expect("Verifier setup unexpectedly failed to deserialize")
-            .0;
-    verifier_setup
+    try_standard_binary_deserialization(HYPER_KZG_VERIFIER_SETUP_BYTES)
+        .expect("Verifier setup unexpectedly failed to deserialize")
+        .0
 }
 
 #[cfg(test)]
