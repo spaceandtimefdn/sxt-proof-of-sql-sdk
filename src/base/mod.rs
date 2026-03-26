@@ -5,10 +5,15 @@ pub(crate) mod serde;
 mod commitment_scheme;
 pub use commitment_scheme::{CommitmentEvaluationProofId, CommitmentScheme};
 
+#[cfg(feature = "hyperkzg")]
+mod javascript_friendly_types;
+
 mod uppercase_accessor;
 pub use uppercase_accessor::{uppercase_table_ref, UppercaseAccessor};
 
 mod verify;
+#[cfg(feature = "hyperkzg")]
+pub use verify::proof_of_sql_verify_from_json_responses;
 pub use verify::{
     verify_from_zk_query_and_substrate_responses, verify_prover_via_gateway_response,
     VerifyProverResponseError,

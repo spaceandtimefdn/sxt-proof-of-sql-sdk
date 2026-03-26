@@ -6,6 +6,14 @@ fn from_hex(hex: &str) -> Result<Vec<u8>, FromHexError> {
     hex::decode(hex.strip_prefix("0x").unwrap_or(hex))
 }
 
+#[cfg(feature = "hyperkzg")]
+/// Function for decoding a hex string with optional "0x" prefix into a byte array of length 20.
+pub(crate) fn address_from_hex(hex: &str) -> Result<[u8; 20], FromHexError> {
+    let mut res = [0u8; 20];
+    hex::decode_to_slice(hex.strip_prefix("0x").unwrap_or(hex), &mut res)?;
+    Ok(res)
+}
+
 /// Function for encoding bytes into a hex string with "0x" prefix.
 pub(crate) fn to_hex(bytes: &Vec<u8>) -> String {
     let hex = hex::encode(bytes);
@@ -177,5 +185,15 @@ mod tests {
         assert_eq!(serialized, "{\"value\":\"0x0128\"}");
         let deserialized: BytesWrapper = serde_json::from_str(&serialized).unwrap();
         assert_eq!(bytes_array, deserialized);
+    }
+
+    #[cfg(feature = "hyperkzg")]
+    #[test]
+    fn we_can_retrieve_address_from_hex() {
+        use super::address_from_hex;
+
+        let hex_string = "0x0101010101010101010101010101010101010101".to_string();
+        let address = address_from_hex(&hex_string).unwrap();
+        assert_eq!(address, [1u8; 20]);
     }
 }
