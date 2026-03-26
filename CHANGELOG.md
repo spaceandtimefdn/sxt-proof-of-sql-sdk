@@ -1,3 +1,12 @@
+# [0.55.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.54.0...v0.55.0) (2026-03-26)
+
+
+### Features
+
+* cre rust support ([#183](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/183)) ([055b0ca](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/055b0ca5d549f47f1c80a9a7f026958fbb17a25c))
+
+
+
 # [0.54.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.53.2...v0.54.0) (2026-03-19)
 
 
@@ -26,10 +35,6 @@
 ### Features
 
 * add missing fields to `AttestedCommitments` ([a26271b](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/a26271b0d1c8e7f1be60c3bef96780e179f63ae1))
-
-
-
-## [0.52.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.52.0...v0.52.1) (2026-01-22)
 
 
 
