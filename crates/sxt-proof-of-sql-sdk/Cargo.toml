@@ -12,9 +12,9 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 ark-serialize = { workspace = true, optional = true }
 arrow-csv = { workspace = true, optional = true }
-bincode = { workspace = true }
+bincode = { workspace = true, features = ["serde", "alloc"] }
 bumpalo = { workspace = true, optional = true }
-clap = { workspace = true, optional = true }
+clap = { workspace = true, features = ["derive", "env"], optional = true }
 datafusion = { workspace = true, optional = true }
 dotenv = { workspace = true, optional = true }
 eth_merkle_tree = { workspace = true }
@@ -24,19 +24,19 @@ indexmap = { workspace = true }
 nova-snark = { workspace = true, optional = true }
 proof-of-sql = { workspace = true }
 proof-of-sql-planner = { workspace = true, optional = true }
-reqwest = { workspace = true, optional = true }
-serde = { workspace = true }
+reqwest = { workspace = true, features = ["json"], optional = true }
+serde = { workspace = true, features = ["serde_derive"] }
 serde_json = { workspace = true }
 snafu = { workspace = true }
-subxt = { workspace = true, optional = true  }
+subxt = { workspace = true, features = ["jsonrpsee"], optional = true  }
 sqlparser = { workspace = true }
-tokio = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["macros"], optional = true }
 url = { workspace = true, optional = true  }
 wasm-bindgen = { workspace = true, optional = true }
 k256 = { workspace = true }
 sha3 = { workspace = true }
 itertools = { workspace = true }
-uuid = { workspace = true }
+uuid = { workspace = true, features=["serde"] }
 
 [dev-dependencies]
 ark-std = { workspace = true }

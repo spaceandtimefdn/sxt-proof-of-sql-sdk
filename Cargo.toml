@@ -10,16 +10,16 @@ exclude = ["**/.gitignore", ".gitignore"]
 ark-serialize = { version = "0.5.0", default-features = false }
 ark-std = { version = "0.5.0", default-features = false }
 arrow-csv = { version = "51.0.0" }
-bincode = { version = "2.0.1", default-features = false, features = ["serde", "alloc"] }
+bincode = { version = "2.0.1", default-features = false }
 bumpalo = { version = "3.19.0" }
-clap = { version = "4.5.20", features = ["derive", "env"] }
+clap = { version = "4.5.20" }
 datafusion = { version = "38.0.0", default-features = false }
 dotenv = { version = "0.15" }
 env_logger = "0.11.5"
 eth_merkle_tree = "0.1.3"
 futures = { version = "0.3.31"}
 gloo-utils = { version = "0.2.0" }
-hex = { version = "0.4.3", default-features = false, features = ["serde"] }
+hex = { version = "0.4.3", default-features = false }
 indexmap = "2.8.0"
 itertools = "0.13.0"
 k256 = { version = "0.13.4" }
@@ -29,15 +29,15 @@ nova-snark = { version = "0.41.0", default-features = false }
 proof-of-sql = { version = "=0.127.25", default-features = false }
 proof-of-sql-planner = { version = "=0.127.25", default-features = false }
 rand = "0.8.5"
-reqwest = { version = "0.12", features = ["json"] }
-serde = { version = "1.0", features = ["serde_derive"] }
+reqwest = { version = "0.12" }
+serde = { version = "1.0" }
 serde_json = "1.0"
 sha3 = { version = "0.10.8" }
 snafu = { version = "0.8.5", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
 sqlparser = { version = "0.45.0", default-features = false }
-subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee"]  }
-tokio = { version = "1.0", features = ["macros"] }
+subxt = { version = "0.37.0", default-features = false  }
+tokio = { version = "1.0" }
 url = { version = "2.5"  }
-uuid = { version = "=1.12.1", default-features = false, features=["serde"] }
+uuid = { version = "=1.12.1", default-features = false }
 wasm-bindgen = { version = "0.2.95" }
