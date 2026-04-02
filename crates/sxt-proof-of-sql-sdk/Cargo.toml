@@ -1,0 +1,77 @@
+[package]
+resolver = "2"
+name = "sxt-proof-of-sql-sdk"
+edition = "2021"
+repository = "https://github.com/spaceandtimelabs/sxt-proof-of-sql-sdk"
+version = "0.1.0"
+license-file = "LICENSE"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ark-serialize = { workspace = true, optional = true }
+arrow-csv = { workspace = true, optional = true }
+bincode = { workspace = true, features = ["serde", "alloc"] }
+bumpalo = { workspace = true, optional = true }
+clap = { workspace = true, features = ["derive", "env"], optional = true }
+datafusion = { workspace = true, optional = true }
+dotenv = { workspace = true, optional = true }
+eth_merkle_tree = { workspace = true }
+gloo-utils = { workspace = true, optional = true }
+hex = { workspace = true, features = ["serde"] }
+indexmap = { workspace = true }
+nova-snark = { workspace = true, optional = true }
+proof-of-sql = { workspace = true }
+proof-of-sql-planner = { workspace = true, optional = true }
+reqwest = { workspace = true, features = ["json"], optional = true }
+serde = { workspace = true, features = ["serde_derive"] }
+serde_json = { workspace = true }
+snafu = { workspace = true }
+subxt = { workspace = true, features = ["jsonrpsee"], optional = true  }
+sqlparser = { workspace = true }
+tokio = { workspace = true, features = ["macros"], optional = true }
+url = { workspace = true, optional = true  }
+wasm-bindgen = { workspace = true, optional = true }
+k256 = { workspace = true }
+sha3 = { workspace = true }
+itertools = { workspace = true }
+uuid = { workspace = true, features=["serde"] }
+
+[dev-dependencies]
+ark-std = { workspace = true }
+rand = { workspace = true }
+lazy_static = { workspace = true }
+
+[target.'cfg(example = "count-ethereum-core")'.dependencies]
+env_logger = { workspace = true }
+futures = { workspace = true }
+log = { workspace = true }
+sp-crypto-hashing = { workspace = true }
+
+[features]
+default = ["native", "hyperkzg"]
+# Do not use the `native` feature unless you are building for the native environment.
+# It can not be used with the `wasm` feature.
+native = ["subxt/native", "proof-of-sql/std", "proof-of-sql/arrow", "sqlparser/std", "sqlparser/visitor", "tokio/rt-multi-thread", "clap", "ark-serialize", "arrow-csv", "url", "bumpalo", "datafusion", "reqwest", "dotenv", "tokio"]
+# Currently the `hyperkzg` and `wasm` features are incompatible.
+hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
+
+# Do not use the `wasm` feature unless you are building for the web.
+# It can not be used with the `native` feature.
+wasm = ["subxt/web", "hyperkzg", "wasm-bindgen", "gloo-utils"]
+trustless-planning = ["proof-of-sql-planner", "sqlparser/visitor", "datafusion"]
+examples = ["native", "hyperkzg"]
+
+[[bin]]
+name = "proof-of-sql-cli"
+path = "src/main.rs"
+required-features = ["native"]
+
+[[example]]
+name = "count-ethereum-core"
+path = "examples/count-ethereum-core/main.rs"
+required-features = ["examples"]
+
+[package.metadata.cargo-udeps.ignore]
+normal = ["gloo-utils", "wasm-bindgen"]

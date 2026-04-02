@@ -1,77 +1,43 @@
-[package]
+[workspace]
 resolver = "2"
-name = "sxt-proof-of-sql-sdk"
+members = ["crates/sxt-proof-of-sql-sdk"]
+
+[workspace.package]
 edition = "2021"
-repository = "https://github.com/spaceandtimelabs/sxt-proof-of-sql-sdk"
-version = "0.1.0"
-license-file = "LICENSE"
+exclude = ["**/.gitignore", ".gitignore"]
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
-[dependencies]
-ark-serialize = { version = "0.5.0", default-features = false, optional = true }
-arrow-csv = { version = "51.0.0", optional = true }
-bincode = { version = "2.0.1", default-features = false, features = ["serde", "alloc"] }
-bumpalo = { version = "3.19.0", optional = true }
-clap = { version = "4.5.20", features = ["derive", "env"], optional = true }
-datafusion = { version = "38.0.0", default-features = false, optional = true }
-dotenv = { version = "0.15", optional = true }
-eth_merkle_tree = "0.1.3"
-gloo-utils = { version = "0.2.0", optional = true }
-hex = { version = "0.4.3", default-features = false, features = ["serde"] }
-indexmap = "2.8.0"
-nova-snark = { version = "0.41.0", default-features = false, optional = true }
-proof-of-sql = { version = "=0.127.25", default-features = false }
-proof-of-sql-planner = { version = "=0.127.25", default-features = false, optional = true }
-reqwest = { version = "0.12", features = ["json"], optional = true }
-serde = { version = "1.0", features = ["serde_derive"] }
-serde_json = "1.0"
-snafu = { version = "0.8.5", default-features = false }
-subxt = { version = "0.37.0", default-features = false, features = ["jsonrpsee"], optional = true  }
-sqlparser = { version = "0.45.0", default-features = false }
-tokio = { version = "1.0", features = ["macros"], optional = true }
-url = { version = "2.5", optional = true  }
-wasm-bindgen = { version = "0.2.95", optional = true }
-k256 = { version = "0.13.4" }
-sha3 = { version = "0.10.8" }
-itertools = "0.13.0"
-uuid = { version = "=1.12.1", default-features = false, features=["serde"] }
-
-[dev-dependencies]
+[workspace.dependencies]
+ark-serialize = { version = "0.5.0", default-features = false }
 ark-std = { version = "0.5.0", default-features = false }
-rand = "0.8.5"
-lazy_static = { version = "1.5.0" }
-
-[target.'cfg(example = "count-ethereum-core")'.dependencies]
+arrow-csv = { version = "51.0.0" }
+bincode = { version = "2.0.1", default-features = false }
+bumpalo = { version = "3.19.0" }
+clap = { version = "4.5.20" }
+datafusion = { version = "38.0.0", default-features = false }
+dotenv = { version = "0.15" }
 env_logger = "0.11.5"
+eth_merkle_tree = "0.1.3"
 futures = { version = "0.3.31"}
+gloo-utils = { version = "0.2.0" }
+hex = { version = "0.4.3", default-features = false }
+indexmap = "2.8.0"
+itertools = "0.13.0"
+k256 = { version = "0.13.4" }
+lazy_static = { version = "1.5.0" }
 log = "0.4.22"
+nova-snark = { version = "0.41.0", default-features = false }
+proof-of-sql = { version = "=0.127.25", default-features = false }
+proof-of-sql-planner = { version = "=0.127.25", default-features = false }
+rand = "0.8.5"
+reqwest = { version = "0.12" }
+serde = { version = "1.0" }
+serde_json = "1.0"
+sha3 = { version = "0.10.8" }
+snafu = { version = "0.8.5", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
-
-[features]
-default = ["native", "hyperkzg"]
-# Do not use the `native` feature unless you are building for the native environment.
-# It can not be used with the `wasm` feature.
-native = ["subxt/native", "proof-of-sql/std", "proof-of-sql/arrow", "sqlparser/std", "sqlparser/visitor", "tokio/rt-multi-thread", "clap", "ark-serialize", "arrow-csv", "url", "bumpalo", "datafusion", "reqwest", "dotenv", "tokio"]
-# Currently the `hyperkzg` and `wasm` features are incompatible.
-hyperkzg = ["proof-of-sql/hyperkzg_proof", "nova-snark"]
-
-# Do not use the `wasm` feature unless you are building for the web.
-# It can not be used with the `native` feature.
-wasm = ["subxt/web", "hyperkzg", "wasm-bindgen", "gloo-utils"]
-trustless-planning = ["proof-of-sql-planner", "sqlparser/visitor", "datafusion"]
-examples = ["native", "hyperkzg"]
-
-[[bin]]
-name = "proof-of-sql-cli"
-path = "src/main.rs"
-required-features = ["native"]
-
-[[example]]
-name = "count-ethereum-core"
-path = "examples/count-ethereum-core/main.rs"
-required-features = ["examples"]
-
-[package.metadata.cargo-udeps.ignore]
-normal = ["gloo-utils", "wasm-bindgen"]
+sqlparser = { version = "0.45.0", default-features = false }
+subxt = { version = "0.37.0", default-features = false  }
+tokio = { version = "1.0" }
+url = { version = "2.5"  }
+uuid = { version = "=1.12.1", default-features = false }
+wasm-bindgen = { version = "0.2.95" }
