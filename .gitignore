@@ -3,6 +3,7 @@
 **/*.json
 **/node_modules
 !node/src/package.json
+!test_assets/**.json
 !examples/node/package.json
 !examples/chainlink/package.json
 !examples/chainlink/abi/functionsClient.json
