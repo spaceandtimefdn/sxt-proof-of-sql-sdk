@@ -1,0 +1,75 @@
+{
+  "verificationStatus": "Success",
+  "result": {
+    "BOOLEAN_COLUMN": {
+      "type": "Boolean",
+      "column": [
+        false
+      ]
+    },
+    "TINYINT_COLUMN": {
+      "type": "TinyInt",
+      "column": [
+        1
+      ]
+    },
+    "SMALLINT_COLUMN": {
+      "type": "SmallInt",
+      "column": [
+        100
+      ]
+    },
+    "INT_COLUMN": {
+      "type": "Int",
+      "column": [
+        22432845
+      ]
+    },
+    "BIGINT_COLUMN": {
+      "type": "BigInt",
+      "column": [
+        "22432845"
+      ]
+    },
+    "VARCHAR_COLUMN": {
+      "type": "VarChar",
+      "column": [
+        "test"
+      ]
+    },
+    "DECIMAL75_COLUMN": {
+      "type": "Decimal75",
+      "precision": 4,
+      "scale": 1,
+      "column": [
+        "22432845"
+      ]
+    },
+    "TIMESTAMPTZ_COLUMN": {
+      "type": "TimestampTZ",
+      "timeUnit": "Millisecond",
+      "offset": 0,
+      "column": [
+        "22432845"
+      ]
+    },
+    "VARBINARY_COLUMN": {
+      "type": "VarBinary",
+      "column": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ]
+    },
+    "SCALAR_COLUMN": {
+      "type": "Scalar",
+      "column": [
+        "22432845"
+      ]
+    }
+  }
+}
