@@ -3,6 +3,7 @@
 **/*.json
 **/node_modules
 !node/src/package.json
+!sxt-proof-of-sql-cre-sdk-typescript/**.json
 !test_assets/**.json
 !examples/node/package.json
 !examples/chainlink/package.json
