@@ -1,3 +1,12 @@
+# [0.56.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.55.1...v0.56.0) (2026-04-07)
+
+
+### Features
+
+* new cre package with proof of sql result schema ([39c20a6](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/39c20a614a996aa4612aa9e8c9ad15e7b1c79250))
+
+
+
 ## [0.55.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.55.0...v0.55.1) (2026-04-02)
 
 
@@ -21,10 +30,6 @@
 
 
 ## [0.53.2](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.53.1...v0.53.2) (2026-01-25)
-
-
-
-## [0.53.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.53.0...v0.53.1) (2026-01-23)
 
 
 
