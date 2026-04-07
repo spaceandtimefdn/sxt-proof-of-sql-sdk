@@ -1,0 +1,27 @@
+[
+  {
+    "verificationStatus": "Failure",
+    "error": "QueryResultsDeserialization",
+    "message": "Failed to deserialize query results"
+  },
+  {
+    "verificationStatus": "Failure",
+    "error": "AttestorDeserialization",
+    "message": "Failed to deserialize attestor information"
+  },
+  {
+    "verificationStatus": "Failure",
+    "error": "VerificationError",
+    "message": "Proof verification failed"
+  },
+  {
+    "verificationStatus": "Failure",
+    "error": "TypeConversion",
+    "message": "Failed to convert result to JavaScript-friendly format"
+  },
+  {
+    "verificationStatus": "Failure",
+    "error": "Serialization",
+    "message": "Failed to serialize result"
+  }
+]

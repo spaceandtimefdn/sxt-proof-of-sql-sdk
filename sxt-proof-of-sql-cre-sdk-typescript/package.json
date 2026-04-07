@@ -1,0 +1,18 @@
+{
+  "name": "sxt-proof-of-sql-cre-sdk-typescript",
+  "version": "1.0.0",
+  "description": "enables proof of sql verification within cre workflows",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "@chainlink/cre-sdk-javy-plugin": "1.5.0-alpha.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.3.0",
+    "ts-jest": "^29.4.9",
+    "typescript": "^6.0.2"
+  }
+}

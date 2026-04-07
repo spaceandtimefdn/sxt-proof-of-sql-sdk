@@ -137,7 +137,8 @@ pub fn verify_from_zk_query_and_substrate_responses<CPI: CommitmentEvaluationPro
 #[cfg(feature = "hyperkzg")]
 mod tests {
     use crate::base::proof_of_sql_verify_from_json_responses;
-    const VALID_GATEWAY_RESPONSE: &str = include_str!("test_assets/valid_gateway_response.json");
+    const VALID_GATEWAY_RESPONSE: &str =
+        include_str!("../../../../test_assets/valid_gateway_response.json");
 
     #[test]
     fn we_can_verify_using_json_inputs() {

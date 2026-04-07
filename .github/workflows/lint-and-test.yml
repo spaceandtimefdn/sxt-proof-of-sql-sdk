@@ -110,6 +110,10 @@ jobs:
         run: cargo test --lib --no-default-features
       - name: Run tests (trustless-planning)
         run: cargo test --lib --no-default-features --features "trustless-planning"
+      - name: Run npm install
+        run: npm install --prefix sxt-proof-of-sql-cre-sdk-typescript
+      - name: Run npm tests
+        run: npm test --prefix sxt-proof-of-sql-cre-sdk-typescript
 
   udeps:
     name: Unused Dependencies

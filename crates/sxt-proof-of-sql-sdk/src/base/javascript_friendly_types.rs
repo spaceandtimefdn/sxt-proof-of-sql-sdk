@@ -7,17 +7,17 @@ use proof_of_sql::{
     },
     proof_primitive::hyperkzg::BNScalar,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::ops::Neg;
 
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Deserialize)]
 pub(crate) struct Decimal75Column {
     precision: u8,
     scale: i8,
     column: Vec<String>,
 }
 
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct TimestampTZColumn {
     time_unit: PoSQLTimeUnit,
@@ -25,13 +25,13 @@ pub(crate) struct TimestampTZColumn {
     column: Vec<String>,
 }
 
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Deserialize)]
 pub(crate) struct Column<T> {
     pub(crate) column: Vec<T>,
 }
 
 /// A JavaScript-friendly representation of a proof of sql result column, converting larger integer types to strings.
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Deserialize)]
 #[serde(tag = "type")]
 pub(crate) enum JSFriendlyColumn {
     /// Boolean columns
@@ -56,23 +56,22 @@ pub(crate) enum JSFriendlyColumn {
     Scalar(Column<String>),
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize, PartialEq)]
 pub(crate) struct Success<T> {
     result: T,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize, PartialEq)]
 #[serde(tag = "error", content = "message")]
 pub(crate) enum Failure {
     QueryResultsDeserialization(String),
     AttestorDeserialization(String),
     VerificationError(String),
     TypeConversion(String),
-    #[cfg_attr(not(test), expect(dead_code))]
     Serialization(String),
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Deserialize, PartialEq)]
 #[serde(tag = "verificationStatus")]
 pub(crate) enum VerificationStatus<T> {
     Success(Success<T>),
@@ -175,7 +174,8 @@ impl From<Result<IndexMap<String, JSFriendlyColumn>, Failure>>
 #[cfg(test)]
 mod tests {
     use crate::base::javascript_friendly_types::{
-        try_convert_table_to_javascript_friendly_table, Failure, JSFriendlyColumn,
+        try_convert_table_to_javascript_friendly_table, Column, Decimal75Column, Failure,
+        JSFriendlyColumn, Success, TimestampTZColumn, VerificationStatus,
     };
     use indexmap::IndexMap;
     use proof_of_sql::{
@@ -187,6 +187,11 @@ mod tests {
         proof_primitive::hyperkzg::BNScalar,
     };
     use sqlparser::ast::Ident;
+
+    const JAVASCRIPT_FRIENDLY_SUCCESS: &str =
+        include_str!("../../../../test_assets/javascript_friendly_success.json");
+    const JAVASCRIPT_FRIENDLY_FAILURES: &str =
+        include_str!("../../../../test_assets/javascript_friendly_failures.json");
 
     #[test]
     fn test_js_friendly_boolean_column_conversion() {
@@ -370,5 +375,57 @@ mod tests {
         assert!(
             matches!(failure, Failure::TypeConversion(message) if message == "Unsupported column type: UINT8")
         );
+    }
+
+    #[test]
+    fn serilization_works_as_expected() {
+        let res = VerificationStatus::Success(Success {
+            result: indexmap::indexmap! {
+                "BOOLEAN_COLUMN".to_string() => JSFriendlyColumn::Boolean(Column{column: vec![false]}),
+                "TINYINT_COLUMN".to_string() => JSFriendlyColumn::TinyInt(Column{column: vec![1]}),
+                "SMALLINT_COLUMN".to_string() => JSFriendlyColumn::SmallInt(Column{column: vec![100]}),
+                "INT_COLUMN".to_string() => JSFriendlyColumn::Int(Column{column: vec![22432845]}),
+                "BIGINT_COLUMN".to_string() => JSFriendlyColumn::BigInt(Column{column: vec!["22432845".to_string()]}),
+                "VARCHAR_COLUMN".to_string() => JSFriendlyColumn::VarChar(Column{column: vec!["test".to_string()]}),
+                "DECIMAL75_COLUMN".to_string() => JSFriendlyColumn::Decimal75(Decimal75Column{ precision: 4, scale: 1, column: vec!["22432845".to_string()] }),
+                "TIMESTAMPTZ_COLUMN".to_string() => JSFriendlyColumn::TimestampTZ(TimestampTZColumn{time_unit: PoSQLTimeUnit::Millisecond, offset: 0, column: vec!["22432845".to_string()]}),
+                "VARBINARY_COLUMN".to_string() => JSFriendlyColumn::VarBinary(Column{column: vec![vec![1,2,3,4,5]]}),
+                "SCALAR_COLUMN".to_string() => JSFriendlyColumn::Scalar(Column{column: vec!["22432845".to_string()]}),
+            },
+        });
+        let serialized = serde_json::to_string(&res).unwrap();
+        let expected_result: VerificationStatus<IndexMap<String, JSFriendlyColumn>> =
+            serde_json::from_str(&serialized).unwrap();
+        assert_eq!(res, expected_result);
+        // We'll include this check just to verify the serialization format is compatible with the zod types.
+        let expected_result: VerificationStatus<IndexMap<String, JSFriendlyColumn>> =
+            serde_json::from_str(JAVASCRIPT_FRIENDLY_SUCCESS).unwrap();
+        assert_eq!(res, expected_result);
+    }
+
+    #[test]
+    fn serilization_works_as_expected_when_failures() {
+        let res: Vec<VerificationStatus<IndexMap<String, JSFriendlyColumn>>> = vec![
+            Failure::QueryResultsDeserialization("Failed to deserialize query results".to_string())
+                .into(),
+            Failure::AttestorDeserialization(
+                "Failed to deserialize attestor information".to_string(),
+            )
+            .into(),
+            Failure::VerificationError("Proof verification failed".to_string()).into(),
+            Failure::TypeConversion(
+                "Failed to convert result to JavaScript-friendly format".to_string(),
+            )
+            .into(),
+            Failure::Serialization("Failed to serialize result".to_string()).into(),
+        ];
+        let serialized = serde_json::to_string(&res).unwrap();
+        let expected_result: Vec<VerificationStatus<IndexMap<String, JSFriendlyColumn>>> =
+            serde_json::from_str(&serialized).unwrap();
+        assert_eq!(res, expected_result);
+        // We'll include this check just to verify the serialization format is compatible with the zod types.
+        let expected_result: Vec<VerificationStatus<IndexMap<String, JSFriendlyColumn>>> =
+            serde_json::from_str(JAVASCRIPT_FRIENDLY_FAILURES).unwrap();
+        assert_eq!(res, expected_result);
     }
 }
