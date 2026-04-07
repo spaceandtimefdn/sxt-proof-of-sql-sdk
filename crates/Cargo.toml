@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/sxt-proof-of-sql-sdk"]
+members = ["sxt-proof-of-sql-sdk"]
 
 [workspace.package]
 edition = "2021"
