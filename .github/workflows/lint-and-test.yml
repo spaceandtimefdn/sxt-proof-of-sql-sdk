@@ -47,8 +47,8 @@ jobs:
         run: cargo check --all-targets --no-default-features --features "trustless-planning"
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: Run cargo check (wasm and hyperkzg features)
-        working-directory: ./crates
+      - name: Run cargo check (wasm)
+        working-directory: ./crates/sxt-proof-of-sql-sdk
         run: cargo check --target wasm32-unknown-unknown --no-default-features --features "wasm"
 
   clippy:
@@ -84,8 +84,8 @@ jobs:
         run: cargo clippy --all-targets --no-default-features --features "trustless-planning" -- -D warnings
       - name: Add wasm32 target
         run: rustup target add wasm32-unknown-unknown
-      - name: Run clippy (wasm and hyperkzg features)
-        working-directory: ./crates
+      - name: Run clippy (wasm)
+        working-directory: ./crates/sxt-proof-of-sql-sdk
         run: cargo clippy --target wasm32-unknown-unknown --no-default-features --features "wasm" -- -D warnings
 
   # Run cargo f --check

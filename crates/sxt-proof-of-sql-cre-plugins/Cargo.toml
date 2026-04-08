@@ -1,0 +1,15 @@
+[package]
+resolver = "2"
+name = "sxt_proof_of_sql_cre_plugins"
+edition = "2021"
+repository = "https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk"
+version = "0.1.0"
+license-file = "LICENSE"
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+sxt-proof-of-sql-sdk = { workspace=true, features = ["hyperkzg"] }
+cre_wasm_exports = { git = "https://github.com/smartcontractkit/cre-sdk-typescript", rev="5eb9658290ea109ef6c6560d36b685506e4daa12" }
+javy-plugin-api = "6.0.0"
