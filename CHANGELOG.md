@@ -1,3 +1,7 @@
+## [0.57.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.57.0...v0.57.1) (2026-04-13)
+
+
+
 # [0.57.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.56.1...v0.57.0) (2026-04-13)
 
 
@@ -23,15 +27,6 @@
 
 
 ## [0.55.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.55.0...v0.55.1) (2026-04-02)
-
-
-
-# [0.55.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.54.0...v0.55.0) (2026-03-26)
-
-
-### Features
-
-* cre rust support ([#183](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/issues/183)) ([055b0ca](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/055b0ca5d549f47f1c80a9a7f026958fbb17a25c))
 
 
 
