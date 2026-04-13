@@ -1,7 +1,7 @@
 import { CronCapability, handler, Runner, type Runtime } from '@chainlink/cre-sdk'
 import { z } from 'zod'
 import { proofOfSql } from 'sxt-proof-of-sql-cre-sdk-typescript'
-import input from '../../test_assets/valid_gateway_response.json' with { type: 'json' };
+import input from '../../../test_assets/valid_gateway_response.json' with { type: 'json' };
 
 const configSchema = z.object({
 	schedule: z.string(),
