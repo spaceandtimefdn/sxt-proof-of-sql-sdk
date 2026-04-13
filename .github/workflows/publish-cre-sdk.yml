@@ -1,0 +1,37 @@
+name: Publish CRE SDK
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish CRE SDK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Create GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          ref: ${{ github.head_ref }}
+          # Make sure the value of GITHUB_TOKEN will not be persisted in repo's config
+          persist-credentials: false
+          # Pull all previous tags
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org/'
+          scope: '@spaceandtimelabs'
+      - name: Publish cre sdk to npm
+        working-directory: ./sxt-proof-of-sql-cre-sdk-typescript
+        run: npm publish --access public --non-interactive
+

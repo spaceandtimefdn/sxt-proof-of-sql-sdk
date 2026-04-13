@@ -1,6 +1,6 @@
 {
   "name": "sxt-proof-of-sql-cre-sdk-typescript",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "enables proof of sql verification within cre workflows",
   "main": "src/index.ts",
   "scripts": {
