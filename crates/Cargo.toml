@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["sxt-proof-of-sql-sdk"]
+members = ["sxt-proof-of-sql-sdk", "sxt-proof-of-sql-cre-plugins"]
 
 [workspace.package]
 edition = "2021"
@@ -37,6 +37,7 @@ snafu = { version = "0.8.5", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
 sqlparser = { version = "0.45.0", default-features = false }
 subxt = { version = "0.37.0", default-features = false  }
+sxt-proof-of-sql-sdk = { path = "sxt-proof-of-sql-sdk", default-features=false }
 tokio = { version = "1.0" }
 url = { version = "2.5"  }
 uuid = { version = "=1.12.1", default-features = false }

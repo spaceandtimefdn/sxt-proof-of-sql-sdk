@@ -1,0 +1,8 @@
+# Example 2: prebuilt-plugin — uses --plugin pointing to pre-built .plugin.wasm (lib_alpha)
+local-simulation:
+  user-workflow:
+    workflow-owner-address: "(optional)"
+    workflow-name: "simple-verify"
+  workflow-artifacts:
+    workflow-path: "./wasm/workflow.wasm"
+    config-path: "./config.json"

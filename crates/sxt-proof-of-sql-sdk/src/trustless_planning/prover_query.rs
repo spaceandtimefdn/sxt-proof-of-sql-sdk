@@ -37,7 +37,6 @@ impl From<bincode::error::EncodeError> for PlanProverQueryError {
 }
 
 /// Create a query for the prover service from sql query text and commitments.
-#[expect(dead_code)]
 pub fn produce_plan_trustlessly<CPI: CommitmentEvaluationProofId>(
     query: &Statement,
     commitments: &QueryCommitments<<CPI as CommitmentEvaluationProof>::Commitment>,
