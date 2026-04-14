@@ -61,7 +61,7 @@ async function proofOfSqlQuery(query, apiKey) {
 }
 exports.proofOfSqlQuery = proofOfSqlQuery;
 
-proofOfSqlQuery("process.env.QUERY", process.env.SXT_API_KEY).then(result => {
+proofOfSqlQuery(process.env.QUERY, process.env.SXT_API_KEY).then(result => {
     process.stdout.write(JSON.stringify(result));
 }).catch(error => {
     console.error("Error executing proof of SQL query:", error);
