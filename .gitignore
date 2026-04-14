@@ -2,6 +2,9 @@
 **/*.log
 **/*.json
 **/node_modules
+**/.cre_build_tmp.js
+**/workflow.wasm
+**/workflow.js
 !node/src/package.json
 !sxt-proof-of-sql-cre-sdk-typescript/**.json
 !cre-examples/**.json

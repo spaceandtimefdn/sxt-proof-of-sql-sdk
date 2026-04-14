@@ -1,0 +1,8 @@
+local-simulation:
+  user-workflow:
+    workflow-owner-address: "(optional)"
+    workflow-name: "retrieve-access-token"
+  workflow-artifacts:
+    workflow-path: "./index.ts"
+    config-path: "./config.json"
+    secrets-path: "../secrets.yaml"
