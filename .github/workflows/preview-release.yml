@@ -51,3 +51,17 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message: ${{ steps.format-changelog.outputs.changelog }}
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org/'
+          scope: '@spaceandtime'
+
+      - name: Publish to npm
+        working-directory: ./ts-proof-of-sql-sdk
+        run: |
+          npm publish --access public --non-interactive
