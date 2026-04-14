@@ -9,7 +9,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@chainlink/cre-sdk": "1.5.0-alpha.3",
-    "sxt-proof-of-sql-cre-sdk-typescript": "file:../../../../sxt-proof-of-sql-cre-sdk-typescript"
+    "sxt-proof-of-sql-cre-sdk-typescript": "0.0.1"
   },
   "devDependencies": {
     "typescript": "5.9.3"

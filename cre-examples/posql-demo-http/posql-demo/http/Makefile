@@ -1,5 +1,3 @@
-# Example: prebuilt-plugin — compile workflow with a pre-built .plugin.wasm
-# Assumes sxt_proof_of_sql has been built (make -C ../sxt_proof_of_sql build).
 .PHONY: build
 
 build:
