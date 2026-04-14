@@ -5,9 +5,13 @@ This will be a brief tutorial explaining how to run proof of sql queries using C
 - CRE basics: refer to the [CRE docs](https://docs.chain.link/cre/getting-started/part-1-project-setup-ts#prerequisites) as needed.
   - Install bun. This can be done with 
     ```
-    sudo apt install unzip && curl -fsSL https://bun.com/install | bash && source /home/stuarttimwhite/.bashrc
+    sudo apt install unzip && curl -fsSL https://bun.com/install | bash
     ```
-  - Install CRE cli with `curl -sSL https://app.chain.link/cre/install.sh | bash` (version 1.10.0 is used in this tutorial)
+  - Install CRE cli with 
+    ```
+    curl -sSL https://app.chain.link/cre/install.sh | bash
+    ```
+    (version 1.10.0 is used in this tutorial)
   - Create a CRE account as described [here](https://docs.chain.link/cre/account/creating-account). Login using `cre login`.
   - Acquire a funded sepolia account.
 - SXT basics:
@@ -49,61 +53,81 @@ Reference [CRE docs](https://docs.chain.link/cre/getting-started/part-1-project-
 
 
 # Step 3: Add proof of sql as a dependency.
-- Import the `sxt-proof-of-sql-cre-sdk-typescript` package and update `cre-sdk` accordingly:
-  - Modify the dependecies in `package.json` to be 
-    ```
-    "dependencies": {
-      "@chainlink/cre-sdk": "1.5.0-alpha.3",
-      "sxt-proof-of-sql-cre-sdk-typescript": "0.0.1"
-    }
-    ```
-  - Run `bun install --cwd ./http`.
-- Plugin proof of sql build:
-  - Convert the workflow to use custom builds using `cre workflow custom-build ./http -f`. Refer to the [CRE docs](https://docs.chain.link/cre/guides/operations/custom-build#convert-a-workflow-to-custom-build) as needed.
-  - Replace everything in Makefile with:
-    ```
-    .PHONY: build
+In order to use Proof of SQL from within the workflow, we will need to add the Proof of SQL dependency. Additionally, we will need to use CRE custom builds.
 
-    build:
-      mkdir -p wasm
-      bun cre-compile --plugin node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
-        main.ts \
-        wasm/workflow.wasm
+In order to do this, first, modify `package.json` to add `sxt-proof-of-sql-cre-sdk-typescript`
+```
+"dependencies": {
+  "@chainlink/cre-sdk": "1.5.0-alpha.3",
+  "sxt-proof-of-sql-cre-sdk-typescript": "0.0.1"
+}
+```
 
-    clean:
-      rm -rf wasm
-    ```
+Then, install the dependencies with
+```
+bun install --cwd ./http
+```
+
+Next, convert the workflow to use custom builds with the following command. Refer to the [CRE docs](https://docs.chain.link/cre/guides/operations/custom-build#convert-a-workflow-to-custom-build) as needed.
+```
+cre workflow custom-build ./http -f
+``` 
+
+Finally, replace everything in `Makefile` with:
+```
+.PHONY: build
+
+build:
+  mkdir -p wasm
+  bun cre-compile --plugin node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
+    main.ts \
+    wasm/workflow.wasm
+
+clean:
+  rm -rf wasm
+```
 
 # Step 4: Modify the workflow to use proof of sql library.
-Add the import line `import { proofOfSql } from "sxt-proof-of-sql-cre-sdk-typescript";`
-The function `onHttpTrigger` can be replaced with the following:
+Modify `main.ts` as follows:
+Add the import line 
 ```
-const onHttpTrigger = (runtime: Runtime<Config>, payload: HTTPPayload): string => {
-  // The input is expected to be the result of the query "select BLOCK_NUMBER from ETHEREUM.BLOCKS LIMIT 1"
-  const input = payload.input.toString();
-  const queryResult = proofOfSql().verify(input, []);
-  switch (queryResult.verificationStatus) {
-    case "Failure":
-      return "Failure";
-    case "Success":
-      const blockCountColumn = queryResult.result.BLOCK_NUMBER;
-      switch (blockCountColumn.type){
-        case "BigInt": 
-          runtime.log(`First retrieved: ${blockCountColumn.column[0]}`);
-          return "Success";
-        default:
-          return "Failure";
-      }
-  }
-};
+import { proofOfSql } from "sxt-proof-of-sql-cre-sdk-typescript";
 ```
-Simulation using an empty http input should now return `"Failure"`.
+Extract the input from the payload:
+```
+const input = payload.input.toString();
+```
 
-# Step 5: Simulate end to end
-Run the following, being sure to replace `{YOUR_SXT_API_KEY}` with your SXT api key.
+Verify and retrieve the result from the input using the `verify` function:
+```
+const queryResult = proofOfSql().verify(input, []);
+```
+
+Access the data from the result. For the query `select BLOCK_NUMBER from ETHEREUM.BLOCKS LIMIT 1`, this can be done with
+```
+switch (queryResult.verificationStatus) {
+  case "Success":
+    const blockCountColumn = queryResult.result.BLOCK_NUMBER;
+    switch (blockCountColumn.type){
+      case "BigInt": 
+        runtime.log(`First retrieved: ${blockCountColumn.column[0]}`);
+        return "Success";
+      default:
+        return "Failure";
+    }
+  case "Failure":
+    return "Failure";
+}
+```
+
+The entire file should look something like [this](./posql-demo/http/main.ts)
+
+Finally, to simulate the workflow, run the following commands.
 ```
 export SXT_API_KEY={YOUR_SXT_API_KEY} &&
 export QUERY="select BLOCK_NUMBER from ETHEREUM.BLOCKS LIMIT 1" &&
 output=$(npx @spaceandtime/ts-proof-of-sql-sdk) &&
 cre workflow simulate http --non-interactive --trigger-index 0 -T staging-settings --http-payload $output
 ```
+
+
