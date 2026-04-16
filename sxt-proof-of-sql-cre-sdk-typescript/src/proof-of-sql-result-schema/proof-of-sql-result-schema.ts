@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const numberColumnSchema = z.array(z.number())
 const bigintColumnSchema = z.array(z.string().transform((val) => BigInt(val)))
-const errorMessageVariants = z.enum(["QueryResultsDeserialization", "AttestorDeserialization", "VerificationError", "TypeConversion", "Serialization"])
+const errorMessageVariants = z.enum(["QueryResultsDeserialization", "VerifyingConfigurationDeserialization", "VerificationError", "TypeConversion", "Serialization"])
 const timeUnitSchema = z.union([
     z.literal('Second'),
     z.literal('Millisecond'),

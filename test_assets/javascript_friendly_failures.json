@@ -6,8 +6,8 @@
   },
   {
     "verificationStatus": "Failure",
-    "error": "AttestorDeserialization",
-    "message": "Failed to deserialize attestor information"
+    "error": "VerifyingConfigurationDeserialization",
+    "message": "Failed to deserialize verifying configuration"
   },
   {
     "verificationStatus": "Failure",

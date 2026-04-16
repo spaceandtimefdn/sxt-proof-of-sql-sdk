@@ -1,1 +1,8 @@
-{ "schedule": "*/30 * * * * *" }
+{ 
+    "schedule": "*/30 * * * * *",
+    "validAttestors": [
+        "0xd347bfe3e75930c1253ef5d877ff6a5cee90d919",
+        "0x349b729d1ceeaae54fab5655f621750be6fadb49",
+        "0x3c9260330194d2b79038d0190e6bce7346e110a9"
+    ]    
+}

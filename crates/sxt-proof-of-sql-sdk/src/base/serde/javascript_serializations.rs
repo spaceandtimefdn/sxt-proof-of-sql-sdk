@@ -1,7 +1,7 @@
 use crate::base::{
     commitment_scheme::HYPER_KZG_VERIFIER_SETUP_BYTES,
     javascript_friendly_types::{Failure, JSFriendlyColumn, VerificationStatus},
-    serde::hex::address_from_hex,
+    serde::verifying_configuration::VerifyingConfiguration,
     zk_query_models::QueryResultsResponse,
 };
 use indexmap::IndexMap;
@@ -29,20 +29,15 @@ pub(crate) fn deserialize_query_results_from_javascript(
     })
 }
 
-pub(crate) fn deserialize_attestors_from_javascript(
-    valid_attestors: Vec<String>,
-) -> Result<Vec<[u8; 20]>, Failure> {
-    valid_attestors
-        .iter()
-        .map(|attestor| {
-            address_from_hex(attestor).map_err(|err| {
-                Failure::AttestorDeserialization(format!(
-                    "Error deserializing query results: {}",
-                    err
-                ))
-            })
-        })
-        .collect::<Result<Vec<_>, _>>()
+pub(crate) fn deserialize_verifying_configuration_from_javascript(
+    verifying_configuration: String,
+) -> Result<VerifyingConfiguration, Failure> {
+    serde_json::from_str(&verifying_configuration).map_err(|err| {
+        Failure::VerifyingConfigurationDeserialization(format!(
+            "Error deserializing verifying configuration: {}",
+            err
+        ))
+    })
 }
 
 pub(crate) fn deserialize_verifier_key() -> VerifierKey<HyperKZGEngine> {

@@ -65,7 +65,7 @@ pub(crate) struct Success<T> {
 #[serde(tag = "error", content = "message")]
 pub(crate) enum Failure {
     QueryResultsDeserialization(String),
-    AttestorDeserialization(String),
+    VerifyingConfigurationDeserialization(String),
     VerificationError(String),
     TypeConversion(String),
     Serialization(String),
@@ -408,8 +408,8 @@ mod tests {
         let res: Vec<VerificationStatus<IndexMap<String, JSFriendlyColumn>>> = vec![
             Failure::QueryResultsDeserialization("Failed to deserialize query results".to_string())
                 .into(),
-            Failure::AttestorDeserialization(
-                "Failed to deserialize attestor information".to_string(),
+            Failure::VerifyingConfigurationDeserialization(
+                "Failed to deserialize verifying configuration".to_string(),
             )
             .into(),
             Failure::VerificationError("Proof verification failed".to_string()).into(),
