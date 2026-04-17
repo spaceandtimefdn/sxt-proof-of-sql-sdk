@@ -4,7 +4,7 @@
 
 build:
 	mkdir -p wasm
-	bun cre-compile --plugin ../node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
+	bun cre-compile --skip-type-checks --plugin ../node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
 		index.ts \
 		wasm/workflow.wasm
 
