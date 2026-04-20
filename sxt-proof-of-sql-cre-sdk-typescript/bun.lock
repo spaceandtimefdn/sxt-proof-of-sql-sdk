@@ -5,7 +5,7 @@
     "": {
       "name": "sxt-proof-of-sql-cre-sdk-typescript",
       "dependencies": {
-        "@chainlink/cre-sdk-javy-plugin": "1.6.0-alpha.4",
+        "@chainlink/cre-sdk-javy-plugin": "1.6.0",
         "zod": "^3.25.0",
       },
       "devDependencies": {
@@ -87,7 +87,7 @@
 
     "@bcoe/v8-coverage": ["@bcoe/v8-coverage@0.2.3", "", {}, "sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw=="],
 
-    "@chainlink/cre-sdk-javy-plugin": ["@chainlink/cre-sdk-javy-plugin@1.6.0-alpha.4", "", { "peerDependencies": { "zod": ">=3.0.0" }, "optionalPeers": ["zod"], "bin": { "cre-setup": "bin/setup.ts", "cre-compile-workflow": "bin/compile-workflow.ts" } }, "sha512-oFmrA7MVY6KLd5zMe6uVV9pMttsUQpv7js3uIF1oKqdF3K55JqVnFMYRimMFrTDAp+MeaTeQ86L57e9tRPXeig=="],
+    "@chainlink/cre-sdk-javy-plugin": ["@chainlink/cre-sdk-javy-plugin@1.6.0", "", { "peerDependencies": { "zod": ">=3.0.0" }, "optionalPeers": ["zod"], "bin": { "cre-setup": "bin/setup.ts", "cre-compile-workflow": "bin/compile-workflow.ts" } }, "sha512-Bgg4s/2SpqzyJ0nsK9+HYhFRKuy5iQ2CdsA0ZdZShVdGtQZsCshb/LW+0jCq6UebJJCa1LliitYTQaH+C1u3Og=="],
 
     "@isaacs/cliui": ["@isaacs/cliui@8.0.2", "", { "dependencies": { "string-width": "^5.1.2", "string-width-cjs": "npm:string-width@^4.2.0", "strip-ansi": "^7.0.1", "strip-ansi-cjs": "npm:strip-ansi@^6.0.1", "wrap-ansi": "^8.1.0", "wrap-ansi-cjs": "npm:wrap-ansi@^7.0.0" } }, "sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA=="],
 
