@@ -1,23 +1,26 @@
 import {
 	CronCapability,
 	handler,
+	hexToBytes,
 	Runner,
 	type Runtime
 } from '@chainlink/cre-sdk'
-import { getAccessToken } from 'sxt-proof-of-sql-cre-sdk-typescript'
+import { getAccessToken, submitZkQuery } from 'sxt-proof-of-sql-cre-sdk-typescript'
 import { z } from 'zod'
 
 const configSchema = z.object({
 	schedule: z.string(),
 	authUrl: z.string(),
 	sxtApiKeySecretKey: z.string(),
+	zkQueryUrl: z.string(),
 })
 
 type Config = z.infer<typeof configSchema>
 
 const onCronTrigger = (runtime: Runtime<Config>) => {
-	let accessToken = getAccessToken(runtime);
-	return !!accessToken ? "Success" : "Unexpected error retrieving access token";
+	let accessToken = getAccessToken(runtime)!;
+	let result = submitZkQuery(runtime, accessToken, "0x", "0x", "0x");
+	return result;
 }
 
 const initWorkflow = (config: Config) => {

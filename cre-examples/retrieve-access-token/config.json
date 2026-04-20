@@ -1,5 +1,6 @@
 {
 	"schedule": "0 */1 * * * *",
-	"authUrl": "https://proxy.api.makeinfinite.dev",
-	"sxtApiKeySecretKey": "SECRET_SXT_API_KEY"
+	"authUrl": "https://proxy.stage.cosmicmoment.dev",
+	"sxtApiKeySecretKey": "SECRET_SXT_API_KEY",
+	"zkQueryUrl": "https://stage.cosmicmoment.dev"
 }

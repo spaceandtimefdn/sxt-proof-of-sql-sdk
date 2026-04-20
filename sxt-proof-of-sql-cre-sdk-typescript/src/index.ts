@@ -17,5 +17,5 @@ declare global {
 
 const obj = (globalThis as Record<string, unknown>)['proofOfSql']
 export const proofOfSql = () => proofOfSqlSchema.parse(obj)
-export { getAccessToken } from './confidential-zk-query-client/confidential-zk-query-client'
+export { getAccessToken, submitZkQuery } from './confidential-zk-query-client/confidential-zk-query-client'
 export { ZkQueryClientConfig } from './confidential-zk-query-client/zk-query-client-config'
