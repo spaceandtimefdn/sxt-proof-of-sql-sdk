@@ -128,6 +128,22 @@ where
         .collect()
 }
 
+#[cfg(feature = "hyperkzg")]
+/// Deserialization function for `Vec<[u8; 20]>` objects that are encoded as hex strings with a leading `0x`.
+///
+/// Can be used in `#[serde(deserialize_with = "deserialize_address_array_as_hex")]`
+/// for any `Vec<[u8; 20]>` field.
+pub fn deserialize_address_array_as_hex<'de, D>(deserializer: D) -> Result<Vec<[u8; 20]>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let bytes_array = Vec::<String>::deserialize(deserializer)?;
+    bytes_array
+        .into_iter()
+        .map(|b| address_from_hex(&b).map_err(serde::de::Error::custom))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::base::serde::hex::{

@@ -10,8 +10,8 @@ use crate::base::{
         try_convert_table_to_javascript_friendly_table, Failure, JSFriendlyColumn,
     },
     serde::javascript_serializations::{
-        deserialize_attestors_from_javascript, deserialize_query_results_from_javascript,
-        deserialize_verifier_key,
+        deserialize_query_results_from_javascript, deserialize_verifier_key,
+        deserialize_verifying_configuration_from_javascript,
     },
 };
 #[cfg(feature = "hyperkzg")]
@@ -76,15 +76,22 @@ pub fn verify_prover_via_gateway_response<CPI: CommitmentEvaluationProofId>(
 #[cfg(feature = "hyperkzg")]
 fn proof_of_sql_verify_from_json_responses_as_result(
     query_results_json: String,
-    valid_attestors: Vec<String>,
+    verifying_configuration: String,
 ) -> Result<IndexMap<String, JSFriendlyColumn>, Failure> {
     let query_results = deserialize_query_results_from_javascript(query_results_json)?;
-    let valid_attestors = deserialize_attestors_from_javascript(valid_attestors)?;
+    let verifying_configuration =
+        deserialize_verifying_configuration_from_javascript(verifying_configuration)?;
+    if &query_results.plan != verifying_configuration.proof_plan() {
+        return Err(Failure::VerificationError(
+            "Proof plan in query results does not match proof plan in verifying configuration"
+                .to_string(),
+        ));
+    }
     let verifier_setup = deserialize_verifier_key();
 
     let result = verify_from_zk_query_and_substrate_responses::<HyperKZGCommitmentEvaluationProof>(
         query_results,
-        valid_attestors,
+        verifying_configuration.valid_attestors(),
         &&verifier_setup,
     )
     .map_err(|err| Failure::VerificationError(format!("Error verifying result: {}", err)))?;
@@ -94,10 +101,12 @@ fn proof_of_sql_verify_from_json_responses_as_result(
 #[cfg(feature = "hyperkzg")]
 pub fn proof_of_sql_verify_from_json_responses(
     query_results_json: String,
-    valid_attestors: Vec<String>,
+    verifying_configuration: String,
 ) -> String {
-    let result =
-        proof_of_sql_verify_from_json_responses_as_result(query_results_json, valid_attestors);
+    let result = proof_of_sql_verify_from_json_responses_as_result(
+        query_results_json,
+        verifying_configuration,
+    );
     crate::base::serde::javascript_serializations::serialize_javascript_friendly_type(result.into())
 }
 
@@ -144,13 +153,34 @@ mod tests {
     fn we_can_verify_using_json_inputs() {
         let res = proof_of_sql_verify_from_json_responses(
             VALID_GATEWAY_RESPONSE.to_string(),
-            vec![
-                "0x349b729d1cEeAAe54fAB5655F621750Be6FadB49".to_string(),
-                "0xd347bfE3e75930c1253eF5D877FF6A5cee90D919".to_string(),
-                "0x3c9260330194d2B79038d0190e6BCE7346e110a9".to_string(),
-            ],
+            serde_json::json!({
+                "validAttestors": [
+                    "0x349b729d1cEeAAe54fAB5655F621750Be6FadB49",
+                    "0xd347bfE3e75930c1253eF5D877FF6A5cee90D919",
+                    "0x3c9260330194d2B79038d0190e6BCE7346e110a9"
+                ],
+                "proofPlan": "0x0000000000000001000000000000000f455448455245554d2e424c4f434b5300000000000000010000000000000000000000000000000c424c4f434b5f4e554d424552000000050000000000000002000000000000000c424c4f434b5f4e554d424552000000000000000c7265636f72645f636f756e74000000030000000400000003000000090000000200000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000010000000000000000000000000000000131000000000000000200000000000000000000000000000000000000000000000100000000000000000100000000000000010000000000000002000000000000000000000000000000000000000000000001"
+            }).to_string()
         );
         let expected_response = "{\"verificationStatus\":\"Success\",\"result\":{\"BLOCK_NUMBER\":{\"type\":\"BigInt\",\"column\":[\"22432845\"]},\"record_count\":{\"type\":\"BigInt\",\"column\":[\"1\"]}}}";
+        assert_eq!(res, expected_response);
+    }
+
+    #[test]
+    fn we_cannot_verify_using_json_inputs_if_plan_mismatch() {
+        let res = proof_of_sql_verify_from_json_responses(
+            VALID_GATEWAY_RESPONSE.to_string(),
+            serde_json::json!({
+                "validAttestors": [
+                    "0x349b729d1cEeAAe54fAB5655F621750Be6FadB49",
+                    "0xd347bfE3e75930c1253eF5D877FF6A5cee90D919",
+                    "0x3c9260330194d2B79038d0190e6BCE7346e110a9"
+                ],
+                "proofPlan": "0x01"
+            })
+            .to_string(),
+        );
+        let expected_response = "{\"verificationStatus\":\"Failure\",\"error\":\"VerificationError\",\"message\":\"Proof plan in query results does not match proof plan in verifying configuration\"}";
         assert_eq!(res, expected_response);
     }
 
@@ -158,11 +188,14 @@ mod tests {
     fn we_cannot_verify_using_json_inputs_if_attestors_are_bogus() {
         let res = proof_of_sql_verify_from_json_responses(
             VALID_GATEWAY_RESPONSE.to_string(),
-            vec![
-                "0x349b729d1cEeAAe54fAB5655F621750Be6FadB49".to_string(),
-                "0xd347bfE3e75930c1253eF5D877FF6A5cee90D919".to_string(),
-                "0x3c9260330194d2B79038d0190e6BCE7346e110a8".to_string(),
-            ],
+            serde_json::json!({
+                "validAttestors": [
+                    "0x349b729d1cEeAAe54fAB5655F621750Be6FadB49",
+                    "0xd347bfE3e75930c1253eF5D877FF6A5cee90D919",
+                    "0x3c9260330194d2B79038d0190e6BCE7346e110a8"
+                ],
+                "proofPlan": "0x0000000000000001000000000000000f455448455245554d2e424c4f434b5300000000000000010000000000000000000000000000000c424c4f434b5f4e554d424552000000050000000000000002000000000000000c424c4f434b5f4e554d424552000000000000000c7265636f72645f636f756e74000000030000000400000003000000090000000200000000000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000000010000000000000000000000000000000131000000000000000200000000000000000000000000000000000000000000000100000000000000000100000000000000010000000000000002000000000000000000000000000000000000000000000001"
+            }).to_string()
         );
         let expected_response = "{\"verificationStatus\":\"Failure\",\"error\":\"VerificationError\",\"message\":\"Error verifying result: At least one required attestor has not signed\"}";
         assert_eq!(res, expected_response);
@@ -170,7 +203,8 @@ mod tests {
 
     #[test]
     fn we_can_reject_verification_using_nonsense_json_inputs() {
-        let res = proof_of_sql_verify_from_json_responses("nonsense".to_string(), Vec::new());
+        let res =
+            proof_of_sql_verify_from_json_responses("nonsense".to_string(), "nonsense".to_string());
         let expected_response = "{\"verificationStatus\":\"Failure\",\"error\":\"QueryResultsDeserialization\",\"message\":\"Error deserializing query results: expected ident at line 1 column 2\"}";
         assert_eq!(res, expected_response);
     }
