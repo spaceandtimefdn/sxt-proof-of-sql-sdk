@@ -1,3 +1,12 @@
+# [0.58.0](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.57.1...v0.58.0) (2026-06-04)
+
+
+### Features
+
+* confirm proof plan matches gateway response within cre ([7dce3e7](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/7dce3e7383178b04b2817ca4f279c143bd531cd5))
+
+
+
 ## [0.57.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.57.0...v0.57.1) (2026-04-13)
 
 
@@ -23,10 +32,6 @@
 ### Features
 
 * new cre package with proof of sql result schema ([39c20a6](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/commit/39c20a614a996aa4612aa9e8c9ad15e7b1c79250))
-
-
-
-## [0.55.1](https://github.com/spaceandtimefdn/sxt-proof-of-sql-sdk/compare/v0.55.0...v0.55.1) (2026-04-02)
 
 
 
