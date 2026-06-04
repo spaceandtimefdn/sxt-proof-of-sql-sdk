@@ -22,6 +22,11 @@ Create the default CRE hello world typescript project with
 ```
 cre init --non-interactive -p posql-demo -w http -t hello-world-ts && cd posql-demo
 ```
+Run 
+```
+bun install --cwd ./http
+```
+
 Replace everything in `main.ts` with the following:
 ```
 import { cre, HTTPPayload, Runner, type Runtime } from "@chainlink/cre-sdk";
