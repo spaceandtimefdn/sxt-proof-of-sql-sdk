@@ -73,19 +73,21 @@ Next, convert the workflow to use custom builds with the following command. Refe
 cre workflow custom-build ./http -f
 ``` 
 
-Finally, replace everything in `Makefile` with:
+Replace everything in `Makefile` with:
 ```
 .PHONY: build
 
 build:
-  mkdir -p wasm
-  bun cre-compile --plugin node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
-    main.ts \
-    wasm/workflow.wasm
+	mkdir -p wasm
+	bun cre-compile --plugin node_modules/sxt-proof-of-sql-cre-sdk-typescript/dist/sxt_proof_of_sql.plugin.wasm \
+    	main.ts \
+    	wasm/workflow.wasm
 
 clean:
-  rm -rf wasm
+	rm -rf wasm
 ```
+
+and run `cd ./http && make build && cd ../`
 
 # Step 4: Modify the workflow to use proof of sql library.
 Modify `main.ts` as follows:
