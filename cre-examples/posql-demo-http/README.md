@@ -15,7 +15,8 @@ This will be a brief tutorial explaining how to run proof of sql queries using C
   - Create a CRE account as described [here](https://docs.chain.link/cre/account/creating-account). Login using `cre login`.
   - Acquire a funded sepolia account.
 - SXT basics:
-  - Acquire an SXT API Key from [here](https://app.spaceandtime.ai/settings/myPlan/apiAuthentication). This will be used to query the SXT prover.
+  - Create a Space and Time PPC account. You can sign up and run queries from the [Studio](https://app.spaceandtime.ai/queries/new).
+  - Acquire an SXT API key. This is a two-step process: first [log in](https://docs.makeinfinite.com/reference/login), then [create an API key](https://docs.makeinfinite.com/reference/create-api-key). The API key is used to query the SXT prover.
 
 # Step 2: Create an empty Http Workflow
 Create the default CRE hello world typescript project with 
